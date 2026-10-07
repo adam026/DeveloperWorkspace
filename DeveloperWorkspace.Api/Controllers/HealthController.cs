@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DeveloperWorkspace.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeveloperWorkspace.Api.Controllers
@@ -7,13 +7,36 @@ namespace DeveloperWorkspace.Api.Controllers
     [ApiController]
     public class HealthController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult Get()
+        private readonly MongoDbContext _mongoDbContext;
+
+        public HealthController(MongoDbContext mongoDbContext)
         {
-            return Ok(new
+            _mongoDbContext = mongoDbContext;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            try
             {
-                status = "OK"
-            });
+                await _mongoDbContext.Database
+                    .RunCommandAsync<MongoDB.Bson.BsonDocument>(
+                        new MongoDB.Bson.BsonDocument("ping", 1));
+
+                return Ok(new
+                {
+                    status = "OK",
+                    database = "Connected"
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new
+                {
+                    status = "Error",
+                    database = "Disconnected"
+                });
+            }
         }
     }
 }

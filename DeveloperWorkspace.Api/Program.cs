@@ -1,4 +1,6 @@
 
+using DeveloperWorkspace.Api.Data;
+
 namespace DeveloperWorkspace.Api
 {
     public class Program
@@ -10,6 +12,19 @@ namespace DeveloperWorkspace.Api
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddSingleton<MongoDbContext>(sp =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+
+                var settings = configuration
+                    .GetSection("MongoDbSettings")
+                    .Get<MongoDbSettings>()
+                    ?? throw new InvalidOperationException(
+                        "MongoDbSettings configuration is missing.");
+
+                return new MongoDbContext(settings);
+            });
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
