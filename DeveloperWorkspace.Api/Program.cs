@@ -1,5 +1,6 @@
 
 using DeveloperWorkspace.Api.Data;
+using DeveloperWorkspace.Api.Services;
 
 namespace DeveloperWorkspace.Api
 {
@@ -13,6 +14,10 @@ namespace DeveloperWorkspace.Api
 
             builder.Services.AddControllers();
 
+            // DocumentService registration for dependency injection
+            builder.Services.AddScoped<DocumentService>();
+
+            // MongoDbContext registration with configuration from appsettings.json
             builder.Services.AddSingleton<MongoDbContext>(sp =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
