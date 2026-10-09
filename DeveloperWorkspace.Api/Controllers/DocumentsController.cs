@@ -2,6 +2,7 @@
 using DeveloperWorkspace.Api.Models;
 using DeveloperWorkspace.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace DeveloperWorkspace.Api.Controllers
 {
@@ -26,6 +27,11 @@ namespace DeveloperWorkspace.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Document>> GetById(string id)
         {
+            if (!ObjectId.TryParse(id, out _))
+            {
+                return BadRequest("Érvénytelen dokumentumazonosító.");
+            }
+
             var document = await _documentService.GetByIdAsync(id);
 
             if (document is null)
@@ -55,6 +61,11 @@ namespace DeveloperWorkspace.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, Document document)
         {
+            if (!ObjectId.TryParse(id, out _))
+            {
+                return BadRequest("Érvénytelen dokumentumazonosító.");
+            }
+
             if (string.IsNullOrWhiteSpace(document.Title))
             {
                 return BadRequest("A dokumentum címe kötelező.");
@@ -73,6 +84,11 @@ namespace DeveloperWorkspace.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (!ObjectId.TryParse(id, out _))
+            {
+                return BadRequest("Érvénytelen dokumentumazonosító.");
+            }
+
             var deleted = await _documentService.DeleteAsync(id);
 
             if (!deleted)

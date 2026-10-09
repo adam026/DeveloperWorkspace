@@ -1,5 +1,6 @@
 
 using DeveloperWorkspace.Api.Data;
+using DeveloperWorkspace.Api.Middleware;
 using DeveloperWorkspace.Api.Services;
 
 namespace DeveloperWorkspace.Api
@@ -35,6 +36,9 @@ namespace DeveloperWorkspace.Api
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            // Add the exception handling middleware to the pipeline
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
