@@ -11,6 +11,18 @@ namespace DeveloperWorkspace.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Allow requests from the Angular frontend running on localhost:4200
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AngularFrontend", policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -36,6 +48,9 @@ namespace DeveloperWorkspace.Api
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            // Use the CORS policy for requests from the Angular frontend
+            app.UseCors("AngularFrontend");
 
             // Add the exception handling middleware to the pipeline
             app.UseMiddleware<ExceptionHandlingMiddleware>();
