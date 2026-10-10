@@ -268,11 +268,86 @@
           <article class="document-card">
             <div class="document-icon">▤</div>
             <div class="document-details">
+
+              @if (editingDocumentId === document.id) {
+              <form class="document-form" (ngSubmit)="updateDocument()">
+                <label>Title *</label>
+                <input name="editTitle"
+                       type="text"
+                       [(ngModel)]="editDocument.title"
+                       required
+                       maxlength="150" />
+
+                <label>Description</label>
+                <textarea name="editDescription"
+                          [(ngModel)]="editDocument.description"
+                          rows="3"
+                          maxlength="2000"></textarea>
+
+                <label>Category</label>
+                <input name="editCategory"
+                       type="text"
+                       [(ngModel)]="editDocument.category"
+                       maxlength="100" />
+
+                <div class="form-actions">
+                  <button type="button"
+                          class="secondary-button"
+                          (click)="cancelEditing()">
+                    Cancel
+                  </button>
+
+                  <button type="submit"
+                          class="primary-button"
+                          [disabled]="saving || !editDocument.title.trim()">
+                    {{ saving ? 'Saving...' : 'Save changes' }}
+                  </button>
+                </div>
+              </form>
+              } @else {
               <h3>{{ document.title }}</h3>
+              }
               <p>{{ document.description || 'No description provided.' }}</p>
               <span class="category-label">
                 {{ document.category || 'Uncategorized' }}
               </span>
+
+              <div class="document-actions">
+                <button type="button"
+                        class="secondary-button"
+                        [disabled]="saving"
+                        (click)="startEditing(document)">
+                  Edit
+                </button>
+
+                <button type="button"
+                        class="secondary-button"
+                        [disabled]="saving"
+                        (click)="deletingDocumentId = document.id ?? null">
+                  Delete
+                </button>
+
+                @if (deletingDocumentId === document.id) {
+                <div class="delete-confirmation">
+                  <p>Are you sure you want to delete this document?</p>
+
+                  <button type="button"
+                          class="secondary-button"
+                          (click)="deletingDocumentId = null">
+                    Cancel
+                  </button>
+
+
+                  <button type="button"
+                          class="primary-button"
+                          [disabled]="saving"
+                          (click)="document.id && deleteDocument(document.id)">
+                    {{ saving ? 'Deleting...' : 'Confirm delete' }}
+                  </button>
+
+                </div>
+                }
+              </div>
             </div>
             <span class="document-arrow">↗</span>
           </article>

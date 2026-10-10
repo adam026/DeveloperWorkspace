@@ -19,6 +19,13 @@ export class App {
   protected documents: Document[] = [];
   protected loading = false;
   protected errorMessage = '';
+  protected editingDocumentId: string | null = null;
+  protected editDocument = {
+    title: '',
+    description: '',
+    category: ''
+  };
+  protected deletingDocumentId: string | null = null;
   protected showCreateForm = false;
   protected saving = false;
   protected newDocument = {
@@ -65,6 +72,30 @@ export class App {
     this.showCreateForm = false;
   }
 
+  protected startEditing(document: Document): void {
+    if (!document.id) {
+      return;
+    }
+
+    this.editingDocumentId = document.id;
+
+    this.editDocument = {
+      title: document.title,
+      description: document.description,
+      category: document.category
+    };
+  }
+
+  protected cancelEditing(): void {
+    this.editingDocumentId = null;
+
+    this.editDocument = {
+      title: '',
+      description: '',
+      category: ''
+    };
+  }
+
   protected createDocument(): void {
     if (!this.newDocument.title.trim() || this.saving) {
       return;
@@ -99,4 +130,61 @@ export class App {
       }
     });
   }
+
+  protected updateDocument(): void {
+    if (!this.editingDocumentId || !this.editDocument.title.trim() || this.saving) {
+      return;
+    }
+
+    this.saving = true;
+    this.errorMessage = '';
+
+    const documentToUpdate: Document = {
+      title: this.editDocument.title.trim(),
+      description: this.editDocument.description.trim(),
+      category: this.editDocument.category.trim()
+    };
+
+    this.documentService.update(this.editingDocumentId, documentToUpdate).subscribe({
+      next: () => {
+        this.saving = false;
+        this.cancelEditing();
+        this.loadDocuments();
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Hiba a dokumentum frissítésekor:', error);
+        this.errorMessage = 'Nem sikerült frissíteni a dokumentumot.';
+        this.saving = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+
+  protected deleteDocument(id: string): void {
+    if (this.deletingDocumentId !== id) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.saving = true;
+
+    this.documentService.delete(id).subscribe({
+      next: () => {
+        this.saving = false;
+        this.deletingDocumentId = null;
+        this.loadDocuments();
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        this.saving = false;
+        console.error('Hiba a dokumentum törlésekor:', error);
+        this.errorMessage = 'Nem sikerült törölni a dokumentumot.';
+        this.deletingDocumentId = null;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
 }

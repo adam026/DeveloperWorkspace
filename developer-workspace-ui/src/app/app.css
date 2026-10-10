@@ -537,23 +537,64 @@ body {
   font-size: 13px;
 }
 
-.primary-button {
-  padding: 11px 16px;
-  border: 0;
-  border-radius: 9px;
-  color: #fff;
-  background: #6557e8;
-  font: inherit;
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease;
 }
 
-  .primary-button:hover {
-    transform: translateY(-1px);
+.primary-button {
+  border: 1px solid transparent;
+  color: #fff;
+  background: #6557e8;
+  box-shadow: 0 2px 5px rgb(101 87 232 / 16%);
+}
+
+  .primary-button:hover:not(:disabled) {
     background: #5546d5;
+    box-shadow: 0 4px 10px rgb(101 87 232 / 22%);
+    transform: translateY(-1px);
   }
+
+.secondary-button {
+  border: 1px solid #e1e4ee;
+  color: #626a7e;
+  background: #fff;
+}
+
+  .secondary-button:hover:not(:disabled) {
+    border-color: #c9c5f8;
+    color: #5546d5;
+    background: #f7f6ff;
+  }
+
+  .primary-button:focus-visible,
+  .secondary-button:focus-visible {
+    outline: 3px solid rgb(101 87 232 / 25%);
+    outline-offset: 2px;
+  }
+
+  .primary-button:disabled,
+  .secondary-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
 
 @media (max-width: 900px) {
   .documents-list {
@@ -684,24 +725,6 @@ body {
   border-top: 1px solid #eff0f5;
 }
 
-.secondary-button {
-  padding: 11px 17px;
-  border: 1px solid #e1e4ee;
-  border-radius: 9px;
-  color: #626a7e;
-  background: #fff;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-  .secondary-button:hover {
-    border-color: #cfd2e0;
-    background: #f8f9fc;
-  }
-
 .primary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -736,5 +759,29 @@ body {
       width: 100%;
     }
 }
+
+
+/* Space between the category label and document actions */
+.document-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+  /* Destructive action */
+  .document-actions .secondary-button:last-child {
+    border-color: #fecaca;
+    color: #dc2626;
+    background: #fff;
+  }
+
+    .document-actions .secondary-button:last-child:hover:not(:disabled) {
+      border-color: #fca5a5;
+      color: #b91c1c;
+      background: #fef2f2;
+    }
+
 
 
