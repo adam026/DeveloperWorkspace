@@ -1,4 +1,4 @@
-
+@if (currentRouteIsHome) {
 <div class="app-shell">
   <aside class="sidebar">
     <div class="brand">
@@ -288,6 +288,16 @@
             Clear filters
           </button>
           }
+
+          <div class="document-results-info">
+            <span>
+              @if (searchTerm || selectedCategory) {
+              {{ filteredDocuments.length }} matching documents
+              } @else {
+              {{ filteredDocuments.length }} documents
+              }
+            </span>
+          </div>
         </div>
 
         @if (loading) {
@@ -299,7 +309,8 @@
         </button>
         } @else if (filteredDocuments.length === 0) {
         <p>
-          {{documents.length === 0
+          {{
+documents.length === 0
             ? 'No documents found.'
             : 'No documents match your filters.'
           }}
@@ -349,11 +360,12 @@
               </form>
               } @else {
               <h3>{{ document.title }}</h3>
-              }
+
               <p>{{ document.description || 'No description provided.' }}</p>
               <span class="category-label">
                 {{ document.category || 'Uncategorized' }}
               </span>
+              }
 
               <div class="document-actions">
                 <button type="button"
@@ -392,7 +404,12 @@
                 }
               </div>
             </div>
-            <span class="document-arrow">↗</span>
+            <a class="document-arrow"
+               [routerLink]="['/documents', document.id]"
+               [attr.aria-label]="'View details: ' + document.title"
+               title="View details">
+              ↗
+            </a>
           </article>
           }
         </div>
@@ -402,3 +419,7 @@
     </section>
   </main>
 </div>
+
+} @else {
+<router-outlet></router-outlet>
+}

@@ -1,22 +1,24 @@
 
-import { Component, signal, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { DocumentService, Document } from './services/document';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule],
+  imports: [RouterOutlet, RouterLink, FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('developer-workspace-ui');
 
   private readonly documentService = inject(DocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   protected documents: Document[] = [];
+  protected currentRouteIsHome = true;
   protected searchTerm = '';
   protected selectedCategory = '';
   protected sortOrder:
@@ -41,6 +43,21 @@ export class App {
     category: ''
   };
   protected currentPage: 'dashboard' | 'documents' = 'dashboard';
+
+  private readonly router = inject(Router);
+
+  ngOnInit(): void {
+    this.currentRouteIsHome = this.router.url === '/';
+
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          this.currentRouteIsHome = event.urlAfterRedirects === '/';
+          this.cdr.markForCheck();
+        }
+      });
+  }
 
   protected navigateTo(page: 'dashboard' | 'documents'): void {
     this.currentPage = page;

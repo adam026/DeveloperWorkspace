@@ -1,0 +1,76 @@
+
+<div class="detail-page">
+  <a routerLink="/" class="back-link">
+    <span aria-hidden="true">←</span>
+    Back to documents
+  </a>
+
+  @if (loading) {
+  <section class="detail-panel">
+    <p class="status-message">Loading document...</p>
+  </section>
+  } @else if (errorMessage) {
+  <section class="detail-panel">
+    <div class="error-icon">!</div>
+    <h2>Document unavailable</h2>
+    <p class="status-message">{{ errorMessage }}</p>
+    <a routerLink="/" class="back-button">Back to documents</a>
+  </section>
+  } @else if (document) {
+  <header class="detail-header">
+    <div class="document-heading">
+      <div class="detail-icon" aria-hidden="true">▤</div>
+      <div>
+        <p class="eyebrow">KNOWLEDGE BASE</p>
+        <h1>{{ document.title }}</h1>
+        <p class="detail-subtitle">
+          {{ document.description || 'No description provided.' }}
+        </p>
+      </div>
+    </div>
+
+    <span class="category-label">
+      {{ document.category || 'Uncategorized' }}
+    </span>
+  </header>
+
+  <section class="detail-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">DOCUMENT INFORMATION</p>
+        <h2>Details</h2>
+      </div>
+    </div>
+
+    <div class="detail-field">
+      <span class="field-label">Title</span>
+      <p>{{ document.title }}</p>
+    </div>
+
+    <div class="detail-field">
+      <span class="field-label">Description</span>
+      <p class="description-content">
+        {{ document.description || 'No description provided.' }}
+      </p>
+    </div>
+
+    <div class="detail-field">
+      <span class="field-label">Category</span>
+      <p>{{ document.category || 'Uncategorized' }}</p>
+    </div>
+
+    <div class="metadata-grid">
+      <div class="metadata-item">
+        <span class="field-label">Created</span>
+        <p>{{ document.createdAt ? (document.createdAt | date:'medium') : 'Not available' }}</p>
+      </div>
+
+      <div class="metadata-item">
+        <span class="field-label">Last updated</span>
+        <p>{{ document.updatedAt ? (document.updatedAt | date:'medium') : 'Not updated' }}</p>
+      </div>
+    </div>
+  </section>
+  }
+</div>
+
