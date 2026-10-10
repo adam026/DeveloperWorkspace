@@ -253,6 +253,43 @@
       }
 
       <section class="documents-panel">
+
+        <div class="document-filters">
+          <div class="search-box">
+            <span class="search-icon">⌕</span>
+            <input type="search"
+                   aria-label="Search documents"
+                   placeholder="Search by title, description or category..."
+                   [(ngModel)]="searchTerm" />
+          </div>
+
+          <select class="category-filter"
+                  aria-label="Filter by category"
+                  [(ngModel)]="selectedCategory">
+            <option value="">All categories</option>
+            @for (category of categories; track category) {
+            <option [value]="category">{{ category }}</option>
+            }
+          </select>
+
+          <select class="category-filter"
+                  aria-label="Sort documents"
+                  [(ngModel)]="sortOrder">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="titleAsc">Title A–Z</option>
+            <option value="titleDesc">Title Z–A</option>
+          </select>
+
+          @if (searchTerm || selectedCategory) {
+          <button type="button"
+                  class="secondary-button"
+                  (click)="searchTerm = ''; selectedCategory = ''; sortOrder = 'newest'">
+            Clear filters
+          </button>
+          }
+        </div>
+
         @if (loading) {
         <p>Loading documents...</p>
         } @else if (errorMessage) {
@@ -260,11 +297,17 @@
         <button class="primary-button" (click)="loadDocuments()">
           Try again
         </button>
-        } @else if (documents.length === 0) {
-        <p>No documents found.</p>
-        } @else {
+        } @else if (filteredDocuments.length === 0) {
+        <p>
+          {{documents.length === 0
+            ? 'No documents found.'
+            : 'No documents match your filters.'
+          }}
+        </p>
+        }
+        @else {
         <div class="documents-list">
-          @for (document of documents; track document.id) {
+          @for (document of filteredDocuments; track document.id) {
           <article class="document-card">
             <div class="document-icon">▤</div>
             <div class="document-details">

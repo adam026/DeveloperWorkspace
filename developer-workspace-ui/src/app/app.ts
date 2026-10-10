@@ -17,6 +17,13 @@ export class App {
   private readonly cdr = inject(ChangeDetectorRef);
 
   protected documents: Document[] = [];
+  protected searchTerm = '';
+  protected selectedCategory = '';
+  protected sortOrder:
+    | 'newest'
+    | 'oldest'
+    | 'titleAsc'
+    | 'titleDesc' = 'newest';
   protected loading = false;
   protected errorMessage = '';
   protected editingDocumentId: string | null = null;
@@ -161,7 +168,6 @@ export class App {
     });
   }
 
-
   protected deleteDocument(id: string): void {
     if (this.deletingDocumentId !== id) {
       return;
@@ -187,4 +193,49 @@ export class App {
     });
   }
 
+  protected get categories(): string[] {
+    return [...new Set(
+      this.documents
+        .map(document => document.category?.trim())
+        .filter((category): category is string => !!category)
+    )].sort((a, b) => a.localeCompare(b));
+  }
+
+
+  protected get filteredDocuments(): Document[] {
+    const term = this.searchTerm.trim().toLocaleLowerCase();
+
+    const filtered = this.documents.filter(document => {
+      const matchesSearch =
+        !term ||
+        document.title.toLocaleLowerCase().includes(term) ||
+        (document.description ?? '').toLocaleLowerCase().includes(term) ||
+        (document.category ?? '').toLocaleLowerCase().includes(term);
+
+      const matchesCategory =
+        !this.selectedCategory ||
+        (document.category ?? '').trim() === this.selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    return [...filtered].sort((a, b) => {
+      switch (this.sortOrder) {
+        case 'oldest':
+          return new Date(a.createdAt ?? 0).getTime()
+            - new Date(b.createdAt ?? 0).getTime();
+
+        case 'titleAsc':
+          return a.title.localeCompare(b.title);
+
+        case 'titleDesc':
+          return b.title.localeCompare(a.title);
+
+        case 'newest':
+        default:
+          return new Date(b.createdAt ?? 0).getTime()
+            - new Date(a.createdAt ?? 0).getTime();
+      }
+    });
+  }
 }
