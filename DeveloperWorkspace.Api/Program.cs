@@ -44,6 +44,13 @@ namespace DeveloperWorkspace.Api
                 return new MongoDbContext(settings);
             });
 
+            // OllamaService registration with HttpClient configuration
+            builder.Services.AddHttpClient<OllamaService>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:11434/");
+                client.Timeout = TimeSpan.FromMinutes(3);
+            });
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
