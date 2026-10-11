@@ -377,7 +377,7 @@ documents.length === 0
 
                 <button type="button"
                         class="secondary-button"
-                        [disabled]="saving"
+                        [disabled]="deleting"
                         (click)="deletingDocumentId = document.id ?? null">
                   Delete
                 </button>
@@ -395,9 +395,9 @@ documents.length === 0
 
                   <button type="button"
                           class="primary-button"
-                          [disabled]="saving"
+                          [disabled]="deleting"
                           (click)="document.id && deleteDocument(document.id)">
-                    {{ saving ? 'Deleting...' : 'Confirm delete' }}
+                    {{ deleting ? 'Deleting...' : 'Confirm delete' }}
                   </button>
 
                 </div>

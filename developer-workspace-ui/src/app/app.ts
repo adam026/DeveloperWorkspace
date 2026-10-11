@@ -37,6 +37,7 @@ export class App implements OnInit {
   protected deletingDocumentId: string | null = null;
   protected showCreateForm = false;
   protected saving = false;
+  protected deleting = false;
   protected newDocument = {
     title: '',
     description: '',
@@ -186,24 +187,24 @@ export class App implements OnInit {
   }
 
   protected deleteDocument(id: string): void {
-    if (this.deletingDocumentId !== id) {
+    if (this.deletingDocumentId !== id || this.deleting) {
       return;
     }
 
     this.errorMessage = '';
-    this.saving = true;
+    this.deleting = true;
 
     this.documentService.delete(id).subscribe({
       next: () => {
-        this.saving = false;
+        this.deleting = false;
         this.deletingDocumentId = null;
         this.loadDocuments();
         this.cdr.markForCheck();
       },
       error: (error) => {
-        this.saving = false;
         console.error('Hiba a dokumentum törlésekor:', error);
         this.errorMessage = 'Nem sikerült törölni a dokumentumot.';
+        this.deleting = false;
         this.deletingDocumentId = null;
         this.cdr.markForCheck();
       }
