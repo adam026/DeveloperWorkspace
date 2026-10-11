@@ -1,101 +1,200 @@
 
-import { Component, signal, inject, ChangeDetectorRef, OnInit } from '@angular/core';
+import {Component,signal,inject,ChangeDetectorRef,OnInit} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
+import {Router,NavigationEnd,RouterLink,RouterOutlet} from '@angular/router';
 import { filter } from 'rxjs';
 import { DocumentService, Document } from './services/document';
+import { PromptLibrary } from './prompt-library/prompt-library';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, FormsModule],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    FormsModule,
+    PromptLibrary
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+
+  // =========================================================
+  // 1. Alkalmazás és navigáció
+  // =========================================================
+
   protected readonly title = signal('developer-workspace-ui');
 
-  private readonly documentService = inject(DocumentService);
+  private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  protected documents: Document[] = [];
   protected currentRouteIsHome = true;
-  protected searchTerm = '';
-  protected selectedCategory = '';
-  protected sortOrder:
-    | 'newest'
-    | 'oldest'
-    | 'titleAsc'
-    | 'titleDesc' = 'newest';
-  protected loading = false;
-  protected errorMessage = '';
-  protected editingDocumentId: string | null = null;
-  protected editDocument = {
-    title: '',
-    description: '',
-    category: ''
-  };
-  protected deletingDocumentId: string | null = null;
-  protected showCreateForm = false;
-  protected saving = false;
-  protected deleting = false;
-  protected newDocument = {
-    title: '',
-    description: '',
-    category: ''
-  };
-  protected currentPage: 'dashboard' | 'documents' = 'dashboard';
 
-  private readonly router = inject(Router);
+  // A három jelenleg támogatott fő nézet.
+  protected currentPage: 'dashboard' | 'documents' | 'prompts' = 'dashboard';
 
   ngOnInit(): void {
     this.currentRouteIsHome = this.router.url === '/';
 
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event) => {
+      .subscribe(event => {
         if (event instanceof NavigationEnd) {
-          this.currentRouteIsHome = event.urlAfterRedirects === '/';
+          this.currentRouteIsHome =
+            event.urlAfterRedirects === '/';
+
           this.cdr.markForCheck();
         }
       });
   }
 
-  protected navigateTo(page: 'dashboard' | 'documents'): void {
+  // Fő nézetek közötti váltás.
+  protected navigateTo(
+    page: 'dashboard' | 'documents' | 'prompts'
+  ): void {
     this.currentPage = page;
 
+    // Dokumentumok betöltése, amikor megnyitjuk ezt a nézetet.
     if (page === 'documents') {
-      this.loading = true;
       this.loadDocuments();
     }
+
+    // A promptok betöltését a PromptLibrary komponens végzi.
+    this.cdr.markForCheck();
   }
+
+
+  // =========================================================
+  // 2. Dokumentumok – adatok és állapotok
+  // =========================================================
+
+  private readonly documentService = inject(DocumentService);
+
+  protected documents: Document[] = [];
+
+  protected searchTerm = '';
+  protected selectedCategory = '';
+
+  protected sortOrder:
+    | 'newest'
+    | 'oldest'
+    | 'titleAsc'
+    | 'titleDesc' = 'newest';
+
+  protected loading = false;
+  protected errorMessage = '';
+
+  protected editingDocumentId: string | null = null;
+
+  protected editDocument = {
+    title: '',
+    description: '',
+    category: ''
+  };
+
+  protected deletingDocumentId: string | null = null;
+  protected showCreateForm = false;
+  protected saving = false;
+  protected deleting = false;
+
+  protected newDocument = {
+    title: '',
+    description: '',
+    category: ''
+  };
+
+
+  // =========================================================
+  // 3. Dokumentumok – betöltés
+  // =========================================================
 
   protected loadDocuments(): void {
     this.loading = true;
     this.errorMessage = '';
 
     this.documentService.getAll().subscribe({
-      next: (documents) => {
+      next: documents => {
         this.documents = documents;
         this.loading = false;
-        console.log('Lekért dokumentumok:', documents);
+
         this.cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('Hiba a dokumentumok lekérésekor:', error);
-        this.errorMessage = 'Nem sikerült lekérni a dokumentumokat.';
+      error: error => {
+        console.error(
+          'Hiba a dokumentumok lekérésekor:',
+          error
+        );
+
+        this.errorMessage =
+          'Nem sikerült lekérni a dokumentumokat.';
+
         this.loading = false;
         this.cdr.markForCheck();
       }
     });
   }
 
+
+  // =========================================================
+  // 4. Dokumentumok – új dokumentum létrehozása
+  // =========================================================
+
   protected openCreateForm(): void {
+    this.errorMessage = '';
     this.showCreateForm = true;
   }
 
   protected closeCreateForm(): void {
     this.showCreateForm = false;
   }
+
+  protected createDocument(): void {
+    if (!this.newDocument.title.trim() || this.saving) {
+      return;
+    }
+
+    this.saving = true;
+    this.errorMessage = '';
+
+    const documentToCreate: Document = {
+      title: this.newDocument.title.trim(),
+      description: this.newDocument.description.trim(),
+      category: this.newDocument.category.trim()
+    };
+
+    this.documentService.create(documentToCreate).subscribe({
+      next: () => {
+        this.saving = false;
+
+        this.newDocument = {
+          title: '',
+          description: '',
+          category: ''
+        };
+
+        this.showCreateForm = false;
+        this.loadDocuments();
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        console.error(
+          'Hiba a dokumentum mentésekor:',
+          error
+        );
+
+        this.errorMessage =
+          'Nem sikerült elmenteni a dokumentumot.';
+
+        this.saving = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+
+  // =========================================================
+  // 5. Dokumentumok – szerkesztés és frissítés
+  // =========================================================
 
   protected startEditing(document: Document): void {
     if (!document.id) {
@@ -121,43 +220,12 @@ export class App implements OnInit {
     };
   }
 
-  protected createDocument(): void {
-    if (!this.newDocument.title.trim() || this.saving) {
-      return;
-    }
-
-    this.saving = true;
-    this.errorMessage = '';
-
-    const documentToCreate: Document = {
-      title: this.newDocument.title.trim(),
-      description: this.newDocument.description.trim(),
-      category: this.newDocument.category.trim()
-    };
-
-    this.documentService.create(documentToCreate).subscribe({
-      next: () => {
-        this.saving = false;
-        this.newDocument = {
-          title: '',
-          description: '',
-          category: ''
-        };
-        this.showCreateForm = false;
-        this.loadDocuments();
-        this.cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Hiba a dokumentum mentésekor:', error);
-        this.errorMessage = 'Nem sikerült elmenteni a dokumentumot.';
-        this.saving = false;
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
   protected updateDocument(): void {
-    if (!this.editingDocumentId || !this.editDocument.title.trim() || this.saving) {
+    if (
+      !this.editingDocumentId ||
+      !this.editDocument.title.trim() ||
+      this.saving
+    ) {
       return;
     }
 
@@ -170,24 +238,40 @@ export class App implements OnInit {
       category: this.editDocument.category.trim()
     };
 
-    this.documentService.update(this.editingDocumentId, documentToUpdate).subscribe({
-      next: () => {
-        this.saving = false;
-        this.cancelEditing();
-        this.loadDocuments();
-        this.cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Hiba a dokumentum frissítésekor:', error);
-        this.errorMessage = 'Nem sikerült frissíteni a dokumentumot.';
-        this.saving = false;
-        this.cdr.markForCheck();
-      }
-    });
+    this.documentService
+      .update(this.editingDocumentId, documentToUpdate)
+      .subscribe({
+        next: () => {
+          this.saving = false;
+          this.cancelEditing();
+          this.loadDocuments();
+          this.cdr.markForCheck();
+        },
+        error: error => {
+          console.error(
+            'Hiba a dokumentum frissítésekor:',
+            error
+          );
+
+          this.errorMessage =
+            'Nem sikerült frissíteni a dokumentumot.';
+
+          this.saving = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
+
+  // =========================================================
+  // 6. Dokumentumok – törlés
+  // =========================================================
+
   protected deleteDocument(id: string): void {
-    if (this.deletingDocumentId !== id || this.deleting) {
+    if (
+      this.deletingDocumentId !== id ||
+      this.deleting
+    ) {
       return;
     }
 
@@ -198,18 +282,30 @@ export class App implements OnInit {
       next: () => {
         this.deleting = false;
         this.deletingDocumentId = null;
+
         this.loadDocuments();
         this.cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('Hiba a dokumentum törlésekor:', error);
-        this.errorMessage = 'Nem sikerült törölni a dokumentumot.';
+      error: error => {
+        console.error(
+          'Hiba a dokumentum törlésekor:',
+          error
+        );
+
+        this.errorMessage =
+          'Nem sikerült törölni a dokumentumot.';
+
         this.deleting = false;
         this.deletingDocumentId = null;
         this.cdr.markForCheck();
       }
     });
   }
+
+
+  // =========================================================
+  // 7. Dokumentumok – kategóriák és szűrés
+  // =========================================================
 
   protected get categories(): string[] {
     return [...new Set(
@@ -219,24 +315,31 @@ export class App implements OnInit {
     )].sort((a, b) => a.localeCompare(b));
   }
 
-
   protected get filteredDocuments(): Document[] {
-    const term = this.searchTerm.trim().toLocaleLowerCase();
+    const term = this.searchTerm
+      .trim()
+      .toLocaleLowerCase();
 
     const filtered = this.documents.filter(document => {
       const matchesSearch =
         !term ||
         document.title.toLocaleLowerCase().includes(term) ||
-        (document.description ?? '').toLocaleLowerCase().includes(term) ||
-        (document.category ?? '').toLocaleLowerCase().includes(term);
+        (document.description ?? '')
+          .toLocaleLowerCase()
+          .includes(term) ||
+        (document.category ?? '')
+          .toLocaleLowerCase()
+          .includes(term);
 
       const matchesCategory =
         !this.selectedCategory ||
-        (document.category ?? '').trim() === this.selectedCategory;
+        (document.category ?? '').trim() ===
+        this.selectedCategory;
 
       return matchesSearch && matchesCategory;
     });
 
+    // A szűrés után a kiválasztott rendezést alkalmazzuk.
     return [...filtered].sort((a, b) => {
       switch (this.sortOrder) {
         case 'oldest':

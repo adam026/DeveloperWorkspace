@@ -1,0 +1,43 @@
+
+<section class="prompt-library">
+  <header class="page-header">
+    <div>
+      <h1>Prompt Library</h1>
+      <p>Gyakran használt AI-promptjaid egy helyen.</p>
+    </div>
+
+    <span class="prompt-count">
+      {{ prompts.length }} prompt
+    </span>
+  </header>
+
+  <p *ngIf="isLoading">Promptok betöltése...</p>
+
+  <p *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </p>
+
+  <div *ngIf="!isLoading && !errorMessage && prompts.length === 0"
+       class="empty-state">
+    <h2>Még nincsenek promptok</h2>
+    <p>Hamarosan itt kezelheted és rendszerezheted a saját promptjaidat.</p>
+  </div>
+
+  <div class="prompt-grid" *ngIf="!isLoading && prompts.length > 0">
+    <article class="prompt-card" *ngFor="let prompt of prompts">
+      <div class="prompt-card-header">
+        <span class="category">{{ prompt.category || 'Általános' }}</span>
+      </div>
+
+      <h2>{{ prompt.title }}</h2>
+      <p class="description">
+        {{ prompt.description || 'Nincs leírás megadva.' }}
+      </p>
+
+      <div class="prompt-content">
+        {{ prompt.content }}
+      </div>
+    </article>
+  </div>
+</section>
+

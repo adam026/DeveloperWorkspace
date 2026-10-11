@@ -26,7 +26,11 @@
         <span>▤</span> Documents
       </a>
 
-      <a class="nav-item" href="#" (click)="$event.preventDefault()">
+      <!-- Prompt Library navigation -->
+      <a class="nav-item"
+         [class.active]="currentPage === 'prompts'"
+         href="#"
+         (click)="navigateTo('prompts'); $event.preventDefault()">
         <span>✧</span> Prompt Library
       </a>
       <a class="nav-item" href="#" (click)="$event.preventDefault()">
@@ -56,12 +60,15 @@
     <header class="topbar">
       <div class="breadcrumb">
         Workspace <span>/</span>
-        {{ currentPage === 'dashboard' ? 'Dashboard' : 'Documents' }}
+        {{ currentPage === 'dashboard' ? 'Dashboard' : currentPage === 'prompts' ? 'Prompt Library' : 'Documents' }}
       </div>
       <div class="user-avatar">DW</div>
     </header>
 
     <section class="page-content">
+      <!-- ===================================================== -->
+      <!-- DASHBOARD: workspace overview and module shortcuts -->
+      <!-- ===================================================== -->
       @if (currentPage === 'dashboard') {
       <div class="welcome-section">
         <div>
@@ -100,7 +107,7 @@
           <span class="card-footer">Knowledge base</span>
         </article>
 
-        <article class="module-card">
+        <article class="module-card" (click)="navigateTo('prompts')">
           <div class="module-icon blue">✧</div>
           <div class="card-heading">
             <h4>Prompt Library</h4>
@@ -164,7 +171,10 @@
       <footer class="page-footer">
         DeveloperWorkspace <span>•</span> Built for your daily workflow
       </footer>
-      } @else {
+      } @else if (currentPage === 'documents') {
+      <!-- ===================================================== -->
+      <!-- DOCUMENTS: create, search, filter, edit and delete -->
+      <!-- ===================================================== -->
       <div class="welcome-section">
         <div>
           <p class="eyebrow">KNOWLEDGE BASE</p>
@@ -310,7 +320,7 @@
         } @else if (filteredDocuments.length === 0) {
         <p>
           {{
-documents.length === 0
+          documents.length === 0
             ? 'No documents found.'
             : 'No documents match your filters.'
           }}
@@ -415,6 +425,9 @@ documents.length === 0
         </div>
         }
       </section>
+      } @else if (currentPage === 'prompts') {
+      <!-- PROMPT LIBRARY -->
+      <app-prompt-library></app-prompt-library>
       }
     </section>
   </main>
