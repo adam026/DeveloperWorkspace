@@ -1,43 +1,283 @@
 
 <section class="prompt-library">
+
+  <!-- FEJLÉC -->
   <header class="page-header">
     <div>
       <h1>Prompt Library</h1>
       <p>Gyakran használt AI-promptjaid egy helyen.</p>
     </div>
 
-    <span class="prompt-count">
-      {{ prompts.length }} prompt
-    </span>
+    <button type="button"
+            class="primary-button"
+            (click)="openCreateForm()">
+      ＋ New prompt
+    </button>
   </header>
 
-  <p *ngIf="isLoading">Promptok betöltése...</p>
+  <!-- VISSZAJELZÉSEK -->
+  @if (successMessage) {
+  <p class="success-message">{{ successMessage }}</p>
+  }
 
-  <p *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
-  </p>
+  @if (errorMessage) {
+  <p class="error-message">{{ errorMessage }}</p>
+  }
 
-  <div *ngIf="!isLoading && !errorMessage && prompts.length === 0"
-       class="empty-state">
-    <h2>Még nincsenek promptok</h2>
-    <p>Hamarosan itt kezelheted és rendszerezheted a saját promptjaidat.</p>
-  </div>
-
-  <div class="prompt-grid" *ngIf="!isLoading && prompts.length > 0">
-    <article class="prompt-card" *ngFor="let prompt of prompts">
-      <div class="prompt-card-header">
-        <span class="category">{{ prompt.category || 'Általános' }}</span>
+  <!-- ÚJ PROMPT ŰRLAP -->
+  @if (showCreateForm) {
+  <section class="create-prompt-panel">
+    <div class="form-heading">
+      <div>
+        <h2>New prompt</h2>
+        <p>Add a reusable prompt to your library.</p>
       </div>
 
-      <h2>{{ prompt.title }}</h2>
+      <button type="button"
+              class="close-button"
+              aria-label="Close form"
+              [disabled]="isSaving"
+              (click)="closeCreateForm()">
+        ×
+      </button>
+    </div>
+
+    <form class="prompt-form"
+          (ngSubmit)="createPrompt()"
+          #promptForm="ngForm">
+
+      <label for="prompt-title">Title *</label>
+      <input id="prompt-title"
+             name="title"
+             type="text"
+             [(ngModel)]="newPrompt.title"
+             placeholder="e.g. C# code review"
+             required
+             maxlength="150" />
+
+      <label for="prompt-description">Description</label>
+      <input id="prompt-description"
+             name="description"
+             type="text"
+             [(ngModel)]="newPrompt.description"
+             placeholder="What is this prompt used for?"
+             maxlength="500" />
+
+      <label for="prompt-category">Category</label>
+      <input id="prompt-category"
+             name="category"
+             type="text"
+             [(ngModel)]="newPrompt.category"
+             placeholder="e.g. C#, Code Review, Testing"
+             maxlength="100" />
+
+      <label for="prompt-content">Prompt content *</label>
+      <textarea id="prompt-content"
+                name="content"
+                [(ngModel)]="newPrompt.content"
+                placeholder="Write the prompt you want to save..."
+                rows="8"
+                required
+                maxlength="20000"></textarea>
+
+      <div class="character-count">
+        {{ newPrompt.content.length }} / 20000 characters
+      </div>
+
+      <div class="form-actions">
+        <button type="button"
+                class="secondary-button"
+                [disabled]="isSaving"
+                (click)="closeCreateForm()">
+          Cancel
+        </button>
+
+        <button type="submit"
+                class="primary-button"
+                [disabled]="isSaving || promptForm.invalid">
+          {{ isSaving ? 'Saving...' : 'Save prompt' }}
+        </button>
+      </div>
+    </form>
+  </section>
+  }
+
+
+  <!-- KERESÉS ÉS KATEGÓRIASZŰRÉS -->
+  <section class="prompt-filters">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="search"
+             aria-label="Promptok keresése"
+             placeholder="Keresés cím, leírás, kategória vagy tartalom alapján..."
+             [(ngModel)]="searchTerm" />
+    </div>
+
+    <select class="category-filter"
+            aria-label="Szűrés kategória szerint"
+            [(ngModel)]="selectedCategory">
+      <option value="">Minden kategória</option>
+
+      @for (category of categories; track category) {
+      <option [value]="category">{{ category }}</option>
+      }
+    </select>
+
+    @if (searchTerm || selectedCategory) {
+    <button type="button"
+            class="secondary-button"
+            (click)="clearFilters()">
+      Szűrők törlése
+    </button>
+    }
+  </section>
+
+  <!-- PROMPTLISTA FEJLÉCE -->
+  <div class="section-heading">
+    <div>
+      <h2>Your prompts</h2>
+      <p>{{ filteredPrompts.length }} találat / {{ prompts.length }} prompt</p>
+    </div>
+  </div>
+
+  <!-- BETÖLTÉSI ÁLLAPOT -->
+  @if (isLoading) {
+  <p>Promptok betöltése...</p>
+  } @else if (filteredPrompts.length === 0) {
+  <div class="empty-state">
+    @if (prompts.length === 0) {
+    <h3>Még nincsenek promptok</h3>
+    <p>Hozd létre az első promptodat a New prompt gombbal.</p>
+    } @else {
+    <h3>Nincs találat</h3>
+    <p>Próbálj más keresőkifejezést vagy kategóriát.</p>
+    }
+  </div>
+  } @else {
+
+
+  <!-- PROMPTKÁRTYÁK -->
+  <div class="prompt-grid">
+    @for (prompt of filteredPrompts; track prompt.id) {
+    <article class="prompt-card">
+
+      @if (editingPromptId === prompt.id) {
+      <!-- SZERKESZTŐŰRLAP -->
+      <form class="prompt-form" (ngSubmit)="updatePrompt()">
+
+        <label>Cím *</label>
+        <input name="editTitle"
+               [(ngModel)]="editPrompt.title"
+               required
+               maxlength="150" />
+
+        <label>Leírás</label>
+        <input name="editDescription"
+               [(ngModel)]="editPrompt.description"
+               maxlength="500" />
+
+        <label>Kategória</label>
+        <input name="editCategory"
+               [(ngModel)]="editPrompt.category"
+               maxlength="100" />
+
+        <label>Prompt szövege *</label>
+        <textarea name="editContent"
+                  [(ngModel)]="editPrompt.content"
+                  required
+                  maxlength="20000"
+                  rows="8"></textarea>
+
+        <div class="form-actions">
+          <button type="button"
+                  class="secondary-button"
+                  [disabled]="isSaving"
+                  (click)="cancelEditing()">
+            Mégse
+          </button>
+
+          <button type="submit"
+                  class="primary-button"
+                  [disabled]="isSaving ||
+                !editPrompt.title.trim() ||
+                !editPrompt.content.trim()">
+            {{ isSaving ? 'Mentés...' : 'Változtatások mentése' }}
+          </button>
+        </div>
+      </form>
+
+      } @else {
+      <!-- NORMÁL PROMPTKÁRTYA -->
+      <div class="prompt-card-header">
+        <span class="category">
+          {{ prompt.category || 'Általános' }}
+        </span>
+      </div>
+
+      <h3>{{ prompt.title }}</h3>
+
       <p class="description">
         {{ prompt.description || 'Nincs leírás megadva.' }}
       </p>
 
-      <div class="prompt-content">
-        {{ prompt.content }}
-      </div>
-    </article>
-  </div>
-</section>
+      <div class="prompt-content">{{ prompt.content }}</div>
 
+      <!-- KÁRTYAMŰVELETEK -->
+      <div class="form-actions prompt-actions">
+        <button type="button"
+                class="secondary-button"
+                [disabled]="isSaving"
+                (click)="startEditing(prompt)">
+          Szerkesztés
+        </button>
+
+        <button type="button"
+                class="secondary-button"
+                [disabled]="isSaving"
+                (click)="confirmDelete(prompt)">
+          Törlés
+        </button>
+
+        <button type="button"
+                class="secondary-button"
+                [disabled]="isSaving"
+                (click)="copyPrompt(prompt)">
+          {{ copiedPromptId === prompt.id ? 'Másolva ✓' : 'Másolás' }}
+        </button>
+      </div>
+
+      <!-- TÖRLÉS MEGERŐSÍTÉSE -->
+      @if (deletingPromptId === prompt.id) {
+      <div class="delete-confirmation">
+        <p>Biztosan törlöd ezt a promptot? A művelet nem vonható vissza.</p>
+
+        <div class="form-actions">
+          <button type="button"
+                  class="secondary-button"
+                  [disabled]="isSaving"
+                  (click)="cancelDelete()">
+            Mégse
+          </button>
+
+          <button type="button"
+                  class="primary-button"
+                  [disabled]="isSaving"
+                  (click)="prompt.id && deletePrompt(prompt.id)">
+            {{ isSaving ? 'Törlés...' : 'Végleges törlés' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- MÁSOLÁSI HIBA -->
+      @if (copyErrorMessage) {
+      <p class="error-message">{{ copyErrorMessage }}</p>
+      }
+      }
+      }
+
+    </article>
+    }
+  </div>
+  }
+
+</section>
