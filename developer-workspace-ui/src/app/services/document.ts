@@ -10,6 +10,8 @@ export interface Document {
   category: string;
   createdAt?: string;
   updatedAt?: string | null;
+  aiSummary?: string | null;
+  aiSummaryUpdatedAt?: string | null;
 }
 
 @Injectable({

@@ -20,11 +20,20 @@ public sealed class OllamaService
         var request = new OllamaRequest(
             Model: "llama3.2:3b",
             Prompt: $"""
-                Foglald össze magyarul az alábbi szöveget.
-                Emeld ki a legfontosabb információkat.
-                Ne találj ki olyan információt, amely nem szerepel a szövegben.
+                Te egy tapasztalt szoftverfejlesztő vagy, aki technikai dokumentációkat foglal össze.
 
-                Szöveg:
+                Készíts magyar nyelvű, tömör és informatív összefoglalót az alábbi dokumentumról.
+
+                Követelmények:
+                - Az összefoglaló 3-5 mondatból álljon.
+                - A dokumentum fő témáját és legfontosabb újdonságait emeld ki.
+                - Ne ismételd meg a teljes leírást, és ne sorold fel az összes részletet.
+                - Ne ismételd vissza a dokumentum címét, kategóriáját vagy metaadatait.
+                - Használj természetes, szakmailag pontos magyar nyelvet.
+                - Ne adj hozzá olyan információt, amely nem következik a bemenetből.
+                - Kizárólag az összefoglalót add vissza, bevezető és külön cím nélkül.
+
+                Dokumentum:
                 {text}
                 """,
             Stream: false);

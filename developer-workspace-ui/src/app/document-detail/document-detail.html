@@ -71,6 +71,48 @@
       </div>
     </div>
   </section>
+
+
+  <section class="ai-summary">
+    <h2>AI Summary</h2>
+
+    <p>
+      Készíts automatikus összefoglalót a dokumentum tartalmából
+      a helyi AI-modell segítségével.
+    </p>
+
+    <button type="button"
+            [disabled]="summarizing || loading || !document"
+            (click)="generateSummary()">
+            {{summarizing
+              ? 'Összefoglalás készítése...'
+              : (summary ? 'Összefoglaló újragenerálása' : 'AI Summary készítése')
+      }}
+    </button>
+
+    @if (summaryError) {
+    <p class="error-message">{{ summaryError }}</p>
+    }
+
+    @if (summarizing) {
+    <p>Az AI feldolgozza a dokumentumot. Ez néhány másodpercig tarthat.</p>
+    }
+
+    @if (summary) {
+    <div class="summary-result">
+      <h3>Generált összefoglaló</h3>
+      <p>{{ summary }}</p>
+
+      @if (document?.aiSummaryUpdatedAt) {
+      <p class="summary-date">
+        Utolsó generálás:
+        {{ document?.aiSummaryUpdatedAt | date:'yyyy. MM. dd. HH:mm' }}
+      </p>
+      }
+    </div>
+    }
+  </section>
+
   }
 </div>
 

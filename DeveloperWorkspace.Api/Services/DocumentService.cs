@@ -39,6 +39,7 @@ namespace DeveloperWorkspace.Api.Services
             return document;
         }
 
+
         public async Task<bool> UpdateAsync(string id, Document updatedDocument)
         {
             var existingDocument = await GetByIdAsync(id);
@@ -48,16 +49,41 @@ namespace DeveloperWorkspace.Api.Services
                 return false;
             }
 
+            var contentChanged =
+                existingDocument.Title != updatedDocument.Title ||
+                existingDocument.Description != updatedDocument.Description ||
+                existingDocument.Category != updatedDocument.Category;
+
             existingDocument.Title = updatedDocument.Title;
             existingDocument.Description = updatedDocument.Description;
             existingDocument.Category = updatedDocument.Category;
             existingDocument.UpdatedAt = DateTime.UtcNow;
 
+            if (contentChanged)
+            {
+                existingDocument.AiSummary = null;
+                existingDocument.AiSummaryUpdatedAt = null;
+            }
+
             var result = await _documents.ReplaceOneAsync(
                 document => document.Id == id,
                 existingDocument);
 
-            return result.ModifiedCount > 0;
+            return result.MatchedCount > 0;
+        }
+
+
+        public async Task<bool> SaveAiSummaryAsync(string id, string summary)
+        {
+            var update = Builders<Document>.Update
+                .Set(document => document.AiSummary, summary)
+                .Set(document => document.AiSummaryUpdatedAt, DateTime.UtcNow);
+
+            var result = await _documents.UpdateOneAsync(
+                document => document.Id == id,
+                update);
+
+            return result.MatchedCount > 0;
         }
 
         public async Task<bool> DeleteAsync(string id)

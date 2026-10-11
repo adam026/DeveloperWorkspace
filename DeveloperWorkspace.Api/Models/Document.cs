@@ -29,5 +29,12 @@ namespace DeveloperWorkspace.Api.Models
 
         [BsonElement("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
+
+        [BsonElement("aiSummary")]
+        public string? AiSummary { get; set; }
+
+        [BsonElement("aiSummaryUpdatedAt")]
+        public DateTime? AiSummaryUpdatedAt { get; set; }
+
     }
 }
