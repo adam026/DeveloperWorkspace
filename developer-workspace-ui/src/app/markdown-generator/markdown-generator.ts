@@ -72,6 +72,8 @@ export class MarkdownGenerator implements OnInit {
   protected successMessage = '';
   protected generatedDocument: MarkdownDocument | null = null;
 
+  protected showGeneratorForm = false;
+
   protected savedDocuments: MarkdownDocument[] = [];
   protected isLoadingDocuments = false;
   protected selectedDocumentId = '';
@@ -83,6 +85,27 @@ export class MarkdownGenerator implements OnInit {
 
     this.filePath = selected?.defaultPath ?? '';
     this.generatedDocument = null;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  protected startNewDocument(): void {
+    this.showGeneratorForm = true;
+    this.generatedDocument = null;
+    this.selectedDocumentId = '';
+
+    this.selectedType = 'Agent';
+    this.name = '';
+    this.description = '';
+    this.requirements = '';
+    this.filePath = this.fileTypes[0].defaultPath;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  protected cancelGeneration(): void {
+    this.showGeneratorForm = false;
     this.errorMessage = '';
     this.successMessage = '';
   }
@@ -110,8 +133,12 @@ export class MarkdownGenerator implements OnInit {
     }).subscribe({
       next: document => {
         this.generatedDocument = document;
+        this.selectedDocumentId = document.id ?? '';
+        this.showGeneratorForm = false;
+
         this.isGenerating = false;
         this.successMessage = 'Markdown file generated and saved successfully.';
+
         this.loadSavedDocuments();
         this.cdr.detectChanges();
       },
@@ -229,6 +256,7 @@ export class MarkdownGenerator implements OnInit {
     this.markdownService.getById(id).subscribe({
       next: document => {
         this.generatedDocument = document;
+        this.showGeneratorForm = false;
         this.selectedDocumentId = document.id ?? '';
         this.selectedType = document.fileType;
         this.name = document.name;

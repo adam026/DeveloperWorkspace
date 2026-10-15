@@ -1,3 +1,4 @@
+
 <section class="generator-page">
   <header class="page-header">
     <div>
@@ -6,7 +7,26 @@
     </div>
   </header>
 
+  <div class="page-actions">
+    <button type="button"
+            (click)="startNewDocument()">
+      + Generate new MD file
+    </button>
+  </div>
 
+  @if (successMessage) {
+  <div class="message success-message" role="status">
+    {{ successMessage }}
+  </div>
+  }
+
+  @if (errorMessage) {
+  <div class="message error-message" role="alert">
+    {{ errorMessage }}
+  </div>
+  }
+
+  <!-- Saved documents are always visible. -->
   <section class="generator-card saved-documents-card">
     <h2>Saved Markdown files</h2>
 
@@ -39,29 +59,20 @@
       </div>
       }
     </div>
+    }
 
     <button type="button"
+            class="secondary-button"
             (click)="loadSavedDocuments()"
             [disabled]="isLoadingDocuments">
       Refresh list
     </button>
-    }
   </section>
 
-  @if (successMessage) {
-  <div class="message success-message" role="status">
-    {{ successMessage }}
-  </div>
-  }
-
-  @if (errorMessage) {
-  <div class="message error-message" role="alert">
-    {{ errorMessage }}
-  </div>
-  }
-
+  <!-- The generation form is visible only when requested. -->
+  @if (showGeneratorForm) {
   <section class="generator-card">
-    <h2>File configuration</h2>
+    <h2>Generate new Markdown file</h2>
 
     <form #generatorForm="ngForm" (ngSubmit)="generate()">
       <div class="form-field">
@@ -119,12 +130,21 @@
                placeholder="Relative path inside your repository." />
       </div>
 
-      <button type="submit"
-              [disabled]="generatorForm.invalid || isGenerating">
-        {{ isGenerating ? 'Generating...' : 'Generate Markdown' }}
-      </button>
+      <div class="editor-actions">
+        <button type="submit"
+                [disabled]="generatorForm.invalid || isGenerating">
+          {{ isGenerating ? 'Generating...' : 'Generate Markdown' }}
+        </button>
+
+        <button type="button"
+                class="secondary-button"
+                (click)="cancelGeneration()">
+          Cancel
+        </button>
+      </div>
     </form>
   </section>
+  }
 
   @if (isGenerating) {
   <p class="loading-message" role="status">
@@ -132,33 +152,70 @@
   </p>
   }
 
-  @if (generatedDocument; as document) {
+  <!-- The editor is visible only when a document is open. -->
+  @if (generatedDocument && !showGeneratorForm) {
   <section class="result-card">
-    <h2>Generated Markdown</h2>
-    <p><strong>File:</strong> {{ document.name }}</p>
-    <p><strong>Type:</strong> {{ document.fileType }}</p>
-    <p><strong>Path:</strong> {{ document.filePath }}</p>
+    <h2>Edit Markdown file</h2>
 
-    <textarea class="markdown-preview"
-              aria-label="Generated Markdown content"
-              [(ngModel)]="document.content"
-              rows="20"></textarea>
+    <div class="form-field">
+      <label for="editName">Name</label>
+      <input id="editName"
+             name="editName"
+             [(ngModel)]="generatedDocument.name"
+             maxlength="150"
+             required />
+    </div>
 
-    <button type="button"
-            (click)="saveChanges()"
-            [disabled]="isSaving || !generatedDocument?.id">
-      {{ isSaving ? 'Saving...' : 'Save changes' }}
-    </button>
+    <div class="form-field">
+      <label for="editDescription">Description</label>
+      <textarea id="editDescription"
+                name="editDescription"
+                [(ngModel)]="generatedDocument.description"
+                maxlength="1000"
+                rows="2"></textarea>
+    </div>
 
-    <button type="button"
-            (click)="downloadMarkdown()"
-            [disabled]="!generatedDocument">
-      Download .md
-    </button>
+    <div class="form-field">
+      <label for="editFilePath">File path</label>
+      <input id="editFilePath"
+             name="editFilePath"
+             [(ngModel)]="generatedDocument.filePath"
+             maxlength="500" />
+    </div>
+
+    <div class="form-field">
+      <label for="markdownContent">Markdown content</label>
+      <textarea id="markdownContent"
+                name="markdownContent"
+                class="markdown-preview"
+                aria-label="Markdown content"
+                [(ngModel)]="generatedDocument.content"
+                rows="20"></textarea>
+    </div>
 
     <p class="result-note">
-      Changes in this preview are not saved automatically.
+      Remember to save your changes before leaving this document.
     </p>
+
+    <div class="editor-actions">
+      <button type="button"
+              (click)="saveChanges()"
+              [disabled]="isSaving || !generatedDocument.id">
+        {{ isSaving ? 'Saving...' : 'Save changes' }}
+      </button>
+
+      <button type="button"
+              class="secondary-button"
+              (click)="downloadMarkdown()">
+        Download .md
+      </button>
+
+      <button type="button"
+              class="secondary-button"
+              (click)="generatedDocument = null; selectedDocumentId = ''">
+        Close editor
+      </button>
+    </div>
   </section>
   }
 </section>

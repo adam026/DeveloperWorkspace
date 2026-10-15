@@ -253,3 +253,84 @@
   }
 }
 
+
+/* Page actions */
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+  .page-actions button,
+  .editor-actions button {
+    padding: 10px 16px;
+    border: 1px solid #2563eb;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+    .page-actions button:hover:not(:disabled),
+    .editor-actions button:hover:not(:disabled) {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .page-actions button:disabled,
+    .editor-actions button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+/* Form and editor actions */
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.generator-card .editor-actions {
+  margin-top: 20px;
+}
+
+.editor-actions .secondary-button,
+.generator-card > .secondary-button {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+  .editor-actions .secondary-button:hover:not(:disabled),
+  .generator-card > .secondary-button:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+  }
+
+  /* Consistent focus indicator */
+  .page-actions button:focus-visible,
+  .editor-actions button:focus-visible,
+  .generator-card > .secondary-button:focus-visible {
+    outline: 3px solid #bfdbfe;
+    outline-offset: 2px;
+  }
+
+@media (max-width: 600px) {
+  .page-actions button,
+  .editor-actions button {
+    width: 100%;
+  }
+
+  .editor-actions {
+    align-items: stretch;
+  }
+}
+
+
