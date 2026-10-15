@@ -1,0 +1,164 @@
+<section class="generator-page">
+  <header class="page-header">
+    <div>
+      <h1>Markdown Generator</h1>
+      <p>Generate AI-powered development instructions and knowledge files.</p>
+    </div>
+  </header>
+
+
+  <section class="generator-card saved-documents-card">
+    <h2>Saved Markdown files</h2>
+
+    @if (isLoadingDocuments) {
+    <p>Loading saved files...</p>
+    } @else if (savedDocuments.length === 0) {
+    <p>No saved Markdown files yet. Generate your first file below.</p>
+    } @else {
+    <div class="saved-document-list">
+      @for (document of savedDocuments; track document.id) {
+      <div class="saved-document-item"
+           [class.selected]="generatedDocument?.id === document.id">
+
+        <button type="button"
+                class="open-saved-document"
+                (click)="openSavedDocument(document.id ?? '')">
+          <span class="saved-document-info">
+            <strong>{{ document.name }}</strong>
+            <span>{{ document.fileType }}</span>
+            <small>{{ document.filePath }}</small>
+          </span>
+          <span class="open-label">Open →</span>
+        </button>
+
+        <button type="button"
+                class="delete-button"
+                (click)="deleteSavedDocument(document)">
+          Delete
+        </button>
+      </div>
+      }
+    </div>
+
+    <button type="button"
+            (click)="loadSavedDocuments()"
+            [disabled]="isLoadingDocuments">
+      Refresh list
+    </button>
+    }
+  </section>
+
+  @if (successMessage) {
+  <div class="message success-message" role="status">
+    {{ successMessage }}
+  </div>
+  }
+
+  @if (errorMessage) {
+  <div class="message error-message" role="alert">
+    {{ errorMessage }}
+  </div>
+  }
+
+  <section class="generator-card">
+    <h2>File configuration</h2>
+
+    <form #generatorForm="ngForm" (ngSubmit)="generate()">
+      <div class="form-field">
+        <label for="fileType">File type</label>
+        <select id="fileType"
+                name="fileType"
+                [(ngModel)]="selectedType"
+                (ngModelChange)="onFileTypeChange()"
+                required>
+          @for (type of fileTypes; track type.value) {
+          <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="name">Name</label>
+        <input id="name"
+               name="name"
+               [(ngModel)]="name"
+               maxlength="150"
+               required
+               placeholder="e.g. Code Reviewer" />
+      </div>
+
+      <div class="form-field">
+        <label for="description">Description</label>
+        <textarea id="description"
+                  name="description"
+                  [(ngModel)]="description"
+                  maxlength="1000"
+                  rows="2"
+                  placeholder="Describe the purpose of this file."></textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="requirements">Requirements</label>
+        <textarea id="requirements"
+                  name="requirements"
+                  [(ngModel)]="requirements"
+                  minlength="10"
+                  maxlength="20000"
+                  rows="7"
+                  required
+                  placeholder="Describe the expected behavior, rules and workflow."></textarea>
+        <small>At least 10 characters.</small>
+      </div>
+
+      <div class="form-field">
+        <label for="filePath">Target file path</label>
+        <input id="filePath"
+               name="filePath"
+               [(ngModel)]="filePath"
+               maxlength="500"
+               placeholder="Relative path inside your repository." />
+      </div>
+
+      <button type="submit"
+              [disabled]="generatorForm.invalid || isGenerating">
+        {{ isGenerating ? 'Generating...' : 'Generate Markdown' }}
+      </button>
+    </form>
+  </section>
+
+  @if (isGenerating) {
+  <p class="loading-message" role="status">
+    The AI is generating your Markdown file. This may take a moment.
+  </p>
+  }
+
+  @if (generatedDocument; as document) {
+  <section class="result-card">
+    <h2>Generated Markdown</h2>
+    <p><strong>File:</strong> {{ document.name }}</p>
+    <p><strong>Type:</strong> {{ document.fileType }}</p>
+    <p><strong>Path:</strong> {{ document.filePath }}</p>
+
+    <textarea class="markdown-preview"
+              aria-label="Generated Markdown content"
+              [(ngModel)]="document.content"
+              rows="20"></textarea>
+
+    <button type="button"
+            (click)="saveChanges()"
+            [disabled]="isSaving || !generatedDocument?.id">
+      {{ isSaving ? 'Saving...' : 'Save changes' }}
+    </button>
+
+    <button type="button"
+            (click)="downloadMarkdown()"
+            [disabled]="!generatedDocument">
+      Download .md
+    </button>
+
+    <p class="result-note">
+      Changes in this preview are not saved automatically.
+    </p>
+  </section>
+  }
+</section>

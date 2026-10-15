@@ -1,0 +1,255 @@
+.generator-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #1f2937;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+  .page-header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+  }
+
+  .page-header p,
+  .result-note {
+    color: #6b7280;
+  }
+
+.generator-card,
+.result-card {
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+  .generator-card h2,
+  .result-card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+  .form-field label {
+    font-weight: 600;
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .markdown-preview {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font: inherit;
+  }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus,
+    .markdown-preview:focus {
+      outline: 2px solid #93c5fd;
+      outline-offset: 1px;
+    }
+
+  .form-field small {
+    color: #6b7280;
+  }
+
+.generator-card button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+  .generator-card button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+.message {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.success-message {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.loading-message {
+  color: #4b5563;
+  margin: 20px 0;
+}
+
+.markdown-preview {
+  min-height: 400px;
+  resize: vertical;
+  font-family: Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.result-note {
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .generator-page {
+    padding: 16px;
+  }
+
+  .generator-card,
+  .result-card {
+    padding: 16px;
+  }
+}
+
+
+/* Saved Markdown files */
+
+.saved-document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.saved-document-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+  .saved-document-item:hover {
+    border-color: #93c5fd;
+    background: #f8fafc;
+  }
+
+  .saved-document-item.selected {
+    border-color: #93c5fd;
+    background: #eff6ff;
+  }
+
+  .saved-document-item .open-saved-document {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: #1e293b;
+    text-align: left;
+    box-shadow: none;
+  }
+
+    .saved-document-item .open-saved-document:hover:not(:disabled) {
+      background: transparent;
+      color: #1d4ed8;
+      box-shadow: none;
+    }
+
+.saved-document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+  .saved-document-info strong {
+    color: #1e293b;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .saved-document-info span {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  .saved-document-info small {
+    color: #94a3b8;
+    font-size: 12px;
+  }
+
+.open-label {
+  flex-shrink: 0;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.saved-document-item .delete-button {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 9px 13px;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+  .saved-document-item .delete-button:hover:not(:disabled) {
+    border-color: #fca5a5;
+    background: #fef2f2;
+    color: #991b1b;
+  }
+
+@media (max-width: 600px) {
+  .saved-document-item {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+    .saved-document-item .open-saved-document {
+      align-items: flex-start;
+    }
+
+  .open-label {
+    white-space: nowrap;
+  }
+
+  .saved-document-item .delete-button {
+    align-self: center;
+  }
+}
+

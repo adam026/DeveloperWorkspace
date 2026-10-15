@@ -33,6 +33,12 @@ namespace DeveloperWorkspace.Api
             // PromptService registration for dependency injection
             builder.Services.AddScoped<PromptService>();
 
+            // MarkdownDocumentService registration for dependency injection
+            builder.Services.AddScoped<MarkdownDocumentService>();
+
+            // AgentService registration for dependency injection
+            builder.Services.AddScoped<AgentService>();
+
             // MongoDbContext registration with configuration from appsettings.json
             builder.Services.AddSingleton<MongoDbContext>(sp =>
             {

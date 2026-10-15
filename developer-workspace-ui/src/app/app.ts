@@ -5,6 +5,7 @@ import {Router,NavigationEnd,RouterLink,RouterOutlet} from '@angular/router';
 import { filter } from 'rxjs';
 import { DocumentService, Document } from './services/document';
 import { PromptLibrary } from './prompt-library/prompt-library';
+import { MarkdownGenerator } from './markdown-generator/markdown-generator';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,7 @@ import { PromptLibrary } from './prompt-library/prompt-library';
     RouterOutlet,
     RouterLink,
     FormsModule,
+    MarkdownGenerator,
     PromptLibrary
   ],
   templateUrl: './app.html',
@@ -30,8 +32,12 @@ export class App implements OnInit {
 
   protected currentRouteIsHome = true;
 
-  // A három jelenleg támogatott fő nézet.
-  protected currentPage: 'dashboard' | 'documents' | 'prompts' = 'dashboard';
+  // A négy jelenleg támogatott fő nézet.
+  currentPage:
+    | 'dashboard'
+    | 'documents'
+    | 'prompts'
+    | 'markdown-generator' = 'dashboard';
 
   ngOnInit(): void {
     this.currentRouteIsHome = this.router.url === '/';
@@ -50,7 +56,7 @@ export class App implements OnInit {
 
   // Fő nézetek közötti váltás.
   protected navigateTo(
-    page: 'dashboard' | 'documents' | 'prompts'
+    page: 'dashboard' | 'documents' | 'prompts' | 'markdown-generator'
   ): void {
     this.currentPage = page;
 

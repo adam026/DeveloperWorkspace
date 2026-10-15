@@ -33,9 +33,14 @@
          (click)="navigateTo('prompts'); $event.preventDefault()">
         <span>✧</span> Prompt Library
       </a>
-      <a class="nav-item" href="#" (click)="$event.preventDefault()">
-        <span>⌘</span> Agent Generator
+      <!-- Agent & Markdown Generator navigation-->
+      <a class="nav-item"
+         [class.active]="currentPage === 'markdown-generator'"
+         href="#"
+         (click)="navigateTo('markdown-generator'); $event.preventDefault()">
+        <span>⚙</span> Agent & Markdown Generator
       </a>
+
       <a class="nav-item" href="#" (click)="$event.preventDefault()">
         <span>◈</span> Architecture Library
       </a>
@@ -117,10 +122,10 @@
           <span class="card-footer">Reusable prompts</span>
         </article>
 
-        <article class="module-card">
+        <article class="module-card" (click)="navigateTo('markdown-generator')">
           <div class="module-icon green">⌘</div>
           <div class="card-heading">
-            <h4>Agent Generator</h4>
+            <h4>Agent & Markdown Generator</h4>
             <span class="card-arrow">↗</span>
           </div>
           <p>Create Markdown instructions for your development agents.</p>
@@ -428,6 +433,8 @@
       } @else if (currentPage === 'prompts') {
       <!-- PROMPT LIBRARY -->
       <app-prompt-library></app-prompt-library>
+      } @else if (currentPage === 'markdown-generator') {
+      <app-markdown-generator></app-markdown-generator>
       }
     </section>
   </main>
