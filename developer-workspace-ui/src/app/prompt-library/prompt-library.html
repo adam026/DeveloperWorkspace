@@ -1,11 +1,9 @@
-
 <section class="prompt-library">
-
-  <!-- FEJLÉC -->
+  <!-- Page header -->
   <header class="page-header">
     <div>
       <h1>Prompt Library</h1>
-      <p>Gyakran használt AI-promptjaid egy helyen.</p>
+      <p>Keep your frequently used AI prompts in one place.</p>
     </div>
 
     <button type="button"
@@ -15,16 +13,20 @@
     </button>
   </header>
 
-  <!-- VISSZAJELZÉSEK -->
+  <!-- Operation feedback -->
   @if (successMessage) {
-  <p class="success-message">{{ successMessage }}</p>
+  <p class="success-message" role="status">{{ successMessage }}</p>
   }
 
   @if (errorMessage) {
-  <p class="error-message">{{ errorMessage }}</p>
+  <p class="error-message" role="alert">{{ errorMessage }}</p>
   }
 
-  <!-- ÚJ PROMPT ŰRLAP -->
+  @if (copyErrorMessage) {
+  <p class="error-message" role="alert">{{ copyErrorMessage }}</p>
+  }
+
+  <!-- Create prompt form -->
   @if (showCreateForm) {
   <section class="create-prompt-panel">
     <div class="form-heading">
@@ -102,22 +104,20 @@
   </section>
   }
 
-
-  <!-- KERESÉS ÉS KATEGÓRIASZŰRÉS -->
+  <!-- Search and category filters -->
   <section class="prompt-filters">
     <div class="search-box">
-      <span class="search-icon">⌕</span>
+      <span class="search-icon" aria-hidden="true">⌕</span>
       <input type="search"
-             aria-label="Promptok keresése"
-             placeholder="Keresés cím, leírás, kategória vagy tartalom alapján..."
+             aria-label="Search prompts"
+             placeholder="Search by title, description, category, or content..."
              [(ngModel)]="searchTerm" />
     </div>
 
     <select class="category-filter"
-            aria-label="Szűrés kategória szerint"
+            aria-label="Filter by category"
             [(ngModel)]="selectedCategory">
-      <option value="">Minden kategória</option>
-
+      <option value="">All categories</option>
       @for (category of categories; track category) {
       <option [value]="category">{{ category }}</option>
       }
@@ -127,62 +127,61 @@
     <button type="button"
             class="secondary-button"
             (click)="clearFilters()">
-      Szűrők törlése
+      Clear filters
     </button>
     }
   </section>
 
-  <!-- PROMPTLISTA FEJLÉCE -->
+  <!-- Prompt list heading -->
   <div class="section-heading">
     <div>
       <h2>Your prompts</h2>
-      <p>{{ filteredPrompts.length }} találat / {{ prompts.length }} prompt</p>
+      <p>{{ filteredPrompts.length }} of {{ prompts.length }} prompts</p>
     </div>
   </div>
 
-  <!-- BETÖLTÉSI ÁLLAPOT -->
+  <!-- Loading, empty, and list states -->
   @if (isLoading) {
-  <p>Promptok betöltése...</p>
+  <p class="loading-message" role="status">Loading prompts...</p>
   } @else if (filteredPrompts.length === 0) {
   <div class="empty-state">
     @if (prompts.length === 0) {
-    <h3>Még nincsenek promptok</h3>
-    <p>Hozd létre az első promptodat a New prompt gombbal.</p>
+    <h3>No prompts yet</h3>
+    <p>Create your first prompt using the New prompt button.</p>
     } @else {
-    <h3>Nincs találat</h3>
-    <p>Próbálj más keresőkifejezést vagy kategóriát.</p>
+    <h3>No results found</h3>
+    <p>Try a different search term or category.</p>
     }
   </div>
   } @else {
-
-
-  <!-- PROMPTKÁRTYÁK -->
   <div class="prompt-grid">
     @for (prompt of filteredPrompts; track prompt.id) {
     <article class="prompt-card">
-
       @if (editingPromptId === prompt.id) {
-      <!-- SZERKESZTŐŰRLAP -->
+      <!-- Inline prompt editor -->
       <form class="prompt-form" (ngSubmit)="updatePrompt()">
-
-        <label>Cím *</label>
-        <input name="editTitle"
+        <label [for]="'edit-title-' + prompt.id">Title *</label>
+        <input [id]="'edit-title-' + prompt.id"
+               name="editTitle"
                [(ngModel)]="editPrompt.title"
                required
                maxlength="150" />
 
-        <label>Leírás</label>
-        <input name="editDescription"
+        <label [for]="'edit-description-' + prompt.id">Description</label>
+        <input [id]="'edit-description-' + prompt.id"
+               name="editDescription"
                [(ngModel)]="editPrompt.description"
                maxlength="500" />
 
-        <label>Kategória</label>
-        <input name="editCategory"
+        <label [for]="'edit-category-' + prompt.id">Category</label>
+        <input [id]="'edit-category-' + prompt.id"
+               name="editCategory"
                [(ngModel)]="editPrompt.category"
                maxlength="100" />
 
-        <label>Prompt szövege *</label>
-        <textarea name="editContent"
+        <label [for]="'edit-content-' + prompt.id">Prompt content *</label>
+        <textarea [id]="'edit-content-' + prompt.id"
+                  name="editContent"
                   [(ngModel)]="editPrompt.content"
                   required
                   maxlength="20000"
@@ -193,91 +192,81 @@
                   class="secondary-button"
                   [disabled]="isSaving"
                   (click)="cancelEditing()">
-            Mégse
+            Cancel
           </button>
 
           <button type="submit"
                   class="primary-button"
-                  [disabled]="isSaving ||
-                !editPrompt.title.trim() ||
-                !editPrompt.content.trim()">
-            {{ isSaving ? 'Mentés...' : 'Változtatások mentése' }}
+                  [disabled]="isSaving || !editPrompt.title.trim() || !editPrompt.content.trim()">
+            {{ isSaving ? 'Saving...' : 'Save changes' }}
           </button>
         </div>
       </form>
-
       } @else {
-      <!-- NORMÁL PROMPTKÁRTYA -->
+      <!-- Prompt card content -->
       <div class="prompt-card-header">
         <span class="category">
-          {{ prompt.category || 'Általános' }}
+          {{ prompt.category || 'General' }}
         </span>
       </div>
 
       <h3>{{ prompt.title }}</h3>
 
       <p class="description">
-        {{ prompt.description || 'Nincs leírás megadva.' }}
+        {{ prompt.description || 'No description provided.' }}
       </p>
 
       <div class="prompt-content">{{ prompt.content }}</div>
 
-      <!-- KÁRTYAMŰVELETEK -->
+      <!-- Prompt actions -->
       <div class="form-actions prompt-actions">
         <button type="button"
                 class="secondary-button"
                 [disabled]="isSaving"
                 (click)="startEditing(prompt)">
-          Szerkesztés
+          Edit
         </button>
 
         <button type="button"
                 class="secondary-button"
                 [disabled]="isSaving"
                 (click)="confirmDelete(prompt)">
-          Törlés
+          Delete
         </button>
 
         <button type="button"
                 class="secondary-button"
                 [disabled]="isSaving"
                 (click)="copyPrompt(prompt)">
-          {{ copiedPromptId === prompt.id ? 'Másolva ✓' : 'Másolás' }}
+          {{ copiedPromptId === prompt.id ? 'Copied ✓' : 'Copy' }}
         </button>
       </div>
 
-      <!-- TÖRLÉS MEGERŐSÍTÉSE -->
+      <!-- Delete confirmation -->
       @if (deletingPromptId === prompt.id) {
       <div class="delete-confirmation">
-        <p>Biztosan törlöd ezt a promptot? A művelet nem vonható vissza.</p>
+        <p>Are you sure you want to delete this prompt? This action cannot be undone.</p>
 
         <div class="form-actions">
           <button type="button"
                   class="secondary-button"
                   [disabled]="isSaving"
                   (click)="cancelDelete()">
-            Mégse
+            Cancel
           </button>
 
           <button type="button"
                   class="primary-button"
                   [disabled]="isSaving"
                   (click)="prompt.id && deletePrompt(prompt.id)">
-            {{ isSaving ? 'Törlés...' : 'Végleges törlés' }}
+            {{ isSaving ? 'Deleting...' : 'Delete permanently' }}
           </button>
         </div>
       </div>
-
-      <!-- MÁSOLÁSI HIBA -->
-      @if (copyErrorMessage) {
-      <p class="error-message">{{ copyErrorMessage }}</p>
       }
       }
-      }
-
     </article>
     }
   </div>
   }
-
 </section>

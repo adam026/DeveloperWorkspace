@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import {
@@ -18,10 +18,6 @@ import {
 export class MarkdownGenerator implements OnInit {
   private readonly markdownService = inject(MarkdownDocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  ngOnInit(): void {
-    this.loadSavedDocuments();
-  }
 
   protected readonly fileTypes: {
     value: MarkdownFileType;
@@ -66,7 +62,7 @@ export class MarkdownGenerator implements OnInit {
   protected requirements = '';
   protected filePath = this.fileTypes[0].defaultPath;
 
-  // State management
+  // Generation and editing state
   protected isGenerating = false;
   protected isSaving = false;
   protected errorMessage = '';
@@ -76,14 +72,18 @@ export class MarkdownGenerator implements OnInit {
   // Form visibility
   protected showGeneratorForm = false;
 
-  // Saved documents
+  // Saved document list state
   protected savedDocuments: MarkdownDocument[] = [];
   protected isLoadingDocuments = false;
   protected selectedDocumentId = '';
 
-  // Search and filter
+  // Search and filtering state
   protected searchTerm = '';
   protected selectedFileType = 'All';
+
+  ngOnInit(): void {
+    this.loadSavedDocuments();
+  }
 
   protected onFileTypeChange(): void {
     const selected = this.fileTypes.find(
@@ -112,6 +112,10 @@ export class MarkdownGenerator implements OnInit {
   }
 
   protected cancelGeneration(): void {
+    if (this.isGenerating) {
+      return;
+    }
+
     this.showGeneratorForm = false;
     this.errorMessage = '';
     this.successMessage = '';
@@ -142,7 +146,6 @@ export class MarkdownGenerator implements OnInit {
         this.generatedDocument = document;
         this.selectedDocumentId = document.id ?? '';
         this.showGeneratorForm = false;
-
         this.isGenerating = false;
         this.successMessage = 'Markdown file generated and saved successfully.';
 
@@ -150,7 +153,7 @@ export class MarkdownGenerator implements OnInit {
         this.cdr.detectChanges();
       },
       error: error => {
-        console.error('Markdown generation failed:', error);
+        console.error('Markdown generation failed.', error);
         this.errorMessage =
           'Failed to generate the Markdown file. Check the API and Ollama service.';
         this.isGenerating = false;
@@ -158,7 +161,6 @@ export class MarkdownGenerator implements OnInit {
       }
     });
   }
-
 
   protected saveChanges(): void {
     const document = this.generatedDocument;
@@ -179,14 +181,13 @@ export class MarkdownGenerator implements OnInit {
         this.cdr.detectChanges();
       },
       error: error => {
-        console.error('Markdown save failed:', error);
+        console.error('Markdown save failed.', error);
         this.isSaving = false;
         this.errorMessage = 'Failed to save changes. Please try again.';
         this.cdr.detectChanges();
       }
     });
   }
-
 
   protected downloadMarkdown(): void {
     const document = this.generatedDocument;
@@ -210,10 +211,8 @@ export class MarkdownGenerator implements OnInit {
     URL.revokeObjectURL(url);
   }
 
-  private getDownloadFileName(
-    document: MarkdownDocument
-  ): string {
-    const fileName = document.filePath
+  private getDownloadFileName(document: MarkdownDocument): string {
+    const fileName = (document.filePath ?? '')
       .replace(/\\/g, '/')
       .split('/')
       .pop()
@@ -223,7 +222,7 @@ export class MarkdownGenerator implements OnInit {
       return fileName;
     }
 
-    const safeName = document.name
+    const safeName = (document.name ?? '')
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9-]+/g, '-')
@@ -231,7 +230,6 @@ export class MarkdownGenerator implements OnInit {
 
     return `${safeName || 'generated-document'}.md`;
   }
-
 
   protected loadSavedDocuments(): void {
     this.isLoadingDocuments = true;
@@ -244,7 +242,7 @@ export class MarkdownGenerator implements OnInit {
         this.cdr.detectChanges();
       },
       error: error => {
-        console.error('Failed to load Markdown documents:', error);
+        console.error('Failed to load Markdown documents.', error);
         this.errorMessage = 'Failed to load saved Markdown files.';
         this.isLoadingDocuments = false;
         this.cdr.detectChanges();
@@ -267,19 +265,18 @@ export class MarkdownGenerator implements OnInit {
         this.selectedDocumentId = document.id ?? '';
         this.selectedType = document.fileType;
         this.name = document.name;
-        this.description = document.description;
-        this.filePath = document.filePath;
+        this.description = document.description ?? '';
+        this.filePath = document.filePath ?? '';
         this.successMessage = 'Saved Markdown document loaded successfully.';
         this.cdr.detectChanges();
       },
       error: error => {
-        console.error('Loading Markdown document failed:', error);
+        console.error('Failed to load the selected Markdown document.', error);
         this.errorMessage = 'Failed to load the selected Markdown document.';
         this.cdr.detectChanges();
       }
     });
   }
-
 
   protected deleteSavedDocument(document: MarkdownDocument): void {
     if (!document.id) {
@@ -312,7 +309,7 @@ export class MarkdownGenerator implements OnInit {
         this.cdr.detectChanges();
       },
       error: error => {
-        console.error('Deleting Markdown document failed:', error);
+        console.error('Failed to delete the Markdown document.', error);
         this.errorMessage = 'Failed to delete the Markdown document.';
         this.cdr.detectChanges();
       }
@@ -325,9 +322,9 @@ export class MarkdownGenerator implements OnInit {
     return this.savedDocuments.filter(document => {
       const matchesSearch =
         !search ||
-        document.name.toLowerCase().includes(search) ||
-        document.description.toLowerCase().includes(search) ||
-        document.filePath.toLowerCase().includes(search);
+        (document.name ?? '').toLowerCase().includes(search) ||
+        (document.description ?? '').toLowerCase().includes(search) ||
+        (document.filePath ?? '').toLowerCase().includes(search);
 
       const matchesType =
         this.selectedFileType === 'All' ||
@@ -343,6 +340,4 @@ export class MarkdownGenerator implements OnInit {
       ...new Set(this.savedDocuments.map(document => document.fileType))
     ];
   }
-
 }
-

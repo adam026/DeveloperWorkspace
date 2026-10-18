@@ -1,4 +1,3 @@
-
 <section class="generator-page">
   <header class="page-header">
     <div>
@@ -8,8 +7,7 @@
   </header>
 
   <div class="page-actions">
-    <button type="button"
-            (click)="startNewDocument()">
+    <button type="button" (click)="startNewDocument()">
       + Generate new MD file
     </button>
   </div>
@@ -29,7 +27,6 @@
   <!-- Saved documents are always visible. -->
   <section class="generator-card saved-documents-card">
     <h2>Saved Markdown files</h2>
-
 
     <div class="document-filters">
       <div class="form-field search-field">
@@ -61,11 +58,11 @@
     </p>
 
     @if (isLoadingDocuments) {
-    <p>Loading saved files...</p>
+    <p role="status">Loading saved files...</p>
     } @else if (filteredDocuments.length === 0) {
-      <p class="empty-results">
-        No matching files found. Try another search or file type.
-      </p>
+    <p class="empty-results">
+      No matching files found. Try another search or file type.
+    </p>
     } @else {
     <div class="saved-document-list">
       @for (document of filteredDocuments; track document.id) {
@@ -74,6 +71,7 @@
 
         <button type="button"
                 class="open-saved-document"
+                [disabled]="!document.id"
                 (click)="openSavedDocument(document.id ?? '')">
           <span class="saved-document-info">
             <strong>{{ document.name }}</strong>
@@ -85,6 +83,7 @@
 
         <button type="button"
                 class="delete-button"
+                [disabled]="!document.id"
                 (click)="deleteSavedDocument(document)">
           Delete
         </button>
@@ -163,13 +162,13 @@
       </div>
 
       <div class="editor-actions">
-        <button type="submit"
-                [disabled]="generatorForm.invalid || isGenerating">
+        <button type="submit" [disabled]="generatorForm.invalid || isGenerating">
           {{ isGenerating ? 'Generating...' : 'Generate Markdown' }}
         </button>
 
         <button type="button"
                 class="secondary-button"
+                [disabled]="isGenerating"
                 (click)="cancelGeneration()">
           Cancel
         </button>

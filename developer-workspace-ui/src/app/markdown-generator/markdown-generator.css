@@ -21,8 +21,8 @@
 
 .generator-card,
 .result-card {
-  padding: 24px;
   margin-bottom: 24px;
+  padding: 24px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #fff;
@@ -55,6 +55,7 @@
     padding: 12px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
+    color: #1f2937;
     font: inherit;
   }
 
@@ -70,25 +71,75 @@
     color: #6b7280;
   }
 
-.generator-card button {
+.generator-card button,
+.page-actions button,
+.editor-actions button {
   padding: 12px 18px;
-  border: none;
+  border: 1px solid #2563eb;
   border-radius: 8px;
   background: #2563eb;
-  color: white;
+  color: #fff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-  .generator-card button:disabled {
-    opacity: 0.5;
+  .generator-card button:hover:not(:disabled),
+  .page-actions button:hover:not(:disabled),
+  .editor-actions button:hover:not(:disabled) {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+  }
+
+  .generator-card button:disabled,
+  .page-actions button:disabled,
+  .editor-actions button:disabled {
+    opacity: 0.55;
     cursor: not-allowed;
   }
 
+.generator-card .secondary-button,
+.editor-actions .secondary-button {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+  .generator-card .secondary-button:hover:not(:disabled),
+  .editor-actions .secondary-button:hover:not(:disabled) {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+.page-actions,
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.editor-actions {
+  margin-top: 16px;
+}
+
+.generator-card .editor-actions {
+  margin-top: 20px;
+}
+
+.page-actions button:focus-visible,
+.editor-actions button:focus-visible,
+.generator-card > .secondary-button:focus-visible {
+  outline: 3px solid #bfdbfe;
+  outline-offset: 2px;
+}
+
 .message {
-  padding: 12px 16px;
   margin-bottom: 16px;
+  padding: 12px 16px;
   border-radius: 8px;
 }
 
@@ -103,8 +154,8 @@
 }
 
 .loading-message {
-  color: #4b5563;
   margin: 20px 0;
+  color: #4b5563;
 }
 
 .markdown-preview {
@@ -118,20 +169,6 @@
 .result-note {
   font-size: 13px;
 }
-
-@media (max-width: 600px) {
-  .generator-page {
-    padding: 16px;
-  }
-
-  .generator-card,
-  .result-card {
-    padding: 16px;
-  }
-}
-
-
-/* Saved Markdown files */
 
 .saved-document-list {
   display: flex;
@@ -147,8 +184,8 @@
   padding: 14px 16px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: #ffffff;
-  transition: border-color 0.2s, background-color 0.2s;
+  background: #fff;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
   .saved-document-item:hover {
@@ -219,8 +256,7 @@
   flex-shrink: 0;
   margin: 0;
   padding: 9px 13px;
-  border: 1px solid #fecaca;
-  border-radius: 7px;
+  border-color: #fecaca;
   background: #fff;
   color: #b91c1c;
   font-size: 13px;
@@ -232,107 +268,6 @@
     background: #fef2f2;
     color: #991b1b;
   }
-
-@media (max-width: 600px) {
-  .saved-document-item {
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px;
-  }
-
-    .saved-document-item .open-saved-document {
-      align-items: flex-start;
-    }
-
-  .open-label {
-    white-space: nowrap;
-  }
-
-  .saved-document-item .delete-button {
-    align-self: center;
-  }
-}
-
-
-/* Page actions */
-.page-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
-}
-
-  .page-actions button,
-  .editor-actions button {
-    padding: 10px 16px;
-    border: 1px solid #2563eb;
-    border-radius: 7px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-  }
-
-    .page-actions button:hover:not(:disabled),
-    .editor-actions button:hover:not(:disabled) {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
-    }
-
-    .page-actions button:disabled,
-    .editor-actions button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
-/* Form and editor actions */
-.editor-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.generator-card .editor-actions {
-  margin-top: 20px;
-}
-
-.editor-actions .secondary-button,
-.generator-card > .secondary-button {
-  background: #ffffff;
-  color: #334155;
-  border-color: #cbd5e1;
-}
-
-  .editor-actions .secondary-button:hover:not(:disabled),
-  .generator-card > .secondary-button:hover:not(:disabled) {
-    background: #f1f5f9;
-    border-color: #94a3b8;
-    color: #0f172a;
-  }
-
-  /* Consistent focus indicator */
-  .page-actions button:focus-visible,
-  .editor-actions button:focus-visible,
-  .generator-card > .secondary-button:focus-visible {
-    outline: 3px solid #bfdbfe;
-    outline-offset: 2px;
-  }
-
-@media (max-width: 600px) {
-  .page-actions button,
-  .editor-actions button {
-    width: 100%;
-  }
-
-  .editor-actions {
-    align-items: stretch;
-  }
-}
-
 
 .document-filters {
   display: grid;
@@ -361,10 +296,43 @@
 }
 
 @media (max-width: 600px) {
+  .generator-page {
+    padding: 16px;
+  }
+
+  .generator-card,
+  .result-card {
+    padding: 16px;
+  }
+
   .document-filters {
     grid-template-columns: 1fr;
   }
+
+  .saved-document-item {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+    .saved-document-item .open-saved-document {
+      align-items: flex-start;
+    }
+
+  .open-label {
+    white-space: nowrap;
+  }
+
+  .saved-document-item .delete-button {
+    align-self: center;
+  }
+
+  .page-actions button,
+  .editor-actions button {
+    width: 100%;
+  }
+
+  .editor-actions {
+    align-items: stretch;
+  }
 }
-
-
-

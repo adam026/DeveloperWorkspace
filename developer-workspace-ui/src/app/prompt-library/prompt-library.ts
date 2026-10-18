@@ -1,5 +1,4 @@
-
-import {ChangeDetectorRef,Component,OnInit,inject} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Prompt, PromptService } from '../services/prompt';
@@ -12,39 +11,31 @@ import { Prompt, PromptService } from '../services/prompt';
   styleUrl: './prompt-library.css'
 })
 export class PromptLibrary implements OnInit {
-
-  // =========================================================
-  // Szolgáltatások és állapotok
-  // =========================================================
-
   private readonly promptService = inject(PromptService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   protected prompts: Prompt[] = [];
 
-  protected isLoading = false;
+  protected isLoading = true;
   protected isSaving = false;
   protected errorMessage = '';
   protected successMessage = '';
   protected showCreateForm = false;
 
-  // Edit
+  // Editing and deletion state
   protected editingPromptId: string | null = null;
   protected deletingPromptId: string | null = null;
   protected editPrompt: Prompt = this.createEmptyPrompt();
 
-  // Search and fitler
+  // Search and filtering state
   protected searchTerm = '';
   protected selectedCategory = '';
 
-  // Copy
+  // Clipboard state
   protected copiedPromptId: string | null = null;
   protected copyErrorMessage = '';
 
-  // =========================================================
-  // Új prompt űrlapja
-  // =========================================================
-
+  // New prompt form state
   protected newPrompt: Prompt = this.createEmptyPrompt();
 
   private createEmptyPrompt(): Prompt {
@@ -60,35 +51,24 @@ export class PromptLibrary implements OnInit {
     this.loadPrompts();
   }
 
-  // =========================================================
-  // Promptok betöltése
-  // =========================================================
-
   protected loadPrompts(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
     this.promptService.getAll().subscribe({
-      next: (prompts) => {
+      next: prompts => {
         this.prompts = prompts;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (error) => {
-        console.error('Prompt betöltési hiba:', error);
-
-        this.errorMessage =
-          'Nem sikerült betölteni a promptokat.';
-
+      error: error => {
+        console.error('Failed to load prompts.', error);
+        this.errorMessage = 'Failed to load prompts.';
         this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
   }
-
-  // =========================================================
-  // Új prompt űrlap megnyitása és bezárása
-  // =========================================================
 
   protected openCreateForm(): void {
     this.newPrompt = this.createEmptyPrompt();
@@ -106,10 +86,6 @@ export class PromptLibrary implements OnInit {
     this.errorMessage = '';
   }
 
-  // =========================================================
-  // Új prompt mentése
-  // =========================================================
-
   protected createPrompt(): void {
     if (
       !this.newPrompt.title.trim() ||
@@ -122,43 +98,30 @@ export class PromptLibrary implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.copyErrorMessage = '';
 
     const promptToCreate: Prompt = {
       title: this.newPrompt.title.trim(),
-      description: this.newPrompt.description.trim(),
-      category: this.newPrompt.category.trim(),
+      description: (this.newPrompt.description ?? '').trim(),
+      category: (this.newPrompt.category ?? '').trim(),
       content: this.newPrompt.content.trim()
     };
 
     this.promptService.create(promptToCreate).subscribe({
-      next: (createdPrompt) => {
-        this.prompts = [
-          createdPrompt,
-          ...this.prompts
-        ];
-
+      next: createdPrompt => {
+        this.prompts = [createdPrompt, ...this.prompts];
         this.newPrompt = this.createEmptyPrompt();
         this.showCreateForm = false;
         this.isSaving = false;
-        this.successMessage = 'A prompt sikeresen elmentve.';
-
-        this.cdr.detectChanges();
+        this.successMessage = 'Prompt saved successfully.';
       },
-      error: (error) => {
-        console.error('Prompt mentési hiba:', error);
-
-        this.errorMessage =
-          'Nem sikerült elmenteni a promptot.';
-
+      error: error => {
+        console.error('Failed to save prompt.', error);
+        this.errorMessage = 'Failed to save the prompt.';
         this.isSaving = false;
-        this.cdr.detectChanges();
       }
     });
   }
-
-  // =========================================================
-  // PROMPT SZERKESZTÉSÉNEK ELINDÍTÁSA
-  // =========================================================
 
   protected startEditing(prompt: Prompt): void {
     if (!prompt.id) {
@@ -169,28 +132,21 @@ export class PromptLibrary implements OnInit {
     this.deletingPromptId = null;
     this.errorMessage = '';
     this.successMessage = '';
+    this.copyErrorMessage = '';
 
     this.editPrompt = {
       title: prompt.title,
-      description: prompt.description,
-      category: prompt.category,
+      description: prompt.description ?? '',
+      category: prompt.category ?? '',
       content: prompt.content
     };
   }
-
-  // =========================================================
-  // SZERKESZTÉS MEGSZAKÍTÁSA
-  // =========================================================
 
   protected cancelEditing(): void {
     this.editingPromptId = null;
     this.editPrompt = this.createEmptyPrompt();
     this.errorMessage = '';
   }
-
-  // =========================================================
-  // MÓDOSÍTOTT PROMPT MENTÉSE
-  // =========================================================
 
   protected updatePrompt(): void {
     const id = this.editingPromptId;
@@ -207,11 +163,12 @@ export class PromptLibrary implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.copyErrorMessage = '';
 
     const updatedPrompt: Prompt = {
       title: this.editPrompt.title.trim(),
-      description: this.editPrompt.description.trim(),
-      category: this.editPrompt.category.trim(),
+      description: (this.editPrompt.description ?? '').trim(),
+      category: (this.editPrompt.category ?? '').trim(),
       content: this.editPrompt.content.trim()
     };
 
@@ -219,32 +176,26 @@ export class PromptLibrary implements OnInit {
       next: () => {
         this.prompts = this.prompts.map(prompt =>
           prompt.id === id
-            ? { ...prompt, ...updatedPrompt, updatedAt: new Date().toISOString() }
+            ? {
+              ...prompt,
+              ...updatedPrompt,
+              updatedAt: new Date().toISOString()
+            }
             : prompt
         );
 
         this.editingPromptId = null;
         this.editPrompt = this.createEmptyPrompt();
         this.isSaving = false;
-        this.successMessage = 'A prompt sikeresen frissítve.';
-
-        this.cdr.detectChanges();
+        this.successMessage = 'Prompt updated successfully.';
       },
-      error: (error) => {
-        console.error('Prompt frissítési hiba:', error);
-
-        this.errorMessage =
-          'Nem sikerült frissíteni a promptot.';
-
+      error: error => {
+        console.error('Failed to update prompt.', error);
+        this.errorMessage = 'Failed to update the prompt.';
         this.isSaving = false;
-        this.cdr.detectChanges();
       }
     });
   }
-
-  // =========================================================
-  // TÖRLÉS MEGERŐSÍTÉSÉNEK MEGJELENÍTÉSE
-  // =========================================================
 
   protected confirmDelete(prompt: Prompt): void {
     if (!prompt.id) {
@@ -255,15 +206,12 @@ export class PromptLibrary implements OnInit {
     this.editingPromptId = null;
     this.errorMessage = '';
     this.successMessage = '';
+    this.copyErrorMessage = '';
   }
 
   protected cancelDelete(): void {
     this.deletingPromptId = null;
   }
-
-  // =========================================================
-  // PROMPT VÉGLEGES TÖRLÉSE
-  // =========================================================
 
   protected deletePrompt(id: string): void {
     if (this.deletingPromptId !== id || this.isSaving) {
@@ -276,44 +224,30 @@ export class PromptLibrary implements OnInit {
 
     this.promptService.delete(id).subscribe({
       next: () => {
-        this.prompts = this.prompts.filter(
-          prompt => prompt.id !== id
-        );
-
+        this.prompts = this.prompts.filter(prompt => prompt.id !== id);
         this.deletingPromptId = null;
         this.isSaving = false;
-        this.successMessage = 'A prompt sikeresen törölve.';
+        this.successMessage = 'Prompt deleted successfully.';
 
-        this.cdr.detectChanges();
+        if (this.copiedPromptId === id) {
+          this.copiedPromptId = null;
+        }
       },
-      error: (error) => {
-        console.error('Prompt törlési hiba:', error);
-
-        this.errorMessage =
-          'Nem sikerült törölni a promptot.';
-
+      error: error => {
+        console.error('Failed to delete prompt.', error);
+        this.errorMessage = 'Failed to delete the prompt.';
         this.isSaving = false;
-        this.cdr.detectChanges();
       }
     });
   }
 
-
-  // =========================================================
-  // KATEGÓRIÁK ÖSSZEGYŰJTÉSE
-  // =========================================================
-
   protected get categories(): string[] {
     return [...new Set(
       this.prompts
-        .map(prompt => prompt.category?.trim())
-        .filter((category): category is string => !!category)
+        .map(prompt => (prompt.category ?? '').trim())
+        .filter(category => category.length > 0)
     )].sort((a, b) => a.localeCompare(b));
   }
-
-  // =========================================================
-  // KERESÉS ÉS SZŰRÉS ALKALMAZÁSA
-  // =========================================================
 
   protected get filteredPrompts(): Prompt[] {
     const term = this.searchTerm.trim().toLocaleLowerCase();
@@ -321,10 +255,10 @@ export class PromptLibrary implements OnInit {
     return this.prompts.filter(prompt => {
       const matchesSearch =
         !term ||
-        prompt.title.toLocaleLowerCase().includes(term) ||
+        (prompt.title ?? '').toLocaleLowerCase().includes(term) ||
         (prompt.description ?? '').toLocaleLowerCase().includes(term) ||
         (prompt.category ?? '').toLocaleLowerCase().includes(term) ||
-        prompt.content.toLocaleLowerCase().includes(term);
+        (prompt.content ?? '').toLocaleLowerCase().includes(term);
 
       const matchesCategory =
         !this.selectedCategory ||
@@ -334,18 +268,10 @@ export class PromptLibrary implements OnInit {
     });
   }
 
-  // =========================================================
-  // SZŰRŐK TÖRLÉSE
-  // =========================================================
-
   protected clearFilters(): void {
     this.searchTerm = '';
     this.selectedCategory = '';
   }
-
-  // =========================================================
-  // PROMPT SZÖVEGÉNEK MÁSOLÁSA
-  // =========================================================
 
   protected async copyPrompt(prompt: Prompt): Promise<void> {
     if (!prompt.id) {
@@ -356,16 +282,11 @@ export class PromptLibrary implements OnInit {
 
     try {
       await navigator.clipboard.writeText(prompt.content);
-
       this.copiedPromptId = prompt.id;
-      this.cdr.detectChanges();
     } catch (error) {
-      console.error('Másolási hiba:', error);
-
+      console.error('Failed to copy prompt.', error);
       this.copyErrorMessage =
-        'A másolás nem sikerült. Ellenőrizd a böngésző vágólap-hozzáférését.';
-
-      this.cdr.detectChanges();
+        "Copying failed. Check your browser's clipboard permissions.";
     }
   }
 }
