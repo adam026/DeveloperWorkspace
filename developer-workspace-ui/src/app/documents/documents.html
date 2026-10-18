@@ -1,0 +1,250 @@
+<div class="welcome-section">
+  <div>
+    <p class="eyebrow">KNOWLEDGE BASE</p>
+    <h2>Documents</h2>
+    <p class="subtitle">
+      Manage your technical books, notes and useful documents.
+    </p>
+  </div>
+
+  <div class="documents-actions">
+    <div class="date-label">
+      {{ documents.length }} DOCUMENTS
+    </div>
+
+    <button class="primary-button"
+            (click)="openCreateForm()">
+      <span>＋</span> New document
+    </button>
+  </div>
+</div>
+
+
+@if (showCreateForm) {
+<section class="create-document-panel">
+  <div class="create-document-heading">
+    <div>
+      <p class="eyebrow">KNOWLEDGE BASE</p>
+      <h3>New document</h3>
+      <p class="subtitle">Add a document to your personal workspace.</p>
+    </div>
+
+    <button type="button"
+            class="close-button"
+            aria-label="Close form"
+            (click)="closeCreateForm()">
+      ×
+    </button>
+  </div>
+
+
+  <form class="document-form" (ngSubmit)="createDocument()" #documentForm="ngForm">
+    <label for="document-title">Title *</label>
+    <input id="document-title"
+           name="title"
+           type="text"
+           [(ngModel)]="newDocument.title"
+           placeholder="e.g. C# best practices"
+           required
+           maxlength="150" />
+
+    <label for="document-description">Description</label>
+    <textarea id="document-description"
+              name="description"
+              [(ngModel)]="newDocument.description"
+              placeholder="What is this document about?"
+              rows="4"
+              maxlength="2000"></textarea>
+
+    <label for="document-category">Category</label>
+    <input id="document-category"
+           name="category"
+           type="text"
+           [(ngModel)]="newDocument.category"
+           placeholder="e.g. C#, .NET, Architecture"
+           maxlength="100" />
+
+    @if (errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+    }
+
+    <div class="form-actions">
+      <button type="button"
+              class="secondary-button"
+              (click)="closeCreateForm()">
+        Cancel
+      </button>
+
+      <button type="submit"
+              class="primary-button"
+              [disabled]="saving || documentForm.invalid">
+        {{ saving ? 'Saving...' : 'Save document' }}
+      </button>
+    </div>
+  </form>
+</section>
+}
+
+<section class="documents-panel">
+
+  <div class="document-filters">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="search"
+             aria-label="Search documents"
+             placeholder="Search by title, description or category..."
+             [(ngModel)]="searchTerm" />
+    </div>
+
+    <select class="category-filter"
+            aria-label="Filter by category"
+            [(ngModel)]="selectedCategory">
+      <option value="">All categories</option>
+      @for (category of categories; track category) {
+      <option [value]="category">{{ category }}</option>
+      }
+    </select>
+
+    <select class="category-filter"
+            aria-label="Sort documents"
+            [(ngModel)]="sortOrder">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="titleAsc">Title A–Z</option>
+      <option value="titleDesc">Title Z–A</option>
+    </select>
+
+    @if (searchTerm || selectedCategory) {
+    <button type="button"
+            class="secondary-button"
+            (click)="searchTerm = ''; selectedCategory = ''; sortOrder = 'newest'">
+      Clear filters
+    </button>
+    }
+
+    <div class="document-results-info">
+      <span>
+        @if (searchTerm || selectedCategory) {
+        {{ filteredDocuments.length }} matching documents
+        } @else {
+        {{ filteredDocuments.length }} documents
+        }
+      </span>
+    </div>
+  </div>
+
+  @if (loading) {
+  <p>Loading documents...</p>
+  } @else if (errorMessage) {
+  <p class="error-message">{{ errorMessage }}</p>
+  <button class="primary-button" (click)="loadDocuments()">
+    Try again
+  </button>
+  } @else if (filteredDocuments.length === 0) {
+  <p>
+    {{
+    documents.length === 0
+      ? 'No documents found.'
+      : 'No documents match your filters.'
+    }}
+  </p>
+  }
+  @else {
+  <div class="documents-list">
+    @for (document of filteredDocuments; track document.id) {
+    <article class="document-card">
+      <div class="document-icon">▤</div>
+      <div class="document-details">
+
+        @if (editingDocumentId === document.id) {
+        <form class="document-form" (ngSubmit)="updateDocument()">
+          <label>Title *</label>
+          <input name="editTitle"
+                 type="text"
+                 [(ngModel)]="editDocument.title"
+                 required
+                 maxlength="150" />
+
+          <label>Description</label>
+          <textarea name="editDescription"
+                    [(ngModel)]="editDocument.description"
+                    rows="3"
+                    maxlength="2000"></textarea>
+
+          <label>Category</label>
+          <input name="editCategory"
+                 type="text"
+                 [(ngModel)]="editDocument.category"
+                 maxlength="100" />
+
+          <div class="form-actions">
+            <button type="button"
+                    class="secondary-button"
+                    (click)="cancelEditing()">
+              Cancel
+            </button>
+
+            <button type="submit"
+                    class="primary-button"
+                    [disabled]="saving || !editDocument.title.trim()">
+              {{ saving ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+        } @else {
+        <h3>{{ document.title }}</h3>
+
+        <p>{{ document.description || 'No description provided.' }}</p>
+        <span class="category-label">
+          {{ document.category || 'Uncategorized' }}
+        </span>
+        }
+
+        <div class="document-actions">
+          <button type="button"
+                  class="secondary-button"
+                  [disabled]="saving"
+                  (click)="startEditing(document)">
+            Edit
+          </button>
+
+          <button type="button"
+                  class="secondary-button"
+                  [disabled]="deleting"
+                  (click)="deletingDocumentId = document.id ?? null">
+            Delete
+          </button>
+
+          @if (deletingDocumentId === document.id) {
+          <div class="delete-confirmation">
+            <p>Are you sure you want to delete this document?</p>
+
+            <button type="button"
+                    class="secondary-button"
+                    (click)="deletingDocumentId = null">
+              Cancel
+            </button>
+
+
+            <button type="button"
+                    class="primary-button"
+                    [disabled]="deleting"
+                    (click)="document.id && deleteDocument(document.id)">
+              {{ deleting ? 'Deleting...' : 'Confirm delete' }}
+            </button>
+
+          </div>
+          }
+        </div>
+      </div>
+      <a class="document-arrow"
+         [routerLink]="['/documents', document.id]"
+         [attr.aria-label]="'View details: ' + document.title"
+         title="View details">
+        ↗
+      </a>
+    </article>
+    }
+  </div>
+  }
+</section>

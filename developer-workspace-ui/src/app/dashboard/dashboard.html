@@ -1,0 +1,178 @@
+
+<div class="welcome-section">
+  <div>
+    <p class="eyebrow">YOUR DEVELOPMENT HUB</p>
+    <h2>Welcome back!</h2>
+    <p class="subtitle">
+      Your knowledge, tools and ideas — all in one place.
+    </p>
+  </div>
+  <div class="date-label">PERSONAL WORKSPACE</div>
+</div>
+
+<section class="search-section">
+  <span class="search-icon">⌕</span>
+  <input type="search"
+         placeholder="Search documents, prompts, snippets..."
+         aria-label="Search workspace" />
+  <span class="search-shortcut">Workspace search</span>
+</section>
+
+<div class="section-heading">
+  <div>
+    <h3>Your workspace</h3>
+    <p>Everything you need for your daily development work.</p>
+  </div>
+</div>
+
+<section class="dashboard-stats">
+  <article class="stat-card">
+    <div class="stat-icon purple">▤</div>
+    <div>
+      <p>Documents</p>
+      <h3>{{ isLoadingDashboard ? '...' : documentCount }}</h3>
+    </div>
+  </article>
+
+  <article class="stat-card">
+    <div class="stat-icon blue">✧</div>
+    <div>
+      <p>Prompts</p>
+      <h3>{{ isLoadingDashboard ? '...' : promptCount }}</h3>
+    </div>
+  </article>
+
+  <article class="stat-card">
+    <div class="stat-icon green">⌘</div>
+    <div>
+      <p>Agents</p>
+      <h3>{{ isLoadingDashboard ? '...' : agentCount }}</h3>
+    </div>
+  </article>
+</section>
+
+<section class="recently-updated">
+  <div class="section-heading">
+    <div>
+      <h3>Recently updated</h3>
+      <p>Your latest workspace items across all modules.</p>
+    </div>
+
+    <button type="button"
+            class="secondary-button"
+            (click)="navigateTo('workspace')">
+      View all
+    </button>
+  </div>
+
+  @if (isLoadingDashboard) {
+  <p class="recent-empty">Loading recent items...</p>
+  } @else if (recentlyUpdatedItems.length === 0) {
+  <p class="recent-empty">
+    No workspace items yet. Add a document, prompt or Markdown file to get started.
+  </p>
+  } @else {
+  <div class="recent-list">
+    @for (item of recentlyUpdatedItems; track item.type + '-' + item.id) {
+    <article class="recent-item">
+      <div class="recent-file-icon"
+           [class.document-icon]="item.type === 'Document'"
+           [class.prompt-icon]="item.type === 'Prompt'"
+           [class.markdown-icon]="item.type === 'Markdown'">
+        @if (item.type === 'Document') {
+        DOC
+        } @else if (item.type === 'Prompt') {
+        AI
+        } @else {
+        MD
+        }
+      </div>
+
+      <div class="recent-file-info">
+        <strong>{{ item.title }}</strong>
+        <span>{{ item.type }} · {{ item.subtitle }}</span>
+        <small>
+          {{ item.date ? (item.date | date:'short') : 'No date available' }}
+        </small>
+      </div>
+    </article>
+    }
+  </div>
+  }
+</section>
+
+<section class="module-grid">
+  <article class="module-card" (click)="navigateTo('documents')">
+    <div class="module-icon purple">▤</div>
+    <div class="card-heading">
+      <h4>Documents</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Organize technical books, notes and useful documents.</p>
+    <span class="card-footer">Knowledge base</span>
+  </article>
+
+  <article class="module-card" (click)="navigateTo('prompts')">
+    <div class="module-icon blue">✧</div>
+    <div class="card-heading">
+      <h4>Prompt Library</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Keep your reusable AI prompts organized and ready.</p>
+    <span class="card-footer">Reusable prompts</span>
+  </article>
+
+  <article class="module-card" (click)="navigateTo('markdown-generator')">
+    <div class="module-icon green">⌘</div>
+    <div class="card-heading">
+      <h4>Agent & Markdown Generator</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Create Markdown instructions for your development agents.</p>
+    <span class="card-footer">AI development tools</span>
+  </article>
+
+  <article class="module-card">
+    <div class="module-icon orange">◈</div>
+    <div class="card-heading">
+      <h4>Architecture Library</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Collect design patterns and architectural solutions.</p>
+    <span class="card-footer">Software architecture</span>
+  </article>
+
+  <article class="module-card">
+    <div class="module-icon cyan">▧</div>
+    <div class="card-heading">
+      <h4>Documentation</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Keep project documentation accessible in one place.</p>
+    <span class="card-footer">Project knowledge</span>
+  </article>
+
+  <article class="module-card">
+    <div class="module-icon pink">✓</div>
+    <div class="card-heading">
+      <h4>Task Manager</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Track development tasks, ideas and personal reminders.</p>
+    <span class="card-footer">Personal productivity</span>
+  </article>
+
+  <article class="module-card">
+    <div class="module-icon yellow">&lt;/&gt;</div>
+    <div class="card-heading">
+      <h4>Code Snippets</h4>
+      <span class="card-arrow">↗</span>
+    </div>
+    <p>Save and find useful, reusable code examples.</p>
+    <span class="card-footer">Reusable code</span>
+  </article>
+</section>
+
+<footer class="page-footer">
+  DeveloperWorkspace <span>•</span> Built for your daily workflow
+</footer>

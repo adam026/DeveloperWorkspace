@@ -1,0 +1,94 @@
+<section class="detail-page">
+  <header class="page-header">
+    <button type="button"
+            class="back-button"
+            (click)="goBack()">
+      ← Back to Workspace
+    </button>
+
+    @if (document) {
+    <button type="button"
+            class="copy-button"
+            (click)="copyContent()">
+      Copy Markdown
+    </button>
+    }
+  </header>
+
+  @if (isLoading) {
+  <div class="state-card">
+    <p>Loading Markdown document...</p>
+  </div>
+  } @else if (errorMessage && !document) {
+  <div class="state-card error-state">
+    <h2>Unable to load Markdown document</h2>
+    <p>{{ errorMessage }}</p>
+
+    <button type="button"
+            class="back-button"
+            (click)="goBack()">
+      Back to Workspace
+    </button>
+  </div>
+  } @else if (document) {
+  <article class="markdown-card">
+    <div class="title-row">
+      <div class="title-content">
+        <span class="item-type">Markdown document</span>
+        <h1>{{ document.name }}</h1>
+      </div>
+
+      <span class="type-badge">{{ document.fileType }}</span>
+    </div>
+
+    @if (document.description) {
+    <p class="description">{{ document.description }}</p>
+    }
+
+    @if (document.filePath) {
+    <div class="file-path">
+      <span class="metadata-label">File path</span>
+      <code>{{ document.filePath }}</code>
+    </div>
+    }
+
+    <div class="metadata">
+      @if (document.createdAt) {
+      <span>
+        Created {{ document.createdAt | date:'mediumDate' }}
+      </span>
+      }
+
+      @if (document.updatedAt) {
+      <span>
+        Updated {{ document.updatedAt | date:'mediumDate' }}
+      </span>
+      }
+    </div>
+
+    <section class="content-section">
+      <div class="content-heading">
+        <h2>Markdown content</h2>
+
+        <button type="button"
+                class="copy-button"
+                (click)="copyContent()">
+          Copy content
+        </button>
+      </div>
+
+      <pre class="markdown-content">{{ document.content }}</pre>
+
+      @if (copySuccess) {
+      <p class="success-message">
+        Markdown content copied to clipboard.
+      </p>
+      }
+
+      @if (errorMessage) {
+      <p class="error-message">{{ errorMessage }}</p>
+      }
+    </section>
+  </article>
+  }
+</section>

@@ -1,0 +1,109 @@
+<section class="workspace-page">
+  <header class="page-header">
+    <div>
+      <h1>Workspace</h1>
+      <p class="page-description">
+        Browse and manage your development knowledge in one place.
+      </p>
+    </div>
+
+    <button class="refresh-button"
+            type="button"
+            (click)="loadItems()"
+            [disabled]="isLoading">
+      Refresh
+    </button>
+  </header>
+
+  <div class="workspace-toolbar">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="search"
+             placeholder="Search workspace..."
+             aria-label="Search workspace"
+             [(ngModel)]="searchTerm">
+    </div>
+
+    <select class="type-filter"
+            aria-label="Filter by type"
+            [(ngModel)]="selectedType">
+      @for (type of types; track type) {
+      <option [value]="type">{{ type }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="workspace-summary">
+    <span>{{ filteredItems.length }} items</span>
+    <span>All your development resources</span>
+  </div>
+
+  @if (isLoading) {
+  <div class="workspace-state">
+    <p>Loading workspace items...</p>
+  </div>
+  } @else if (errorMessage) {
+  <div class="workspace-state error-state">
+    <p>{{ errorMessage }}</p>
+    <button type="button" class="refresh-button" (click)="loadItems()">
+      Try again
+    </button>
+  </div>
+  } @else if (filteredItems.length === 0) {
+  <div class="workspace-state empty-state">
+    <h2>No items found</h2>
+    <p>
+      @if (searchTerm || selectedType !== 'All') {
+      Try changing your search or filter.
+      } @else {
+      Your workspace items will appear here when you create them.
+      }
+    </p>
+  </div>
+  } @else {
+  <div class="workspace-list">
+    @for (item of filteredItems; track item.type + '-' + item.id) {
+    <article class="workspace-item" [class.clickable-item]="true" (click)="openItem(item)">
+      <div class="item-icon"
+           [class.document-icon]="item.type === 'Document'"
+           [class.prompt-icon]="item.type === 'Prompt'"
+           [class.markdown-icon]="item.type === 'Markdown'">
+        @switch (item.type) {
+        @case ('Document') {
+        <span>D</span>
+        }
+        @case ('Prompt') {
+        <span>P</span>
+        }
+        @case ('Markdown') {
+        <span>M</span>
+        }
+        }
+      </div>
+
+      <div class="item-content">
+        <div class="item-title-row">
+          <h2>{{ item.title }}</h2>
+          <span class="item-type">{{ item.type }}</span>
+        </div>
+
+        <p class="item-description">
+          {{ item.description || 'No description available.' }}
+        </p>
+
+        <div class="item-meta">
+          @if (item.category) {
+          <span class="item-category">{{ item.category }}</span>
+          }
+          @if (item.updatedAt) {
+          <span>
+            Updated {{ item.updatedAt | date:'mediumDate' }}
+          </span>
+          }
+        </div>
+      </div>
+    </article>
+    }
+  </div>
+  }
+</section>

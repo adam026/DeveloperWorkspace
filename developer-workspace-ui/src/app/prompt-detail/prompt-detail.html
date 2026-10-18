@@ -1,0 +1,86 @@
+<section class="detail-page">
+  <header class="page-header">
+    <button type="button"
+            class="back-button"
+            (click)="goBack()">
+      ← Back to Workspace
+    </button>
+
+    @if (prompt) {
+    <div class="header-actions">
+      <button type="button"
+              class="copy-button"
+              (click)="copyPrompt()">
+        Copy prompt
+      </button>
+    </div>
+    }
+  </header>
+
+  @if (isLoading) {
+  <div class="state-card">
+    <p>Loading prompt...</p>
+  </div>
+  } @else if (errorMessage && !prompt) {
+  <div class="state-card error-state">
+    <h2>Unable to load prompt</h2>
+    <p>{{ errorMessage }}</p>
+    <button type="button" class="back-button" (click)="goBack()">
+      Back to Workspace
+    </button>
+  </div>
+  } @else if (prompt) {
+  <article class="prompt-card">
+    <div class="title-row">
+      <div>
+        <span class="item-type">Prompt</span>
+        <h1>{{ prompt.title }}</h1>
+      </div>
+
+      @if (prompt.category) {
+      <span class="category-badge">{{ prompt.category }}</span>
+      }
+    </div>
+
+    @if (prompt.description) {
+    <p class="description">{{ prompt.description }}</p>
+    }
+
+    <div class="metadata">
+      @if (prompt.createdAt) {
+      <span>
+        Created {{ prompt.createdAt | date:'mediumDate' }}
+      </span>
+      }
+
+      @if (prompt.updatedAt) {
+      <span>
+        Updated {{ prompt.updatedAt | date:'mediumDate' }}
+      </span>
+      }
+    </div>
+
+    <div class="content-section">
+      <div class="content-heading">
+        <h2>Prompt content</h2>
+
+        <button type="button"
+                class="copy-button"
+                (click)="copyPrompt()">
+          Copy content
+        </button>
+      </div>
+
+      <pre class="prompt-content">{{ prompt.content }}</pre>
+
+      @if (copySuccess) {
+      <p class="success-message">Prompt copied to clipboard.</p>
+      }
+
+      @if (errorMessage) {
+      <p class="error-message">{{ errorMessage }}</p>
+      }
+    </div>
+  </article>
+  }
+</section>
