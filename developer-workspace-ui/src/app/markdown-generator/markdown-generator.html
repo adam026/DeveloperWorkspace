@@ -30,13 +30,45 @@
   <section class="generator-card saved-documents-card">
     <h2>Saved Markdown files</h2>
 
+
+    <div class="document-filters">
+      <div class="form-field search-field">
+        <label for="documentSearch">Search files</label>
+        <input id="documentSearch"
+               name="documentSearch"
+               type="search"
+               [(ngModel)]="searchTerm"
+               placeholder="Search by name, description or path..." />
+      </div>
+
+      <div class="form-field type-filter">
+        <label for="documentTypeFilter">File type</label>
+        <select id="documentTypeFilter"
+                name="documentTypeFilter"
+                [(ngModel)]="selectedFileType">
+          @for (type of availableFileTypes; track type) {
+          <option [value]="type">
+            {{ type === 'All' ? 'All types' : type }}
+          </option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <p class="document-count">
+      {{ filteredDocuments.length }}
+      {{ filteredDocuments.length === 1 ? 'file' : 'files' }}
+    </p>
+
     @if (isLoadingDocuments) {
     <p>Loading saved files...</p>
-    } @else if (savedDocuments.length === 0) {
-    <p>No saved Markdown files yet. Generate your first file below.</p>
+    } @else if (filteredDocuments.length === 0) {
+      <p class="empty-results">
+        No matching files found. Try another search or file type.
+      </p>
     } @else {
     <div class="saved-document-list">
-      @for (document of savedDocuments; track document.id) {
+      @for (document of filteredDocuments; track document.id) {
       <div class="saved-document-item"
            [class.selected]="generatedDocument?.id === document.id">
 

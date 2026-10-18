@@ -66,17 +66,24 @@ export class MarkdownGenerator implements OnInit {
   protected requirements = '';
   protected filePath = this.fileTypes[0].defaultPath;
 
+  // State management
   protected isGenerating = false;
   protected isSaving = false;
   protected errorMessage = '';
   protected successMessage = '';
   protected generatedDocument: MarkdownDocument | null = null;
 
+  // Form visibility
   protected showGeneratorForm = false;
 
+  // Saved documents
   protected savedDocuments: MarkdownDocument[] = [];
   protected isLoadingDocuments = false;
   protected selectedDocumentId = '';
+
+  // Search and filter
+  protected searchTerm = '';
+  protected selectedFileType = 'All';
 
   protected onFileTypeChange(): void {
     const selected = this.fileTypes.find(
@@ -310,6 +317,31 @@ export class MarkdownGenerator implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  protected get filteredDocuments(): MarkdownDocument[] {
+    const search = this.searchTerm.trim().toLowerCase();
+
+    return this.savedDocuments.filter(document => {
+      const matchesSearch =
+        !search ||
+        document.name.toLowerCase().includes(search) ||
+        document.description.toLowerCase().includes(search) ||
+        document.filePath.toLowerCase().includes(search);
+
+      const matchesType =
+        this.selectedFileType === 'All' ||
+        document.fileType === this.selectedFileType;
+
+      return matchesSearch && matchesType;
+    });
+  }
+
+  protected get availableFileTypes(): string[] {
+    return [
+      'All',
+      ...new Set(this.savedDocuments.map(document => document.fileType))
+    ];
   }
 
 }
