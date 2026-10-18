@@ -101,6 +101,100 @@
         </div>
       </div>
 
+      <!-- Statistics -->
+      <section class="dashboard-stats">
+        <article class="stat-card">
+          <div class="stat-icon purple">▤</div>
+          <div>
+            <p>Documents</p>
+            <h3>
+              {{ dashboardLoading ? '...' : dashboardDocumentCount }}
+            </h3>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon blue">✧</div>
+          <div>
+            <p>Prompts</p>
+            <h3>
+              {{ dashboardLoading ? '...' : dashboardPromptCount }}
+            </h3>
+          </div>
+        </article>
+
+
+        <article class="stat-card">
+          <div class="stat-icon green">⌘</div>
+          <div>
+            <p>Agents</p>
+            <h3>
+              {{ dashboardLoading ? '...' : dashboardAgentCount }}
+            </h3>
+          </div>
+        </article>
+
+      </section>
+
+      @if (dashboardError) {
+      <p class="error-message" role="alert">
+        {{ dashboardError }}
+      </p>
+      }
+
+      <!-- Recently updated -->
+
+      <section class="recently-updated">
+        <div class="section-heading">
+          <div>
+            <h3>Recently updated</h3>
+            <p>Your latest workspace items across all modules.</p>
+          </div>
+
+          <button type="button"
+                  class="secondary-button"
+                  (click)="navigateTo('markdown-generator')">
+            View all
+          </button>
+        </div>
+
+        @if (dashboardLoading) {
+        <p class="recent-empty">Loading recent items...</p>
+        } @else if (recentlyUpdatedItems.length === 0) {
+        <p class="recent-empty">
+          No workspace items yet. Add a document, prompt or Markdown file to get started.
+        </p>
+        } @else {
+        <div class="recent-list">
+          @for (item of recentlyUpdatedItems; track item.type + '-' + item.id) {
+          <article class="recent-item">
+            <div class="recent-file-icon"
+                 [class.document-icon]="item.type === 'Document'"
+                 [class.prompt-icon]="item.type === 'Prompt'"
+                 [class.markdown-icon]="item.type === 'Markdown'">
+              @if (item.type === 'Document') {
+              DOC
+              } @else if (item.type === 'Prompt') {
+              AI
+              } @else {
+              MD
+              }
+            </div>
+
+            <div class="recent-file-info">
+              <strong>{{ item.title }}</strong>
+              <span>{{ item.type }} · {{ item.subtitle }}</span>
+              <small>
+                {{ item.date ? (item.date | date:'short') : 'No date available' }}
+              </small>
+            </div>
+          </article>
+          }
+        </div>
+        }
+      </section>
+
+      <!-- Workspace modules -->
       <section class="module-grid">
         <article class="module-card" (click)="navigateTo('documents')">
           <div class="module-icon purple">▤</div>
@@ -173,6 +267,7 @@
         </article>
       </section>
 
+      <!-- Footer module -->
       <footer class="page-footer">
         DeveloperWorkspace <span>•</span> Built for your daily workflow
       </footer>

@@ -1,11 +1,23 @@
-
-import {Component,signal,inject,ChangeDetectorRef,OnInit} from '@angular/core';
+import { Component,signal,inject,ChangeDetectorRef,OnInit}  from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {Router,NavigationEnd,RouterLink,RouterOutlet} from '@angular/router';
+import { Router,NavigationEnd,RouterLink,RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { DocumentService, Document } from './services/document';
+import { PromptService, Prompt } from './services/prompt';
 import { PromptLibrary } from './prompt-library/prompt-library';
 import { MarkdownGenerator } from './markdown-generator/markdown-generator';
+import { MarkdownDocument, MarkdownDocumentService } from './services/markdown-document';
+import { DatePipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
+
+type RecentWorkspaceItem = {
+  id: string;
+  title: string;
+  type: 'Document' | 'Prompt' | 'Markdown';
+  subtitle: string;
+  date: string;
+  sortDate: number;
+};
 
 @Component({
   selector: 'app-root',
@@ -13,6 +25,7 @@ import { MarkdownGenerator } from './markdown-generator/markdown-generator';
     RouterOutlet,
     RouterLink,
     FormsModule,
+    DatePipe,
     MarkdownGenerator,
     PromptLibrary
   ],
@@ -22,7 +35,7 @@ import { MarkdownGenerator } from './markdown-generator/markdown-generator';
 export class App implements OnInit {
 
   // =========================================================
-  // 1. Alkalmazás és navigáció
+  // 1. Application state and navigation
   // =========================================================
 
   protected readonly title = signal('developer-workspace-ui');
@@ -32,7 +45,7 @@ export class App implements OnInit {
 
   protected currentRouteIsHome = true;
 
-  // A négy jelenleg támogatott fő nézet.
+  // View states
   currentPage:
     | 'dashboard'
     | 'documents'
@@ -41,6 +54,10 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.currentRouteIsHome = this.router.url === '/';
+
+    if (this.currentRouteIsHome) {
+      this.loadDashboardStats();
+    }
 
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -54,29 +71,39 @@ export class App implements OnInit {
       });
   }
 
-  // Fő nézetek közötti váltás.
+  // View state management
   protected navigateTo(
     page: 'dashboard' | 'documents' | 'prompts' | 'markdown-generator'
   ): void {
     this.currentPage = page;
 
-    // Dokumentumok betöltése, amikor megnyitjuk ezt a nézetet.
     if (page === 'documents') {
       this.loadDocuments();
+    }
+
+    if (page === 'dashboard') {
+      this.loadDashboardStats();
     }
 
     // A promptok betöltését a PromptLibrary komponens végzi.
     this.cdr.markForCheck();
   }
 
-
-  // =========================================================
-  // 2. Dokumentumok – adatok és állapotok
-  // =========================================================
-
+  // Service injections
   private readonly documentService = inject(DocumentService);
+  private readonly promptService = inject(PromptService);
+  private readonly markdownDocumentService =inject(MarkdownDocumentService);
 
   protected documents: Document[] = [];
+  protected recentlyUpdatedDocuments: MarkdownDocument[] = [];
+
+  protected dashboardDocumentCount = 0;
+  protected dashboardPromptCount = 0;
+  protected dashboardAgentCount = 0;
+  protected dashboardLoading = false;
+  protected dashboardError = '';
+
+  protected recentlyUpdatedItems: RecentWorkspaceItem[] =[];
 
   protected searchTerm = '';
   protected selectedCategory = '';
@@ -364,5 +391,96 @@ export class App implements OnInit {
             - new Date(a.createdAt ?? 0).getTime();
       }
     });
+  }
+
+
+  protected loadDashboardStats(): void {
+    this.dashboardLoading = true;
+    this.dashboardError = '';
+
+    forkJoin({
+      documents: this.documentService.getAll(),
+      prompts: this.promptService.getAll(),
+      markdownDocuments: this.markdownDocumentService.getAll()
+    }).subscribe({
+      next: ({ documents, prompts, markdownDocuments }) => {
+        this.dashboardDocumentCount = documents.length;
+        this.dashboardPromptCount = prompts.length;
+
+        this.dashboardAgentCount = markdownDocuments.filter(
+          document => document.fileType === 'Agent'
+        ).length;
+
+        this.updateRecentlyUpdatedItems(
+          documents,
+          prompts,
+          markdownDocuments
+        );
+
+        this.dashboardLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        console.error('Failed to load dashboard statistics:', error);
+        this.dashboardError =
+          'Some dashboard statistics could not be loaded.';
+        this.dashboardLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private updateRecentlyUpdatedItems(
+    documents: Document[],
+    prompts: Prompt[],
+    markdownDocuments: MarkdownDocument[]
+  ): void {
+    const documentItems: RecentWorkspaceItem[] = documents.map(document => {
+      const date = document.updatedAt ?? document.createdAt ?? '';
+
+      return {
+        id: document.id ?? document.title,
+        title: document.title,
+        type: 'Document',
+        subtitle: document.category,
+        date,
+        sortDate: date ? new Date(date).getTime() : 0
+      };
+    });
+
+    const promptItems: RecentWorkspaceItem[] = prompts.map(prompt => {
+      const date = prompt.updatedAt ?? prompt.createdAt ?? '';
+
+      return {
+        id: prompt.id ?? prompt.title,
+        title: prompt.title,
+        type: 'Prompt',
+        subtitle: prompt.category,
+        date,
+        sortDate: date ? new Date(date).getTime() : 0
+      };
+    });
+
+    const markdownItems: RecentWorkspaceItem[] =
+      markdownDocuments.map(document => {
+        const date = document.updatedAt ?? document.createdAt ?? '';
+
+        return {
+          id: document.id ?? document.name,
+          title: document.name,
+          type: 'Markdown',
+          subtitle: document.fileType,
+          date,
+          sortDate: date ? new Date(date).getTime() : 0
+        };
+      });
+
+    this.recentlyUpdatedItems = [
+      ...documentItems,
+      ...promptItems,
+      ...markdownItems
+    ]
+      .sort((a, b) => b.sortDate - a.sortDate)
+      .slice(0, 5);
   }
 }
