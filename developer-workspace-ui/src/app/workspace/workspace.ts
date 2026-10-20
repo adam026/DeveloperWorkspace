@@ -64,16 +64,15 @@ export class WorkspaceComponent implements OnInit {
     this.loadItems();
   }
 
-
   openDocument(id: string): void {
     if (!id) {
       return;
     }
 
-    this.router.navigate(['/documents', id]);
+    this.router.navigate(['/documents', id], {
+      queryParams: { source: 'workspace' }
+    });
   }
-
-
 
   openItem(item: WorkspaceItem): void {
     if (!item.id) {
@@ -82,18 +81,25 @@ export class WorkspaceComponent implements OnInit {
 
     switch (item.type) {
       case 'Document':
-        this.router.navigate(['/documents', item.id]);
+        this.router.navigate(['/documents', item.id], {
+          queryParams: { source: 'workspace' }
+        });
         break;
 
       case 'Prompt':
-        this.router.navigate(['/prompts', item.id]);
+        this.router.navigate(['/prompts', item.id], {
+          queryParams: { source: 'workspace' }
+        });
         break;
 
       case 'Markdown':
-        this.router.navigate(['/markdown-documents', item.id]);
+        this.router.navigate(['/markdown-documents', item.id], {
+          queryParams: { source: 'workspace' }
+        });
         break;
     }
   }
+
 
 
   loadItems(): void {

@@ -1,26 +1,26 @@
-
 <div class="detail-page">
-  <a routerLink="/" class="back-link">
+  <a href="#" class="back-link" (click)="$event.preventDefault(); goBack()">
     <span aria-hidden="true">←</span>
-    Back to documents
+    {{ returnToWorkspace ? 'Back to Workspace' : 'Back to documents' }}
   </a>
 
   @if (loading) {
   <section class="detail-panel">
-    <p class="status-message">Loading document...</p>
+    <p class="status-message" role="status">Loading document...</p>
   </section>
   } @else if (errorMessage) {
-  <section class="detail-panel">
-    <div class="error-icon">!</div>
+  <section class="detail-panel error-panel">
+    <div class="error-icon" aria-hidden="true">!</div>
     <h2>Document unavailable</h2>
     <p class="status-message">{{ errorMessage }}</p>
-    <a routerLink="/" class="back-button">Back to documents</a>
+    <a href="#" class="back-button" (click)="$event.preventDefault(); goBack()">Back to documents</a>
   </section>
   } @else if (document) {
+  <!-- Document header -->
   <header class="detail-header">
     <div class="document-heading">
       <div class="detail-icon" aria-hidden="true">▤</div>
-      <div>
+      <div class="heading-copy">
         <p class="eyebrow">KNOWLEDGE BASE</p>
         <h1>{{ document.title }}</h1>
         <p class="detail-subtitle">
@@ -34,6 +34,7 @@
     </span>
   </header>
 
+  <!-- Document metadata -->
   <section class="detail-panel">
     <div class="section-heading">
       <div>
@@ -62,57 +63,67 @@
     <div class="metadata-grid">
       <div class="metadata-item">
         <span class="field-label">Created</span>
-        <p>{{ document.createdAt ? (document.createdAt | date:'medium') : 'Not available' }}</p>
+        <p>
+          {{ document.createdAt ? (document.createdAt | date:'medium') : 'Not available' }}
+        </p>
       </div>
 
       <div class="metadata-item">
         <span class="field-label">Last updated</span>
-        <p>{{ document.updatedAt ? (document.updatedAt | date:'medium') : 'Not updated' }}</p>
+        <p>
+          {{ document.updatedAt ? (document.updatedAt | date:'medium') : 'Not updated' }}
+        </p>
       </div>
     </div>
   </section>
 
+  <!-- AI summary -->
+  <section class="detail-panel ai-summary">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">LOCAL AI</p>
+        <h2>AI Summary</h2>
+      </div>
+    </div>
 
-  <section class="ai-summary">
-    <h2>AI Summary</h2>
-
-    <p>
-      Készíts automatikus összefoglalót a dokumentum tartalmából
-      a helyi AI-modell segítségével.
+    <p class="summary-intro">
+      Generate a concise summary of this document using your local AI model.
     </p>
 
     <button type="button"
+            class="primary-button"
             [disabled]="summarizing || loading || !document"
             (click)="generateSummary()">
-            {{summarizing
-              ? 'Összefoglalás készítése...'
-              : (summary ? 'Összefoglaló újragenerálása' : 'AI Summary készítése')
+      {{
+ summarizing
+          ? 'Generating summary...'
+          : (summary ? 'Regenerate summary' : 'Generate AI summary')
       }}
     </button>
 
     @if (summaryError) {
-    <p class="error-message">{{ summaryError }}</p>
+    <p class="error-message" role="alert">{{ summaryError }}</p>
     }
 
     @if (summarizing) {
-    <p>Az AI feldolgozza a dokumentumot. Ez néhány másodpercig tarthat.</p>
+    <p class="status-message" role="status">
+      The AI is processing the document. This may take a few seconds.
+    </p>
     }
 
     @if (summary) {
     <div class="summary-result">
-      <h3>Generált összefoglaló</h3>
+      <h3>Generated summary</h3>
       <p>{{ summary }}</p>
 
-      @if (document?.aiSummaryUpdatedAt) {
+      @if (document.aiSummaryUpdatedAt) {
       <p class="summary-date">
-        Utolsó generálás:
-        {{ document?.aiSummaryUpdatedAt | date:'yyyy. MM. dd. HH:mm' }}
+        Last generated:
+        {{ document.aiSummaryUpdatedAt | date:'medium' }}
       </p>
       }
     </div>
     }
   </section>
-
   }
 </div>
-

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { MarkdownDocument, MarkdownDocumentService } from '../services/markdown-document';
 
 @Component({
@@ -12,14 +12,15 @@ import { MarkdownDocument, MarkdownDocumentService } from '../services/markdown-
 })
 export class MarkdownDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly markdownService = inject(MarkdownDocumentService);
+  private readonly location = inject(Location);
   private readonly cdr = inject(ChangeDetectorRef);
 
   protected document: MarkdownDocument | null = null;
   protected isLoading = true;
   protected errorMessage = '';
   protected copySuccess = false;
+  protected returnToWorkspace = false;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -46,7 +47,7 @@ export class MarkdownDetail implements OnInit {
   }
 
   protected goBack(): void {
-    this.router.navigate(['/']);
+    this.location.back();
   }
 
   protected async copyContent(): Promise<void> {

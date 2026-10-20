@@ -56,6 +56,11 @@ export class App implements OnInit {
     this.cdr.markForCheck();
   }
 
+  protected returnToWorkspace(): void {
+    this.currentPage = 'workspace';
+    this.cdr.markForCheck();
+  }
+
   get currentPageTitle(): string {
     const pageTitles: Record<AppPage, string> = {
       dashboard: 'Dashboard',

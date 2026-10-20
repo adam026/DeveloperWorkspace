@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { Prompt, PromptService } from '../services/prompt';
 
 @Component({
@@ -12,14 +12,15 @@ import { Prompt, PromptService } from '../services/prompt';
 })
 export class PromptDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly promptService = inject(PromptService);
+  private readonly location = inject(Location);
   private readonly cdr = inject(ChangeDetectorRef);
 
   protected prompt: Prompt | null = null;
   protected isLoading = true;
   protected errorMessage = '';
   protected copySuccess = false;
+  protected returnToWorkspace = false;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -46,7 +47,7 @@ export class PromptDetail implements OnInit {
   }
 
   protected goBack(): void {
-    this.router.navigate(['/']);
+    this.location.back();
   }
 
   protected async copyPrompt(): Promise<void> {

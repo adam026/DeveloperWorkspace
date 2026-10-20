@@ -1,10 +1,9 @@
 <section class="detail-page">
   <header class="page-header">
-    <button type="button"
-            class="back-button"
-            (click)="goBack()">
-      ← Back to Workspace
-    </button>
+    <a href="#" class="back-link" (click)="$event.preventDefault(); goBack()">
+      <span aria-hidden="true">←</span>
+      {{ returnToWorkspace ? 'Back to Workspace' : 'Back to Agent & Markdown generator' }}
+    </a>
 
     @if (document) {
     <button type="button"
