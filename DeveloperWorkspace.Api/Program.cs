@@ -1,4 +1,3 @@
-
 using DeveloperWorkspace.Api.Data;
 using DeveloperWorkspace.Api.Middleware;
 using DeveloperWorkspace.Api.Services;
@@ -38,6 +37,9 @@ namespace DeveloperWorkspace.Api
 
             // AgentService registration for dependency injection
             builder.Services.AddScoped<AgentService>();
+
+            // ArchitectureProjectService registration for dependency injection
+            builder.Services.AddScoped<ArchitectureProjectService>();
 
             // MongoDbContext registration with configuration from appsettings.json
             builder.Services.AddSingleton<MongoDbContext>(sp =>
