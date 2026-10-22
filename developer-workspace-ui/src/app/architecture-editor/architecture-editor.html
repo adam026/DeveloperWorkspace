@@ -1,0 +1,299 @@
+
+<div class="architecture-editor">
+  <header class="editor-header">
+    <button class="btn-secondary" type="button" (click)="goBack()">
+      ← Back to Architecture Library
+    </button>
+
+    @if (project) {
+    <div class="project-heading">
+      <div>
+        <h1>{{ project.name }}</h1>
+        <p>{{ project.description || 'No description provided.' }}</p>
+      </div>
+
+      <div class="project-stats">
+        <span>{{ project.components.length }} components</span>
+        <span>{{ project.connections.length }} connections</span>
+      </div>
+    </div>
+    }
+  </header>
+
+  @if (loading) {
+  <div class="state-message">
+    <span class="loading-spinner"></span>
+    <p>Loading architecture project...</p>
+  </div>
+  } @else if (errorMessage) {
+  <div class="error-message" role="alert">
+    <p>{{ errorMessage }}</p>
+    <button class="btn-secondary" type="button" (click)="goBack()">
+      Back to Projects
+    </button>
+  </div>
+  } @else if (project) {
+  @if (successMessage) {
+  <div class="success-message" role="status">
+    {{ successMessage }}
+  </div>
+  }
+
+  @if (errorMessage) {
+  <div class="error-message" role="alert">
+    {{ errorMessage }}
+  </div>
+  }
+  <main class="editor-workspace">
+    <aside class="component-sidebar">
+      <h2>Components</h2>
+
+      <p class="sidebar-description">
+        Components included in this architecture.
+      </p>
+
+      @if (project.components.length === 0) {
+      <div class="sidebar-empty">
+        <p>No components yet.</p>
+        <span>Add components in a future editing step.</span>
+      </div>
+      } @else {
+      <div class="component-list">
+        @for (component of project.components; track component.id) {
+        <article class="component-item">
+          <div class="component-type-icon">◇</div>
+          <div class="component-info">
+            <h3>{{ component.name }}</h3>
+            <span>{{ component.type || 'Component' }}</span>
+          </div>
+        </article>
+        }
+      </div>
+      }
+    </aside>
+
+    <section class="architecture-canvas-section">
+
+      <div class="canvas-toolbar">
+        <div>
+          <h2>Architecture Canvas</h2>
+          <p>Drag components to arrange your architecture.</p>
+        </div>
+
+        <div class="toolbar-actions">
+          <button class="btn-secondary"
+                  type="button"
+                  (click)="showAddComponentForm = !showAddComponentForm">
+            + Add Component
+          </button>
+
+          <button class="btn-primary"
+                  type="button"
+                  (click)="saveProject()"
+                  [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save Architecture' }}
+          </button>
+        </div>
+      </div>
+
+      @if (showAddComponentForm) {
+      <form class="add-component-form" (ngSubmit)="addComponent()">
+        <div class="form-field">
+          <label for="componentName">Component Name</label>
+          <input id="componentName"
+                 name="componentName"
+                 [(ngModel)]="newComponentName"
+                 placeholder="e.g. Authentication Service"
+                 required
+                 maxlength="100" />
+        </div>
+
+        <div class="form-field">
+          <label for="componentType">Component Type</label>
+          <select id="componentType"
+                  name="componentType"
+                  [(ngModel)]="newComponentType">
+            @for (type of componentTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+
+        <button class="btn-primary"
+                type="submit"
+                [disabled]="!newComponentName.trim()">
+          Add Component
+        </button>
+      </form>
+      }
+
+      <div class="architecture-canvas"
+           (mousemove)="onCanvasMouseMove($event)"
+           (mouseup)="stopDragging()"
+           (mouseleave)="stopDragging()">
+        @if (project.components.length === 0) {
+        <div class="canvas-empty">
+          <div class="canvas-empty-icon">◇</div>
+          <h3>Your canvas is empty</h3>
+          <p>
+            Your architecture components will appear here.
+          </p>
+        </div>
+        } @else {
+        <div class="canvas-content">
+          <svg class="connection-layer"
+               aria-label="Architecture connections"
+               role="img">
+            @for (connection of project.connections; track connection.id) {
+            <line [attr.x1]="getConnectionPoint(connection.sourceComponentId, 'x')"
+                  [attr.y1]="getConnectionPoint(connection.sourceComponentId, 'y')"
+                  [attr.x2]="getConnectionPoint(connection.targetComponentId, 'x')"
+                  [attr.y2]="getConnectionPoint(connection.targetComponentId, 'y')"
+                  stroke="#8175f5"
+                  stroke-width="2" />
+            <text [attr.x]="getConnectionLabelX(connection)"
+                  [attr.y]="getConnectionLabelY(connection)"
+                  text-anchor="middle"
+                  fill="#c7d2fe"
+                  font-size="11">
+              {{ connection.label || connection.type }}
+            </text>
+            }
+          </svg>
+
+          @for (component of project.components; track component.id) {
+          <article class="canvas-component"
+                   [style.left.px]="component.x"
+                   [style.top.px]="component.y"
+                   (mousedown)="startDragging($event, component.id)">
+            <div class="canvas-component-icon">◇</div>
+            <div class="canvas-component-details">
+              <strong>{{ component.name }}</strong>
+              <span>{{ component.type || 'Component' }}</span>
+            </div>
+          </article>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="canvas-footer">
+        <span>Read-only preview</span>
+        <span>{{ project.components.length }} components loaded</span>
+      </div>
+    </section>
+  </main>
+
+  <section class="connections-section">
+
+    <div class="section-heading">
+      <div>
+        <h2>Connections</h2>
+        <p>Relationships between architecture components.</p>
+      </div>
+
+      <button class="btn-primary"
+              type="button"
+              (click)="showAddConnectionForm = !showAddConnectionForm"
+              [disabled]="project.components.length < 2">
+        {{ showAddConnectionForm ? 'Cancel' : '+ Add Connection' }}
+      </button>
+    </div>
+
+    @if (showAddConnectionForm) {
+    <form class="add-connection-form" (ngSubmit)="addConnection()">
+      <div class="form-field">
+        <label for="sourceComponent">Source Component</label>
+        <select id="sourceComponent"
+                name="sourceComponent"
+                [(ngModel)]="newConnectionSourceId"
+                required>
+          @for (component of project.components; track component.id) {
+          <option [value]="component.id">{{ component.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="targetComponent">Target Component</label>
+        <select id="targetComponent"
+                name="targetComponent"
+                [(ngModel)]="newConnectionTargetId"
+                required>
+          @for (component of project.components; track component.id) {
+          <option [value]="component.id">{{ component.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="connectionType">Connection Type</label>
+        <select id="connectionType"
+                name="connectionType"
+                [(ngModel)]="newConnectionType"
+                required>
+          @for (type of connectionTypes; track type) {
+          <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="connectionLabel">Label</label>
+        <input id="connectionLabel"
+               name="connectionLabel"
+               [(ngModel)]="newConnectionLabel"
+               placeholder="e.g. REST API"
+               maxlength="100" />
+      </div>
+
+      <button class="btn-primary"
+              type="submit"
+              [disabled]="
+        !newConnectionSourceId ||
+        !newConnectionTargetId ||
+        newConnectionSourceId === newConnectionTargetId
+      ">
+        Create Connection
+      </button>
+    </form>
+    }
+
+    @if (project.connections.length === 0) {
+    <div class="connections-empty">
+      No connections defined for this project.
+    </div>
+    } @else {
+    <div class="connection-list">
+      @for (connection of project.connections; track connection.id) {
+      <article class="connection-item">
+        <div class="connection-endpoint">
+          <span class="endpoint-label">Source</span>
+          <strong>
+            {{
+                    getComponentName(connection.sourceComponentId)
+            }}
+          </strong>
+        </div>
+
+        <div class="connection-type">
+          <span class="connection-line"></span>
+          <span>{{ connection.label || connection.type }}</span>
+          <span class="connection-line"></span>
+        </div>
+
+        <div class="connection-endpoint">
+          <span class="endpoint-label">Target</span>
+          <strong>
+            {{
+                    getComponentName(connection.targetComponentId)
+            }}
+          </strong>
+        </div>
+      </article>
+      }
+    </div>
+    }
+  </section>
+  }
+</div>

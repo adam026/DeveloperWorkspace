@@ -1,0 +1,126 @@
+
+<div class="architecture-library">
+  <header class="page-header">
+    <div>
+      <h1>Architecture Library</h1>
+      <p class="page-description">
+        Design, organize, and manage your software architecture projects.
+      </p>
+    </div>
+
+    <button class="btn-primary"
+            type="button"
+            (click)="showCreateForm = !showCreateForm">
+      <span class="button-icon">+</span>
+      New Project
+    </button>
+  </header>
+
+  @if (showCreateForm) {
+  <section class="create-project-panel">
+    <h2>Create New Project</h2>
+
+    <form (ngSubmit)="createProject()">
+      <div class="form-group">
+        <label for="projectName">Project Name</label>
+        <input id="projectName"
+               name="projectName"
+               type="text"
+               [(ngModel)]="newProjectName"
+               placeholder="e.g. SmartPantry Architecture"
+               required
+               maxlength="100" />
+      </div>
+
+      <div class="form-group">
+        <label for="projectDescription">Description</label>
+        <textarea id="projectDescription"
+                  name="projectDescription"
+                  [(ngModel)]="newProjectDescription"
+                  placeholder="Describe the purpose of this architecture..."
+                  rows="3"
+                  maxlength="1000"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-secondary"
+                type="button"
+                (click)="showCreateForm = false">
+          Cancel
+        </button>
+
+        <button class="btn-primary"
+                type="submit"
+                [disabled]="!newProjectName.trim()">
+          Create Project
+        </button>
+      </div>
+    </form>
+  </section>
+  }
+
+  @if (errorMessage) {
+  <div class="error-message" role="alert">
+    {{ errorMessage }}
+  </div>
+  }
+
+  @if (loading) {
+  <div class="state-message">
+    <span class="loading-spinner"></span>
+    <p>Loading architecture projects...</p>
+  </div>
+  } @else if (projects.length === 0) {
+  <section class="empty-state">
+    <div class="empty-state-icon">◇</div>
+    <h2>No architecture projects yet</h2>
+    <p>
+      Start documenting your software architecture by creating your first project.
+    </p>
+    <button class="btn-primary"
+            type="button"
+            (click)="showCreateForm = true">
+      Create Your First Project
+    </button>
+  </section>
+  } @else {
+  <section class="projects-section">
+    <div class="section-header">
+      <h2>Your Projects</h2>
+      <span class="project-count">
+        {{ projects.length }} projects
+      </span>
+    </div>
+
+    <div class="project-grid">
+      @for (project of projects; track project.id) {
+      <article class="project-card">
+        <div class="project-card-header">
+          <div class="project-icon">◇</div>
+          <span class="component-count">
+            {{ project.components.length }} components
+          </span>
+        </div>
+
+        <h3>{{ project.name }}</h3>
+
+        <p class="project-description">
+          {{ project.description || 'No description provided.' }}
+        </p>
+
+        <div class="project-card-footer">
+          <span class="project-date">
+            Created {{ project.createdAt | date:'mediumDate' }}
+          </span>
+          <button class="btn-secondary"
+                  type="button"
+                  (click)="openProject(project)">
+            Open Project →
+          </button>
+        </div>
+      </article>
+      }
+    </div>
+  </section>
+  }
+</div>

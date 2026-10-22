@@ -2,6 +2,18 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
+    path: 'architecture-library',
+    loadComponent: () =>
+      import('./architecture-library/architecture-library')
+        .then(m => m.ArchitectureLibraryComponent)
+  },
+  {
+    path: 'architecture-projects/:id',
+    loadComponent: () =>
+      import('./architecture-editor/architecture-editor')
+        .then(m => m.ArchitectureEditorComponent)
+  },
+  {
     path: 'documents/:id',
     loadComponent: () =>
       import('./document-detail/document-detail')
@@ -20,3 +32,4 @@ export const routes: Routes = [
         .then(m => m.MarkdownDetail)
   }
 ];
+

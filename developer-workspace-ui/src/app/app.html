@@ -41,9 +41,14 @@
         <span>⚙</span> Agent & Markdown Generator
       </a>
 
-      <a class="nav-item" href="#" (click)="$event.preventDefault()">
+      <!-- Architecture Library navigation -->
+      <a class="nav-item"
+         [class.active]="currentPage === 'architecture-library'"
+         href="#"
+         (click)="navigateTo('architecture-library'); $event.preventDefault()">
         <span>◈</span> Architecture Library
       </a>
+
       <a class="nav-item" href="#" (click)="$event.preventDefault()">
         <span>▧</span> Documentation
       </a>
@@ -82,6 +87,8 @@
       <app-markdown-generator />
       } @else if (currentPage === 'workspace') {
       <app-workspace (navigateToPage)="navigateTo($event)" />
+      } @else if (currentPage === 'architecture-library') {
+      <app-architecture-library />
       }
     </section>
 

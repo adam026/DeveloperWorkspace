@@ -2,6 +2,7 @@ import { Component, inject, ChangeDetectorRef, OnInit} from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet} from '@angular/router';
 import { filter } from 'rxjs';
 import { PromptLibrary } from './prompt-library/prompt-library';
+import { ArchitectureLibraryComponent } from './architecture-library/architecture-library';
 import { MarkdownGenerator } from './markdown-generator/markdown-generator';
 import { WorkspaceComponent } from './workspace/workspace';
 import { DocumentsComponent } from './documents/documents';
@@ -12,7 +13,8 @@ type AppPage =
   | 'documents'
   | 'prompts'
   | 'markdown-generator'
-  | 'workspace';
+  | 'workspace'
+  | 'architecture-library';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +25,7 @@ type AppPage =
     MarkdownGenerator,
     PromptLibrary,
     WorkspaceComponent,
+    ArchitectureLibraryComponent,
     DashboardComponent
   ],
   templateUrl: './app.html',
@@ -38,6 +41,9 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.currentRouteIsHome = this.router.url === '/';
+    if (this.router.url === '/') {
+      this.currentPage = 'architecture-library';
+    }
 
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -67,7 +73,8 @@ export class App implements OnInit {
       documents: 'Documents',
       prompts: 'Prompt Library',
       'markdown-generator': 'Agent & Markdown Generator',
-      workspace: 'Workspace'
+      workspace: 'Workspace',
+      'architecture-library': 'Architecture Library'
     };
 
     return pageTitles[this.currentPage];
