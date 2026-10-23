@@ -21,13 +21,11 @@ export class ArchitectureEditorComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
-  showAddComponentForm = false;
   isSaving = false;
   successMessage = '';
 
-
+  // New connection form fields
   showAddConnectionForm = false;
-
   newConnectionSourceId = '';
   newConnectionTargetId = '';
   newConnectionType = 'REST API';
@@ -42,6 +40,8 @@ export class ArchitectureEditorComponent implements OnInit {
     'Other'
   ];
 
+  // New component form fields
+  showAddComponentForm = false;
   newComponentName = '';
   newComponentType = 'Service';
 
@@ -54,6 +54,11 @@ export class ArchitectureEditorComponent implements OnInit {
     'Queue',
     'Other'
   ];
+
+  // Editing state for component properties
+  editingComponentId: string | null = null;
+  editComponentName = '';
+  editComponentType = '';
 
   private dragOffsetX = 0;
   private dragOffsetY = 0;
@@ -117,9 +122,11 @@ export class ArchitectureEditorComponent implements OnInit {
   }
 
 
+
   getConnectionPoint(
     componentId: string,
-    axis: 'x' | 'y'
+    axis: 'x' | 'y',
+    otherComponentId?: string
   ): number {
     const component = this.project?.components.find(
       item => item.id === componentId
@@ -129,13 +136,68 @@ export class ArchitectureEditorComponent implements OnInit {
       return 0;
     }
 
-    // Keep these dimensions in sync with .canvas-component in CSS.
     const componentWidth = 190;
     const componentHeight = 72;
 
+    if (!otherComponentId) {
+      return axis === 'x'
+        ? component.x + componentWidth / 2
+        : component.y + componentHeight / 2;
+    }
+
+    const otherComponent = this.project?.components.find(
+      item => item.id === otherComponentId
+    );
+
+    if (!otherComponent) {
+      return axis === 'x'
+        ? component.x + componentWidth / 2
+        : component.y + componentHeight / 2;
+    }
+
+    const centerX = component.x + componentWidth / 2;
+    const centerY = component.y + componentHeight / 2;
+
+    const otherCenterX = otherComponent.x + componentWidth / 2;
+    const otherCenterY = otherComponent.y + componentHeight / 2;
+
+    const dx = otherCenterX - centerX;
+    const dy = otherCenterY - centerY;
+
+    if (dx === 0 && dy === 0) {
+      return axis === 'x' ? centerX : centerY;
+    }
+
+    const scale = Math.min(
+      (componentWidth / 2) / Math.max(Math.abs(dx), 0.0001),
+      (componentHeight / 2) / Math.max(Math.abs(dy), 0.0001)
+    );
+
     return axis === 'x'
-      ? component.x + componentWidth / 2
-      : component.y + componentHeight / 2;
+      ? centerX + dx * scale
+      : centerY + dy * scale;
+  }
+
+  getConnectionColor(type: string): string {
+    switch (type) {
+      case 'REST API':
+        return '#8175f5'; // Purple
+
+      case 'Database Connection':
+        return '#2dd4bf'; // Teal
+
+      case 'Message Queue':
+        return '#fb923c'; // Orange
+
+      case 'Dependency':
+        return '#94a3b8'; // Gray
+
+      case 'Event':
+        return '#f472b6'; // Pink
+
+      default:
+        return '#a5a0ff'; // Default lavender
+    }
   }
 
   getConnectionLabelX(connection: {
@@ -245,6 +307,127 @@ export class ArchitectureEditorComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  deleteConnection(connectionId: string): void {
+    if (!this.project) {
+      return;
+    }
+
+    this.project.connections = this.project.connections.filter(
+      connection => connection.id !== connectionId
+    );
+
+    this.successMessage = 'Connection deleted. Save to keep the changes.';
+    this.errorMessage = '';
+
+    this.cdr.detectChanges();
+  }
+
+  editComponent(componentId: string): void {
+    if (!this.project) {
+      return;
+    }
+
+    const component = this.project.components.find(
+      item => item.id === componentId
+    );
+
+    if (!component) {
+      return;
+    }
+
+    this.editingComponentId = component.id;
+    this.editComponentName = component.name;
+    this.editComponentType = component.type || 'Service';
+
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  saveComponentEdit(): void {
+    if (!this.project || !this.editingComponentId) {
+      return;
+    }
+
+    const name = this.editComponentName.trim();
+    const type = this.editComponentType.trim();
+
+    if (!name || !type) {
+      this.errorMessage = 'Component name and type are required.';
+      return;
+    }
+
+    const component = this.project.components.find(
+      item => item.id === this.editingComponentId
+    );
+
+    if (!component) {
+      return;
+    }
+
+    component.name = name;
+    component.type = type;
+
+    this.editingComponentId = null;
+    this.editComponentName = '';
+    this.editComponentType = '';
+
+    this.errorMessage = '';
+    this.successMessage = 'Component updated. Save to keep the changes.';
+
+    this.cdr.detectChanges();
+  }
+
+  cancelComponentEdit(): void {
+    this.editingComponentId = null;
+    this.editComponentName = '';
+    this.editComponentType = '';
+    this.errorMessage = '';
+
+    this.cdr.detectChanges();
+  }
+
+  deleteComponent(componentId: string): void {
+    if (!this.project) {
+      return;
+    }
+
+    const componentExists = this.project.components.some(
+      component => component.id === componentId
+    );
+
+    if (!componentExists) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this component and its connections?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.project.components = this.project.components.filter(
+      component => component.id !== componentId
+    );
+
+    this.project.connections = this.project.connections.filter(
+      connection =>
+        connection.sourceComponentId !== componentId &&
+        connection.targetComponentId !== componentId
+    );
+
+    if (this.draggedComponentId === componentId) {
+      this.stopDragging();
+    }
+
+    this.successMessage =
+      'Component and its connections deleted. Save to keep the changes.';
+    this.errorMessage = '';
+
+    this.cdr.detectChanges();
+  }
+
   startDragging(event: MouseEvent, componentId: string): void {
     if (!this.project) {
       return;
@@ -299,6 +482,28 @@ export class ArchitectureEditorComponent implements OnInit {
 
   stopDragging(): void {
     this.draggedComponentId = null;
+  }
+
+  getArrowHeadPoints(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): string {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const length = 12;
+    const width = 6;
+
+    const baseX = x2 - length * Math.cos(angle);
+    const baseY = y2 - length * Math.sin(angle);
+
+    const leftX = baseX + width * Math.sin(angle);
+    const leftY = baseY - width * Math.cos(angle);
+
+    const rightX = baseX - width * Math.sin(angle);
+    const rightY = baseY + width * Math.cos(angle);
+
+    return `${x2},${y2} ${leftX},${leftY} ${rightX},${rightY}`;
   }
 
   saveProject(): void {

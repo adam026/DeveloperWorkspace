@@ -121,8 +121,8 @@
 
 .editor-workspace {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+  gap: 24px;
   align-items: stretch;
 }
 
@@ -302,7 +302,7 @@
   height: 100%;
   overflow: visible;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
 }
 
 .canvas-component {
@@ -486,12 +486,11 @@
 
 /* Connections section */
 
-.connections-section {
-  margin-top: 22px;
-  padding: 22px;
-}
-
 .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
@@ -502,15 +501,20 @@
     line-height: 1.6;
   }
 
-.connections-empty {
-  padding: 22px;
-  color: #64748b;
+.add-connection-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 20px;
   background: #f8f9fc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 13px;
+  border: 1px solid #e2e7f0;
+  border-radius: 10px;
 }
+
+  .add-connection-form .form-field {
+    min-width: 0;
+  }
 
 .connection-list {
   display: flex;
@@ -520,13 +524,36 @@
 
 .connection-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(100px, 0.8fr) minmax(0, 1fr);
+  grid-template-columns: minmax(140px, 1fr) minmax(180px, 1.2fr) minmax(140px, 1fr) 76px;
   align-items: center;
   gap: 20px;
-  padding: 16px;
+  padding: 14px 16px;
   background: #f8f9fc;
   border: 1px solid #e2e7f0;
   border-radius: 8px;
+}
+
+.connection-source {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.connection-item > .connection-type {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  color: #5143dc;
+  font-size: 11px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.connection-target {
+  grid-column: 3;
+  min-width: 0;
 }
 
 .connection-endpoint {
@@ -544,190 +571,55 @@
 }
 
 .connection-endpoint strong {
-  overflow-wrap: anywhere;
   color: #172033;
   font-size: 12px;
-}
-
-.connection-type {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #5143dc;
-  font-size: 11px;
-  text-align: center;
   overflow-wrap: anywhere;
 }
 
 .connection-line {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 10px;
   height: 1px;
   background: #8175f5;
 }
 
-/* Loading state */
-
-.state-message {
-  display: flex;
-  flex-direction: column;
+.connection-item > .btn-delete-connection {
+  grid-column: 4;
+  justify-self: end;
+  align-self: center;
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 64px 24px;
-  color: #64748b;
-  text-align: center;
-}
-
-.loading-spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid #e4e7ec;
-  border-top-color: #6254ed;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Success and error messages */
-
-.success-message {
-  margin-bottom: 20px;
-  padding: 14px 16px;
-  color: #067647;
-  background: #ecfdf3;
-  border: 1px solid #abefc6;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 14px 16px;
+  justify-content: center;
+  width: 76px;
+  min-width: 76px;
+  padding: 8px 0;
   color: #b42318;
-  background: #fef3f2;
+  background: #ffffff;
   border: 1px solid #fecdca;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.5;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-  .error-message p {
-    margin: 0;
-    font-size: 13px;
+  .connection-item > .btn-delete-connection:hover {
+    background: #fef3f2;
+    border-color: #fda29b;
   }
 
-/* Responsive layout */
+  .connection-item > .btn-delete-connection:focus-visible {
+    outline: 3px solid rgb(220 38 38 / 15%);
+    outline-offset: 2px;
+  }
 
 @media (max-width: 1000px) {
-  .editor-workspace {
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 14px;
-  }
-
-  .project-heading {
-    flex-direction: column;
-  }
-
   .connection-item {
+    grid-template-columns: minmax(120px, 1fr) minmax(140px, 1fr) minmax(120px, 1fr) 76px;
     gap: 12px;
   }
 }
-
-@media (max-width: 700px) {
-  .architecture-editor {
-    padding: 20px 16px 32px;
-  }
-
-  .project-heading h1 {
-    font-size: 25px;
-  }
-
-  .editor-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .architecture-canvas {
-    min-height: 350px;
-  }
-
-  .canvas-content,
-  .canvas-empty {
-    min-height: 350px;
-  }
-
-  .canvas-toolbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .toolbar-actions {
-    justify-content: flex-start;
-    width: 100%;
-  }
-
-  .add-component-form {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-    .add-component-form > .btn-primary {
-      align-self: flex-start;
-    }
-
-  .connection-item {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .connection-type {
-    justify-content: flex-start;
-  }
-
-  .connection-line {
-    flex: 0 0 24px;
-  }
-
-  .canvas-footer {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
-
-/* Add connection form */
-
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.add-connection-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 20px;
-  background: #f8f9fc;
-  border: 1px solid #e2e7f0;
-  border-radius: 10px;
-}
-
-  .add-connection-form .form-field {
-    min-width: 0;
-  }
 
 @media (max-width: 700px) {
   .section-heading {
@@ -738,5 +630,290 @@
   .add-connection-form {
     grid-template-columns: 1fr;
     padding: 16px;
+  }
+
+  .connection-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+    .connection-source,
+    .connection-item > .connection-type,
+    .connection-target,
+    .connection-item > .btn-delete-connection {
+      grid-column: 1;
+    }
+
+    .connection-item > .connection-type {
+      justify-content: flex-start;
+    }
+
+  .connection-line {
+    flex: 0 0 24px;
+  }
+
+  .connection-item > .btn-delete-connection {
+    justify-self: start;
+  }
+}
+
+/* Refined component sidebar and component actions */
+.component-sidebar {
+  padding: 22px 18px;
+  background: #fbfaff;
+}
+
+.component-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.component-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  background: #f8f7ff;
+  border: 1px solid #e4e0ff;
+  border-radius: 9px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+  .component-item:hover {
+    background: #f1efff;
+    border-color: #cfc8ff;
+  }
+
+.component-type-icon {
+  flex: 0 0 34px;
+}
+
+.component-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+  .component-info h3 {
+    margin: 0 0 6px;
+    color: #172033;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .component-info span {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+.component-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.btn-edit-component,
+.btn-delete-component {
+  padding: 7px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-edit-component {
+  color: #5143dc;
+  background: #f0edff;
+  border: 1px solid #ddd6fe;
+}
+
+  .btn-edit-component:hover {
+    background: #e5e0ff;
+    border-color: #b9b2ff;
+  }
+
+.btn-delete-component {
+  color: #b42318;
+  background: #fff;
+  border: 1px solid #fecdca;
+}
+
+  .btn-delete-component:hover {
+    background: #fef3f2;
+    border-color: #fda29b;
+  }
+
+.component-edit-form {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+  .component-edit-form input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    background: #fff;
+    color: #344054;
+    font-size: 12px;
+    outline: none;
+  }
+
+    .component-edit-form input:focus {
+      border-color: #8175f5;
+      box-shadow: 0 0 0 3px rgb(98 84 237 / 12%);
+    }
+
+.component-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.btn-save-component,
+.btn-cancel-component {
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-save-component {
+  color: #fff;
+  background: #6254ed;
+  border: 1px solid #6254ed;
+}
+
+  .btn-save-component:hover {
+    background: #5143dc;
+  }
+
+.btn-cancel-component {
+  color: #344054;
+  background: #fff;
+  border: 1px solid #d0d5dd;
+}
+
+  .btn-cancel-component:hover {
+    background: #f2f4f7;
+  }
+
+/* Give the Connections section clear separation from the workspace */
+.connections-section {
+  margin-top: 30px;
+  padding: 22px;
+  background: #fbfaff;
+  border-color: #e2ddff;
+}
+
+  .connections-section .section-heading {
+    margin-bottom: 18px;
+  }
+
+  .connections-section .add-connection-form {
+    background: #f4f2ff;
+    border-color: #e2ddff;
+  }
+
+  .connections-section .connection-item {
+    background: #f8f7ff;
+    border-color: #e2ddff;
+  }
+
+    .connections-section .connection-item:hover {
+      background: #f1efff;
+      border-color: #cfc8ff;
+    }
+
+/* Responsive workspace */
+@media (max-width: 1000px) {
+  .editor-workspace {
+    grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .component-sidebar {
+    padding: 18px 14px;
+  }
+
+  .component-item {
+    flex-wrap: wrap;
+  }
+
+  .component-info {
+    flex: 1 1 calc(100% - 50px);
+  }
+
+  .component-actions {
+    margin-left: auto;
+  }
+
+  .component-edit-form {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .architecture-editor {
+    padding: 20px 16px 32px;
+  }
+
+  .editor-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .component-sidebar {
+    padding: 18px;
+  }
+
+  .component-item {
+    flex-wrap: nowrap;
+  }
+
+  .component-info {
+    flex: 1 1 auto;
+  }
+
+  .component-actions {
+    margin-left: 0;
+  }
+
+  .connections-section {
+    margin-top: 24px;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .component-item {
+    flex-wrap: wrap;
+  }
+
+  .component-info {
+    flex: 1 1 calc(100% - 50px);
+  }
+
+  .component-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
   }
 }

@@ -58,14 +58,62 @@
         <span>Add components in a future editing step.</span>
       </div>
       } @else {
+
       <div class="component-list">
         @for (component of project.components; track component.id) {
         <article class="component-item">
           <div class="component-type-icon">◇</div>
+
+          @if (editingComponentId === component.id) {
+          <div class="component-edit-form">
+            <input type="text"
+                   [(ngModel)]="editComponentName"
+                   placeholder="Component name"
+                   aria-label="Component name" />
+
+            <input type="text"
+                   [(ngModel)]="editComponentType"
+                   placeholder="Component type"
+                   aria-label="Component type" />
+
+            <div class="component-edit-actions">
+              <button type="button"
+                      class="btn-save-component"
+                      (click)="saveComponentEdit()">
+                Save
+              </button>
+
+              <button type="button"
+                      class="btn-cancel-component"
+                      (click)="cancelComponentEdit()">
+                Cancel
+              </button>
+            </div>
+          </div>
+          } @else {
           <div class="component-info">
             <h3>{{ component.name }}</h3>
             <span>{{ component.type || 'Component' }}</span>
           </div>
+
+          <div class="component-actions">
+            <button class="btn-edit-component"
+                    type="button"
+                    (click)="editComponent(component.id)"
+                    [attr.aria-label]="'Edit component ' + component.name"
+                    title="Edit component">
+              Edit
+            </button>
+
+            <button class="btn-delete-component"
+                    type="button"
+                    (click)="deleteComponent(component.id)"
+                    [attr.aria-label]="'Delete component ' + component.name"
+                    title="Delete component">
+              Delete
+            </button>
+          </div>
+          }
         </article>
         }
       </div>
@@ -141,23 +189,39 @@
         </div>
         } @else {
         <div class="canvas-content">
+
           <svg class="connection-layer"
                aria-label="Architecture connections"
                role="img">
+
             @for (connection of project.connections; track connection.id) {
-            <line [attr.x1]="getConnectionPoint(connection.sourceComponentId, 'x')"
-                  [attr.y1]="getConnectionPoint(connection.sourceComponentId, 'y')"
-                  [attr.x2]="getConnectionPoint(connection.targetComponentId, 'x')"
-                  [attr.y2]="getConnectionPoint(connection.targetComponentId, 'y')"
-                  stroke="#8175f5"
+            <line [attr.x1]="getConnectionPoint(connection.sourceComponentId,'x',connection.targetComponentId)"
+                  [attr.y1]="getConnectionPoint(connection.sourceComponentId,'y',connection.targetComponentId)"
+                  [attr.x2]="getConnectionPoint(connection.targetComponentId,'x',connection.sourceComponentId)"
+                  [attr.y2]="getConnectionPoint(connection.targetComponentId,'y',connection.sourceComponentId)"
+                  [attr.stroke]="getConnectionColor(connection.type)"
                   stroke-width="2" />
+
+            <polygon [attr.points]="getArrowHeadPoints(
+              getConnectionPoint(connection.sourceComponentId, 'x', connection.targetComponentId),
+              getConnectionPoint(connection.sourceComponentId, 'y', connection.targetComponentId),
+              getConnectionPoint(connection.targetComponentId, 'x', connection.sourceComponentId),
+              getConnectionPoint(connection.targetComponentId, 'y', connection.sourceComponentId))"
+                     [attr.fill]="getConnectionColor(connection.type)" />
+
             <text [attr.x]="getConnectionLabelX(connection)"
                   [attr.y]="getConnectionLabelY(connection)"
                   text-anchor="middle"
-                  fill="#c7d2fe"
-                  font-size="11">
+                  [attr.fill]="getConnectionColor(connection.type)"
+                  font-size="11"
+                  font-weight="600"
+                  stroke="#151720"
+                  stroke-width="5"
+                  stroke-linejoin="round"
+                  paint-order="stroke">
               {{ connection.label || connection.type }}
             </text>
+
             }
           </svg>
 
@@ -267,13 +331,9 @@
     <div class="connection-list">
       @for (connection of project.connections; track connection.id) {
       <article class="connection-item">
-        <div class="connection-endpoint">
+        <div class="connection-endpoint connection-source">
           <span class="endpoint-label">Source</span>
-          <strong>
-            {{
-                    getComponentName(connection.sourceComponentId)
-            }}
-          </strong>
+          <strong>{{ getComponentName(connection.sourceComponentId) }}</strong>
         </div>
 
         <div class="connection-type">
@@ -282,14 +342,16 @@
           <span class="connection-line"></span>
         </div>
 
-        <div class="connection-endpoint">
+        <div class="connection-endpoint connection-target">
           <span class="endpoint-label">Target</span>
-          <strong>
-            {{
-                    getComponentName(connection.targetComponentId)
-            }}
-          </strong>
+          <strong>{{ getComponentName(connection.targetComponentId) }}</strong>
         </div>
+
+        <button class="btn-delete-connection"
+                type="button"
+                (click)="deleteConnection(connection.id)">
+          Delete
+        </button>
       </article>
       }
     </div>
