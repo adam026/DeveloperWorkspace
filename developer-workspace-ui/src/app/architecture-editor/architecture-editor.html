@@ -135,6 +135,20 @@
             + Add Component
           </button>
 
+          <button class="btn-secondary"
+                  type="button"
+                  (click)="autoLayout()">
+            <i class="bi bi-diagram-3"></i>
+            Auto Layout
+          </button>
+
+          <button class="btn-secondary"
+                  type="button"
+                  (click)="exportArchitecture()">
+            <i class="bi bi-download"></i>
+            Export PNG
+          </button>
+
           <button class="btn-primary"
                   type="button"
                   (click)="saveProject()"
@@ -175,10 +189,44 @@
       </form>
       }
 
+      <div class="canvas-zoom-controls">
+        <button class="zoom-button"
+                type="button"
+                (click)="zoomOut()"
+                title="Zoom out"
+                aria-label="Zoom out">
+          −
+        </button>
+
+        <span class="zoom-level">
+          {{ (zoomLevel * 100).toFixed(0) }}%
+        </span>
+
+        <button class="zoom-button"
+                type="button"
+                (click)="zoomIn()"
+                title="Zoom in"
+                aria-label="Zoom in">
+          +
+        </button>
+
+        <button class="btn-secondary"
+                type="button"
+                (click)="fitToScreen()"
+                title="Fit to screen">
+          <i class="bi bi-arrows-fullscreen"></i>
+          Fit to screen
+        </button>
+      </div>
+
+
+
       <div class="architecture-canvas"
-           (mousemove)="onCanvasMouseMove($event)"
-           (mouseup)="stopDragging()"
-           (mouseleave)="stopDragging()">
+           [class.panning]="isPanning"
+           (mousedown)="startPanning($event)"
+           (mousemove)="panCanvas($event); onCanvasMouseMove($event)"
+           (mouseup)="stopPanning(); stopDragging()"
+           (mouseleave)="stopPanning(); stopDragging()">
         @if (project.components.length === 0) {
         <div class="canvas-empty">
           <div class="canvas-empty-icon">◇</div>
@@ -188,25 +236,23 @@
           </p>
         </div>
         } @else {
-        <div class="canvas-content">
+
+        <div class="canvas-content"
+             [style.transform]="'scale(' + zoomLevel + ')'"
+             [style.transform-origin]="'top left'">
 
           <svg class="connection-layer"
                aria-label="Architecture connections"
                role="img">
 
             @for (connection of project.connections; track connection.id) {
-            <line [attr.x1]="getConnectionPoint(connection.sourceComponentId,'x',connection.targetComponentId)"
-                  [attr.y1]="getConnectionPoint(connection.sourceComponentId,'y',connection.targetComponentId)"
-                  [attr.x2]="getConnectionPoint(connection.targetComponentId,'x',connection.sourceComponentId)"
-                  [attr.y2]="getConnectionPoint(connection.targetComponentId,'y',connection.sourceComponentId)"
-                  [attr.stroke]="getConnectionColor(connection.type)"
-                  stroke-width="2" />
 
-            <polygon [attr.points]="getArrowHeadPoints(
-              getConnectionPoint(connection.sourceComponentId, 'x', connection.targetComponentId),
-              getConnectionPoint(connection.sourceComponentId, 'y', connection.targetComponentId),
-              getConnectionPoint(connection.targetComponentId, 'x', connection.sourceComponentId),
-              getConnectionPoint(connection.targetComponentId, 'y', connection.sourceComponentId))"
+            <path [attr.d]="getConnectionPath(connection.sourceComponentId,connection.targetComponentId)"
+                  [attr.stroke]="getConnectionColor(connection.type)"
+                  stroke-width="2"
+                  fill="none" />
+
+            <polygon [attr.points]="getConnectionArrowHead(connection.sourceComponentId,connection.targetComponentId)"
                      [attr.fill]="getConnectionColor(connection.type)" />
 
             <text [attr.x]="getConnectionLabelX(connection)"
@@ -227,6 +273,7 @@
 
           @for (component of project.components; track component.id) {
           <article class="canvas-component"
+                   [attr.data-component-id]="component.id"
                    [style.left.px]="component.x"
                    [style.top.px]="component.y"
                    (mousedown)="startDragging($event, component.id)">

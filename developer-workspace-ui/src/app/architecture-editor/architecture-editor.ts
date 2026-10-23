@@ -60,6 +60,21 @@ export class ArchitectureEditorComponent implements OnInit {
   editComponentName = '';
   editComponentType = '';
 
+  // Zoom
+  zoomLevel = 1;
+  private readonly minZoom = 0.5;
+  private readonly maxZoom = 2;
+  private readonly zoomStep = 0.1;
+
+  // Panning state
+  isPanning = false;
+
+  private panStartX = 0;
+  private panStartY = 0;
+  private panScrollLeft = 0;
+  private panScrollTop = 0;
+
+  // Dragging state
   private dragOffsetX = 0;
   private dragOffsetY = 0;
   private draggedComponentId: string | null = null;
@@ -121,8 +136,6 @@ export class ArchitectureEditorComponent implements OnInit {
     return component?.name ?? 'Unknown component';
   }
 
-
-
   getConnectionPoint(
     componentId: string,
     axis: 'x' | 'y',
@@ -138,11 +151,11 @@ export class ArchitectureEditorComponent implements OnInit {
 
     const componentWidth = 190;
     const componentHeight = 72;
+    const centerX = component.x + componentWidth / 2;
+    const centerY = component.y + componentHeight / 2;
 
     if (!otherComponentId) {
-      return axis === 'x'
-        ? component.x + componentWidth / 2
-        : component.y + componentHeight / 2;
+      return axis === 'x' ? centerX : centerY;
     }
 
     const otherComponent = this.project?.components.find(
@@ -150,13 +163,8 @@ export class ArchitectureEditorComponent implements OnInit {
     );
 
     if (!otherComponent) {
-      return axis === 'x'
-        ? component.x + componentWidth / 2
-        : component.y + componentHeight / 2;
+      return axis === 'x' ? centerX : centerY;
     }
-
-    const centerX = component.x + componentWidth / 2;
-    const centerY = component.y + componentHeight / 2;
 
     const otherCenterX = otherComponent.x + componentWidth / 2;
     const otherCenterY = otherComponent.y + componentHeight / 2;
@@ -168,10 +176,19 @@ export class ArchitectureEditorComponent implements OnInit {
       return axis === 'x' ? centerX : centerY;
     }
 
-    const scale = Math.min(
-      (componentWidth / 2) / Math.max(Math.abs(dx), 0.0001),
-      (componentHeight / 2) / Math.max(Math.abs(dy), 0.0001)
-    );
+    // Find the intersection with the component's rectangular boundary.
+    const halfWidth = componentWidth / 2;
+    const halfHeight = componentHeight / 2;
+
+    const scaleX = Math.abs(dx) > 0
+      ? halfWidth / Math.abs(dx)
+      : Number.POSITIVE_INFINITY;
+
+    const scaleY = Math.abs(dy) > 0
+      ? halfHeight / Math.abs(dy)
+      : Number.POSITIVE_INFINITY;
+
+    const scale = Math.min(scaleX, scaleY);
 
     return axis === 'x'
       ? centerX + dx * scale
@@ -484,6 +501,246 @@ export class ArchitectureEditorComponent implements OnInit {
     this.draggedComponentId = null;
   }
 
+  getConnectionPath(
+    sourceComponentId: string,
+    targetComponentId: string
+  ): string {
+    const source = this.project?.components.find(
+      component => component.id === sourceComponentId
+    );
+
+    const target = this.project?.components.find(
+      component => component.id === targetComponentId
+    );
+
+    if (!source || !target) {
+      return '';
+    }
+
+    const x1 = this.getConnectionPoint(
+      sourceComponentId,
+      'x',
+      targetComponentId
+    );
+    const y1 = this.getConnectionPoint(
+      sourceComponentId,
+      'y',
+      targetComponentId
+    );
+    const x2 = this.getConnectionPoint(
+      targetComponentId,
+      'x',
+      sourceComponentId
+    );
+    const y2 = this.getConnectionPoint(
+      targetComponentId,
+      'y',
+      sourceComponentId
+    );
+
+    const componentWidth = 190;
+    const componentHeight = 72;
+    const sourceCenterX = source.x + componentWidth / 2;
+    const targetCenterX = target.x + componentWidth / 2;
+    const sourceCenterY = source.y + componentHeight / 2;
+    const targetCenterY = target.y + componentHeight / 2;
+
+    // Prefer a straight line for components in the same row or column.
+    if (
+      Math.abs(sourceCenterY - targetCenterY) < 10 ||
+      Math.abs(sourceCenterX - targetCenterX) < 10
+    ) {
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+
+    // Otherwise, route through a midpoint to create a right-angle path.
+    const middleX = (x1 + x2) / 2;
+
+    return `M ${x1} ${y1} L ${middleX} ${y1} L ${middleX} ${y2} L ${x2} ${y2}`;
+  }
+
+  // Panning methods
+  startPanning(event: MouseEvent): void {
+    // Only start panning with the left mouse button.
+    if (event.button !== 0) {
+      return;
+    }
+
+    const canvas = event.currentTarget as HTMLElement;
+
+    // Do not pan when dragging a component.
+    if ((event.target as HTMLElement).closest('.canvas-component')) {
+      return;
+    }
+
+    this.isPanning = true;
+    this.panStartX = event.clientX;
+    this.panStartY = event.clientY;
+    this.panScrollLeft = canvas.scrollLeft;
+    this.panScrollTop = canvas.scrollTop;
+
+    event.preventDefault();
+  }
+
+  panCanvas(event: MouseEvent): void {
+    if (!this.isPanning) {
+      return;
+    }
+
+    const canvas = event.currentTarget as HTMLElement;
+    const deltaX = event.clientX - this.panStartX;
+    const deltaY = event.clientY - this.panStartY;
+
+    canvas.scrollLeft = this.panScrollLeft - deltaX;
+    canvas.scrollTop = this.panScrollTop - deltaY;
+  }
+
+  stopPanning(): void {
+    this.isPanning = false;
+  }
+
+  // Auto-layout method
+  autoLayout(): void {
+    if (!this.project || this.project.components.length === 0) {
+      return;
+    }
+
+    const components = this.project.components;
+    const connections = this.project.connections;
+
+    const componentWidth = 190;
+    const componentHeight = 72;
+    const horizontalGap = 120;
+    const verticalGap = 90;
+    const startX = 40;
+    const startY = 40;
+
+    // Build a directed graph from the connections.
+    const outgoing = new Map<string, string[]>();
+    const incomingCount = new Map<string, number>();
+
+    for (const component of components) {
+      outgoing.set(component.id, []);
+      incomingCount.set(component.id, 0);
+    }
+
+    for (const connection of connections) {
+      const sourceId = connection.sourceComponentId;
+      const targetId = connection.targetComponentId;
+
+      if (
+        sourceId === targetId ||
+        !outgoing.has(sourceId) ||
+        !outgoing.has(targetId)
+      ) {
+        continue;
+      }
+
+      const targets = outgoing.get(sourceId)!;
+
+      if (!targets.includes(targetId)) {
+        targets.push(targetId);
+        incomingCount.set(
+          targetId,
+          (incomingCount.get(targetId) ?? 0) + 1
+        );
+      }
+    }
+
+    // Find each component's layer using topological traversal.
+    const layers = new Map<string, number>();
+    const queue: string[] = [];
+
+    for (const component of components) {
+      if ((incomingCount.get(component.id) ?? 0) === 0) {
+        layers.set(component.id, 0);
+        queue.push(component.id);
+      }
+    }
+
+    let queueIndex = 0;
+
+    while (queueIndex < queue.length) {
+      const currentId = queue[queueIndex++];
+      const currentLayer = layers.get(currentId) ?? 0;
+
+      for (const targetId of outgoing.get(currentId) ?? []) {
+        layers.set(
+          targetId,
+          Math.max(
+            layers.get(targetId) ?? 0,
+            currentLayer + 1
+          )
+        );
+
+        incomingCount.set(
+          targetId,
+          (incomingCount.get(targetId) ?? 1) - 1
+        );
+
+        if (incomingCount.get(targetId) === 0) {
+          queue.push(targetId);
+        }
+      }
+    }
+
+    // Put disconnected components and components in cycles
+    // into a final layer so that none are left behind.
+    const maxLayer = Math.max(0, ...layers.values()) + 1;
+
+    for (const component of components) {
+      if (!layers.has(component.id)) {
+        layers.set(component.id, maxLayer);
+      }
+    }
+
+    // Group components by layer.
+    const groupedLayers = new Map<number, typeof components>();
+
+    for (const component of components) {
+      const layer = layers.get(component.id) ?? 0;
+
+      if (!groupedLayers.has(layer)) {
+        groupedLayers.set(layer, []);
+      }
+
+      groupedLayers.get(layer)!.push(component);
+    }
+
+    // Position each layer from left to right and center vertically.
+    const sortedLayerNumbers = [...groupedLayers.keys()].sort(
+      (a, b) => a - b
+    );
+
+    for (const layerNumber of sortedLayerNumbers) {
+      const layerComponents = groupedLayers.get(layerNumber)!;
+      const totalHeight =
+        layerComponents.length * componentHeight +
+        (layerComponents.length - 1) * verticalGap;
+
+      layerComponents.forEach((component, index) => {
+        component.x =
+          startX + layerNumber * (componentWidth + horizontalGap);
+
+        component.y =
+          startY + index * (componentHeight + verticalGap);
+      });
+
+      // Keep the next layer's components aligned around its center.
+      const layerOffset = Math.max(0, totalHeight / 2);
+      for (const component of layerComponents) {
+        component.y = Math.max(startY, component.y - layerOffset + componentHeight / 2);
+      }
+    }
+
+    this.successMessage =
+      'Components arranged by connections. Save to keep the changes.';
+    this.errorMessage = '';
+
+    this.cdr.detectChanges();
+  }
+
+  // Arrowhead calculation
   getArrowHeadPoints(
     x1: number,
     y1: number,
@@ -506,6 +763,243 @@ export class ArchitectureEditorComponent implements OnInit {
     return `${x2},${y2} ${leftX},${leftY} ${rightX},${rightY}`;
   }
 
+  getConnectionArrowHead(
+    sourceComponentId: string,
+    targetComponentId: string
+  ): string {
+    const source = this.project?.components.find(
+      component => component.id === sourceComponentId
+    );
+
+    const target = this.project?.components.find(
+      component => component.id === targetComponentId
+    );
+
+    if (!source || !target) {
+      return '';
+    }
+
+    const x1 = this.getConnectionPoint(
+      sourceComponentId,
+      'x',
+      targetComponentId
+    );
+    const y1 = this.getConnectionPoint(
+      sourceComponentId,
+      'y',
+      targetComponentId
+    );
+    const x2 = this.getConnectionPoint(
+      targetComponentId,
+      'x',
+      sourceComponentId
+    );
+    const y2 = this.getConnectionPoint(
+      targetComponentId,
+      'y',
+      sourceComponentId
+    );
+
+    const sourceCenterX = source.x + 95;
+    const sourceCenterY = source.y + 36;
+    const targetCenterX = target.x + 95;
+    const targetCenterY = target.y + 36;
+
+    // Same row: the arrow points horizontally.
+    if (Math.abs(sourceCenterY - targetCenterY) < 10) {
+      return this.getArrowHeadPoints(x1, y1, x2, y2);
+    }
+
+    // Same column: the arrow points vertically.
+    if (Math.abs(sourceCenterX - targetCenterX) < 10) {
+      return this.getArrowHeadPoints(x1, y1, x2, y2);
+    }
+
+    // The current path bends at the midpoint X.
+    const middleX = (x1 + x2) / 2;
+
+    return this.getArrowHeadPoints(
+      middleX,
+      y2,
+      x2,
+      y2
+    );
+  }
+
+  // Export architecture as PNG
+  exportArchitecture(): void {
+    if (!this.project) {
+      this.errorMessage = 'No architecture project is loaded.';
+      return;
+    }
+
+    const canvas = document.querySelector(
+      '.canvas-content'
+    ) as HTMLElement | null;
+
+    if (!canvas) {
+      this.errorMessage = 'Architecture canvas could not be found.';
+      return;
+    }
+
+    const componentElements = Array.from(
+      canvas.querySelectorAll('.canvas-component')
+    ) as HTMLElement[];
+
+    const svg = canvas.querySelector(
+      'svg.connection-layer'
+    ) as SVGSVGElement | null;
+
+    if (!svg) {
+      this.errorMessage = 'Architecture connections could not be found.';
+      return;
+    }
+
+    const componentWidth = 190;
+    const componentHeight = 72;
+    const padding = 40;
+
+    const minX = Math.min(
+      0,
+      ...this.project.components.map(component => component.x)
+    );
+
+    const minY = Math.min(
+      0,
+      ...this.project.components.map(component => component.y)
+    );
+
+    const maxX = Math.max(
+      canvas.clientWidth,
+      ...this.project.components.map(
+        component => component.x + componentWidth
+      )
+    );
+
+    const maxY = Math.max(
+      canvas.clientHeight,
+      ...this.project.components.map(
+        component => component.y + componentHeight
+      )
+    );
+
+    const width = maxX - minX + padding;
+    const height = maxY - minY + padding;
+
+    const scale = 2;
+    const exportCanvas = document.createElement('canvas');
+
+    exportCanvas.width = width * scale;
+    exportCanvas.height = height * scale;
+
+    const context = exportCanvas.getContext('2d');
+
+    if (!context) {
+      this.errorMessage = 'Could not create the export image.';
+      return;
+    }
+
+    context.scale(scale, scale);
+    context.fillStyle = '#151720';
+    context.fillRect(0, 0, width, height);
+
+    const svgClone = svg.cloneNode(true) as SVGSVGElement;
+
+    svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgClone.setAttribute('width', String(width));
+    svgClone.setAttribute('height', String(height));
+    svgClone.setAttribute(
+      'viewBox',
+      `${minX} ${minY} ${width} ${height}`
+    );
+
+    const svgData = new XMLSerializer().serializeToString(svgClone);
+    const svgBlob = new Blob(
+      [svgData],
+      { type: 'image/svg+xml;charset=utf-8' }
+    );
+
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const image = new Image();
+
+    image.onload = async () => {
+      context.drawImage(image, 0, 0, width, height);
+      URL.revokeObjectURL(svgUrl);
+
+      for (const element of componentElements) {
+        const component = this.project?.components.find(
+          item => item.id === element.getAttribute('data-component-id')
+        );
+
+        if (!component) {
+          continue;
+        }
+
+        const x = component.x - minX;
+        const y = component.y - minY;
+
+        context.fillStyle = '#25283a';
+        context.strokeStyle = '#8175f5';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.roundRect(x, y, componentWidth, componentHeight, 10);
+        context.fill();
+        context.stroke();
+
+        context.fillStyle = '#343853';
+        context.beginPath();
+        context.roundRect(x + 12, y + 16, 32, 32, 7);
+        context.fill();
+
+        context.fillStyle = '#b9b5ff';
+        context.font = '24px Arial';
+        context.fillText('◇', x + 18, y + 39);
+
+        context.fillStyle = '#ffffff';
+        context.font = 'bold 11px Arial';
+        context.fillText(component.name, x + 54, y + 27);
+
+        context.fillStyle = '#c7c9d8';
+        context.font = '10px Arial';
+        context.fillText(
+          component.type || 'Component',
+          x + 54,
+          y + 47
+        );
+      }
+
+      exportCanvas.toBlob(blob => {
+        if (!blob) {
+          this.errorMessage = 'PNG export failed.';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = downloadUrl;
+        link.download = 'architecture.png';
+        link.click();
+
+        URL.revokeObjectURL(downloadUrl);
+
+        this.successMessage = 'Architecture exported successfully.';
+        this.errorMessage = '';
+        this.cdr.detectChanges();
+      }, 'image/png');
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(svgUrl);
+      this.errorMessage = 'Could not render the architecture image.';
+      this.cdr.detectChanges();
+    };
+
+    image.src = svgUrl;
+  }
+
+  // Save the project to the backend
   saveProject(): void {
     if (!this.project?.id || this.isSaving) {
       return;
@@ -526,5 +1020,76 @@ export class ArchitectureEditorComponent implements OnInit {
         this.errorMessage = 'Failed to save the architecture. Please try again.';
       }
     });
+  }
+
+  // Zoom methods
+  zoomIn(): void {
+    this.zoomLevel = Math.min(
+      this.maxZoom,
+      Math.round((this.zoomLevel + this.zoomStep) * 10) / 10
+    );
+  }
+
+  zoomOut(): void {
+    this.zoomLevel = Math.max(
+      this.minZoom,
+      Math.round((this.zoomLevel - this.zoomStep) * 10) / 10
+    );
+  }
+
+  fitToScreen(): void {
+    if (!this.project || this.project.components.length === 0) {
+      this.zoomLevel = 1;
+      return;
+    }
+
+    const canvas = document.querySelector(
+      '.architecture-canvas'
+    ) as HTMLElement | null;
+
+    if (!canvas) {
+      this.zoomLevel = 1;
+      return;
+    }
+
+    const componentWidth = 190;
+    const componentHeight = 72;
+    const padding = 60;
+
+    const minX = Math.min(
+      ...this.project.components.map(component => component.x)
+    );
+    const minY = Math.min(
+      ...this.project.components.map(component => component.y)
+    );
+    const maxX = Math.max(
+      ...this.project.components.map(
+        component => component.x + componentWidth
+      )
+    );
+    const maxY = Math.max(
+      ...this.project.components.map(
+        component => component.y + componentHeight
+      )
+    );
+
+    const diagramWidth = maxX - minX + padding * 2;
+    const diagramHeight = maxY - minY + padding * 2;
+
+    const availableWidth = canvas.clientWidth;
+    const availableHeight = canvas.clientHeight;
+
+    const scaleX = availableWidth / diagramWidth;
+    const scaleY = availableHeight / diagramHeight;
+
+    this.zoomLevel = Math.max(
+      this.minZoom,
+      Math.min(
+        this.maxZoom,
+        Math.floor(Math.min(scaleX, scaleY) * 10) / 10
+      )
+    );
+
+    this.cdr.detectChanges();
   }
 }
