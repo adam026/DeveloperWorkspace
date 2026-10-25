@@ -1037,6 +1037,17 @@ export class ArchitectureEditorComponent implements OnInit {
     );
   }
 
+
+  onCanvasWheel(event: WheelEvent): void {
+    event.preventDefault();
+
+    if (event.deltaY < 0) {
+      this.zoomIn();
+    } else if (event.deltaY > 0) {
+      this.zoomOut();
+    }
+  }
+
   fitToScreen(): void {
     if (!this.project || this.project.components.length === 0) {
       this.zoomLevel = 1;

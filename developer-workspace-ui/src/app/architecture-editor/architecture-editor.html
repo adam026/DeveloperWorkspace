@@ -223,6 +223,7 @@
 
       <div class="architecture-canvas"
            [class.panning]="isPanning"
+           (wheel)="onCanvasWheel($event)"
            (mousedown)="startPanning($event)"
            (mousemove)="panCanvas($event); onCanvasMouseMove($event)"
            (mouseup)="stopPanning(); stopDragging()"
