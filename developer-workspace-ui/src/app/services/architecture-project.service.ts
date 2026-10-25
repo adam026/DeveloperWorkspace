@@ -8,6 +8,8 @@ export interface ArchitectureComponent {
   type: string;
   x: number;
   y: number;
+  width?: number;
+  height?: number;
   properties: Record<string, string>;
 }
 
@@ -17,6 +19,7 @@ export interface ArchitectureConnection {
   targetComponentId: string;
   type: string;
   label?: string;
+  direction?: 'forward' | 'backward' | 'both';
 }
 
 export interface ArchitectureProject {

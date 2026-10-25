@@ -40,6 +40,23 @@ export class ArchitectureEditorComponent implements OnInit {
     'Other'
   ];
 
+  // Connection direction for the new connection
+  newConnectionDirection: 'forward' | 'backward' | 'both' = 'forward';
+
+  readonly connectionDirections = [
+    { value: 'forward', label: 'Source → Target' },
+    { value: 'backward', label: 'Source ← Target' },
+    { value: 'both', label: 'Bidirectional ↔' }
+  ] as const;
+
+  // Editing state for an existing connection
+  editingConnectionId: string | null = null;
+  editConnectionSourceId = '';
+  editConnectionTargetId = '';
+  editConnectionType = 'REST API';
+  editConnectionLabel = '';
+  editConnectionDirection: 'forward' | 'backward' | 'both' = 'forward';
+
   // New component form fields
   showAddComponentForm = false;
   newComponentName = '';
@@ -78,6 +95,15 @@ export class ArchitectureEditorComponent implements OnInit {
   private dragOffsetX = 0;
   private dragOffsetY = 0;
   private draggedComponentId: string | null = null;
+
+  // Resizing state
+  private resizingComponentId: string | null = null;
+  private resizeStartX = 0;
+  private resizeStartY = 0;
+  private resizeStartWidth = 190;
+  private resizeStartHeight = 72;
+  private readonly minComponentWidth = 150;
+  private readonly minComponentHeight = 64;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -149,8 +175,8 @@ export class ArchitectureEditorComponent implements OnInit {
       return 0;
     }
 
-    const componentWidth = 190;
-    const componentHeight = 72;
+    const componentWidth = component.width ?? 190;
+    const componentHeight = component.height ?? 72;
     const centerX = component.x + componentWidth / 2;
     const centerY = component.y + componentHeight / 2;
 
@@ -166,8 +192,8 @@ export class ArchitectureEditorComponent implements OnInit {
       return axis === 'x' ? centerX : centerY;
     }
 
-    const otherCenterX = otherComponent.x + componentWidth / 2;
-    const otherCenterY = otherComponent.y + componentHeight / 2;
+    const otherCenterX = otherComponent.x + (otherComponent.width ?? 190) / 2;
+    const otherCenterY = otherComponent.y + (otherComponent.height ?? 72) / 2;
 
     const dx = otherCenterX - centerX;
     const dy = otherCenterY - centerY;
@@ -266,6 +292,8 @@ export class ArchitectureEditorComponent implements OnInit {
       type: this.newComponentType,
       x: 40 + (this.project.components.length % 4) * 220,
       y: 40 + Math.floor(this.project.components.length / 4) * 120,
+      width: 190,
+      height: 72,
       properties: {}
     });
 
@@ -275,7 +303,6 @@ export class ArchitectureEditorComponent implements OnInit {
     this.successMessage = '';
   }
 
-
   addConnection(): void {
     if (!this.project) {
       return;
@@ -284,11 +311,7 @@ export class ArchitectureEditorComponent implements OnInit {
     const sourceId = this.newConnectionSourceId;
     const targetId = this.newConnectionTargetId;
 
-    if (
-      !sourceId ||
-      !targetId ||
-      sourceId === targetId
-    ) {
+    if (!sourceId || !targetId || sourceId === targetId) {
       return;
     }
 
@@ -301,7 +324,8 @@ export class ArchitectureEditorComponent implements OnInit {
     );
 
     if (!sourceExists || !targetExists) {
-      this.errorMessage = 'Please select valid source and target components.';
+      this.errorMessage =
+        'Please select valid source and target components.';
       return;
     }
 
@@ -312,15 +336,92 @@ export class ArchitectureEditorComponent implements OnInit {
       sourceComponentId: sourceId,
       targetComponentId: targetId,
       type: this.newConnectionType,
-      label: label || this.newConnectionType
+      label: label || this.newConnectionType,
+      direction: this.newConnectionDirection
     });
 
-    this.showAddConnectionForm = false;
-    this.newConnectionLabel = '';
+    // Reset the form after successful creation.
+    this.newConnectionSourceId = '';
+    this.newConnectionTargetId = '';
     this.newConnectionType = 'REST API';
+    this.newConnectionLabel = '';
+    this.newConnectionDirection = 'forward';
+
+    this.showAddConnectionForm = false;
     this.successMessage = 'Connection created successfully.';
     this.errorMessage = '';
 
+    this.cdr.detectChanges();
+  }
+
+  editConnection(connectionId: string): void {
+    if (!this.project) {
+      return;
+    }
+
+    const connection = this.project.connections.find(
+      item => item.id === connectionId
+    );
+
+    if (!connection) {
+      return;
+    }
+
+    this.editingConnectionId = connection.id;
+    this.editConnectionSourceId = connection.sourceComponentId;
+    this.editConnectionTargetId = connection.targetComponentId;
+    this.editConnectionType = connection.type;
+    this.editConnectionLabel = connection.label ?? '';
+    this.editConnectionDirection =
+      connection.direction === 'backward' || connection.direction === 'both'
+        ? connection.direction
+        : 'forward';
+
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  saveConnectionEdit(): void {
+    if (!this.project || !this.editingConnectionId) {
+      return;
+    }
+
+    const sourceId = this.editConnectionSourceId;
+    const targetId = this.editConnectionTargetId;
+
+    if (!sourceId || !targetId || sourceId === targetId) {
+      this.errorMessage = 'Please select two different components.';
+      return;
+    }
+
+    const connection = this.project.connections.find(
+      item => item.id === this.editingConnectionId
+    );
+
+    if (!connection) {
+      return;
+    }
+
+    connection.sourceComponentId = sourceId;
+    connection.targetComponentId = targetId;
+    connection.type = this.editConnectionType;
+    connection.label = this.editConnectionLabel.trim() || this.editConnectionType;
+    connection.direction = this.editConnectionDirection;
+
+    this.cancelConnectionEdit();
+    this.successMessage = 'Connection updated. Save to keep the changes.';
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+  }
+
+  cancelConnectionEdit(): void {
+    this.editingConnectionId = null;
+    this.editConnectionSourceId = '';
+    this.editConnectionTargetId = '';
+    this.editConnectionType = 'REST API';
+    this.editConnectionLabel = '';
+    this.editConnectionDirection = 'forward';
+    this.errorMessage = '';
     this.cdr.detectChanges();
   }
 
@@ -469,7 +570,37 @@ export class ArchitectureEditorComponent implements OnInit {
   }
 
   onCanvasMouseMove(event: MouseEvent): void {
-    if (!this.project || !this.draggedComponentId) {
+    if (!this.project) {
+      return;
+    }
+
+    // Resize takes priority over dragging.
+    if (this.resizingComponentId) {
+      const component = this.project.components.find(
+        item => item.id === this.resizingComponentId
+      );
+
+      if (!component) {
+        return;
+      }
+
+      const deltaX = (event.clientX - this.resizeStartX) / this.zoomLevel;
+      const deltaY = (event.clientY - this.resizeStartY) / this.zoomLevel;
+
+      component.width = Math.max(
+        this.minComponentWidth,
+        this.resizeStartWidth + deltaX
+      );
+      component.height = Math.max(
+        this.minComponentHeight,
+        this.resizeStartHeight + deltaY
+      );
+
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.draggedComponentId) {
       return;
     }
 
@@ -486,19 +617,44 @@ export class ArchitectureEditorComponent implements OnInit {
 
     component.x = Math.max(
       0,
-      event.clientX - rect.left + canvas.scrollLeft - this.dragOffsetX
+      (event.clientX - rect.left + canvas.scrollLeft) / this.zoomLevel - this.dragOffsetX / this.zoomLevel
     );
 
     component.y = Math.max(
       0,
-      event.clientY - rect.top + canvas.scrollTop - this.dragOffsetY
+      (event.clientY - rect.top + canvas.scrollTop) / this.zoomLevel - this.dragOffsetY / this.zoomLevel
     );
 
     this.cdr.detectChanges();
   }
 
+  startResizing(event: MouseEvent, componentId: string): void {
+    if (!this.project || event.button !== 0) {
+      return;
+    }
+
+    const component = this.project.components.find(
+      item => item.id === componentId
+    );
+
+    if (!component) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.resizingComponentId = componentId;
+    this.draggedComponentId = null;
+    this.resizeStartX = event.clientX;
+    this.resizeStartY = event.clientY;
+    this.resizeStartWidth = component.width ?? 190;
+    this.resizeStartHeight = component.height ?? 72;
+  }
+
   stopDragging(): void {
     this.draggedComponentId = null;
+    this.resizingComponentId = null;
   }
 
   getConnectionPath(
@@ -538,12 +694,10 @@ export class ArchitectureEditorComponent implements OnInit {
       sourceComponentId
     );
 
-    const componentWidth = 190;
-    const componentHeight = 72;
-    const sourceCenterX = source.x + componentWidth / 2;
-    const targetCenterX = target.x + componentWidth / 2;
-    const sourceCenterY = source.y + componentHeight / 2;
-    const targetCenterY = target.y + componentHeight / 2;
+    const sourceCenterX = source.x + (source.width ?? 190) / 2;
+    const targetCenterX = target.x + (target.width ?? 190) / 2;
+    const sourceCenterY = source.y + (source.height ?? 72) / 2;
+    const targetCenterY = target.y + (target.height ?? 72) / 2;
 
     // Prefer a straight line for components in the same row or column.
     if (
@@ -714,9 +868,9 @@ export class ArchitectureEditorComponent implements OnInit {
 
     for (const layerNumber of sortedLayerNumbers) {
       const layerComponents = groupedLayers.get(layerNumber)!;
-      const totalHeight =
-        layerComponents.length * componentHeight +
-        (layerComponents.length - 1) * verticalGap;
+      const totalHeight = layerComponents.reduce(
+        (sum, component) => sum + (component.height ?? componentHeight), 0
+      ) + (layerComponents.length - 1) * verticalGap;
 
       layerComponents.forEach((component, index) => {
         component.x =
@@ -729,7 +883,7 @@ export class ArchitectureEditorComponent implements OnInit {
       // Keep the next layer's components aligned around its center.
       const layerOffset = Math.max(0, totalHeight / 2);
       for (const component of layerComponents) {
-        component.y = Math.max(startY, component.y - layerOffset + componentHeight / 2);
+        component.y = Math.max(startY, component.y - layerOffset + (component.height ?? componentHeight) / 2);
       }
     }
 
@@ -800,10 +954,10 @@ export class ArchitectureEditorComponent implements OnInit {
       sourceComponentId
     );
 
-    const sourceCenterX = source.x + 95;
-    const sourceCenterY = source.y + 36;
-    const targetCenterX = target.x + 95;
-    const targetCenterY = target.y + 36;
+    const sourceCenterX = source.x + (source.width ?? 190) / 2;
+    const sourceCenterY = source.y + (source.height ?? 72) / 2;
+    const targetCenterX = target.x + (target.width ?? 190) / 2;
+    const targetCenterY = target.y + (target.height ?? 72) / 2;
 
     // Same row: the arrow points horizontally.
     if (Math.abs(sourceCenterY - targetCenterY) < 10) {
@@ -872,14 +1026,14 @@ export class ArchitectureEditorComponent implements OnInit {
     const maxX = Math.max(
       canvas.clientWidth,
       ...this.project.components.map(
-        component => component.x + componentWidth
+        component => component.x + (component.width ?? componentWidth)
       )
     );
 
     const maxY = Math.max(
       canvas.clientHeight,
       ...this.project.components.map(
-        component => component.y + componentHeight
+        component => component.y + (component.height ?? componentHeight)
       )
     );
 
@@ -942,6 +1096,8 @@ export class ArchitectureEditorComponent implements OnInit {
         context.strokeStyle = '#8175f5';
         context.lineWidth = 1;
         context.beginPath();
+        const componentWidth = component.width ?? 190;
+        const componentHeight = component.height ?? 72;
         context.roundRect(x, y, componentWidth, componentHeight, 10);
         context.fill();
         context.stroke();
@@ -1075,12 +1231,12 @@ export class ArchitectureEditorComponent implements OnInit {
     );
     const maxX = Math.max(
       ...this.project.components.map(
-        component => component.x + componentWidth
+        component => component.x + (component.width ?? componentWidth)
       )
     );
     const maxY = Math.max(
       ...this.project.components.map(
-        component => component.y + componentHeight
+        component => component.y + (component.height ?? componentHeight)
       )
     );
 

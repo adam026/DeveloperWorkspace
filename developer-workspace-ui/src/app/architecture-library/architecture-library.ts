@@ -82,6 +82,33 @@ export class ArchitectureLibraryComponent implements OnInit {
     });
   }
 
+  duplicateProject(project: ArchitectureProject): void {
+    const duplicatedProject: ArchitectureProject = {
+      name: `${project.name} (Copy)`,
+      description: project.description,
+      components: project.components.map(component => ({
+        ...component,
+        properties: { ...component.properties }
+      })),
+      connections: project.connections.map(connection => ({
+        ...connection
+      }))
+    };
+
+    this.projectService.create(duplicatedProject).subscribe({
+      next: (createdProject) => {
+        this.projects = [createdProject, ...this.projects];
+        this.errorMessage = '';
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to duplicate architecture project.', error);
+        this.errorMessage = 'Failed to duplicate the project.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   openProject(project: ArchitectureProject): void {
     if (!project.id) {
       this.errorMessage = 'Cannot open a project without an ID.';
@@ -89,5 +116,36 @@ export class ArchitectureLibraryComponent implements OnInit {
     }
 
     this.router.navigate(['/architecture-projects', project.id]);
+  }
+
+  deleteProject(project: ArchitectureProject): void {
+    if (!project.id) {
+      this.errorMessage = 'Cannot delete a project without an ID.';
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.name}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.projectService.delete(project.id).subscribe({
+      next: () => {
+        this.projects = this.projects.filter(
+          item => item.id !== project.id
+        );
+
+        this.errorMessage = '';
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to delete architecture project.', error);
+        this.errorMessage = 'Failed to delete the project.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

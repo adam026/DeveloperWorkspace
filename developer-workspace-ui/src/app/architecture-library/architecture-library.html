@@ -94,6 +94,7 @@
 
     <div class="project-grid">
       @for (project of projects; track project.id) {
+      <!--Project Card-->
       <article class="project-card">
         <div class="project-card-header">
           <div class="project-icon">◇</div>
@@ -112,11 +113,29 @@
           <span class="project-date">
             Created {{ project.createdAt | date:'mediumDate' }}
           </span>
-          <button class="btn-secondary"
+
+          <button class="btn-secondary delete-button"
                   type="button"
-                  (click)="openProject(project)">
-            Open Project →
+                  (click)="deleteProject(project)">
+            <i class="bi bi-trash"></i>
+            Delete
           </button>
+
+          <div class="project-card-actions">
+            <button class="btn-secondary duplicate-button"
+                    type="button"
+                    (click)="duplicateProject(project)">
+              <i class="bi bi-copy"></i>
+              Duplicate
+            </button>
+
+            <button class="btn-primary open-project-button"
+                    type="button"
+                    (click)="openProject(project)">
+              Open Project
+              <i class="bi bi-arrow-up-right"></i>
+            </button>
+          </div>
         </div>
       </article>
       }

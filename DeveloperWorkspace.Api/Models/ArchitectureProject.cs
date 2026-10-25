@@ -35,6 +35,10 @@ namespace DeveloperWorkspace.Api.Models
 
         public double Y { get; set; }
 
+        public double Width { get; set; } = 190;
+
+        public double Height { get; set; } = 72;
+
         public Dictionary<string, string> Properties { get; set; } = new();
     }
 
@@ -49,5 +53,7 @@ namespace DeveloperWorkspace.Api.Models
         public string Type { get; set; } = string.Empty;
 
         public string? Label { get; set; }
+
+        public string Direction { get; set; } = "forward";
     }
 }

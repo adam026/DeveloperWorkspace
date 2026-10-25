@@ -1,4 +1,3 @@
-
 <div class="architecture-editor">
   <header class="editor-header">
     <button class="btn-secondary" type="button" (click)="goBack()">
@@ -44,7 +43,10 @@
     {{ errorMessage }}
   </div>
   }
+
+  <!--Editor Workspace-->
   <main class="editor-workspace">
+    <!--Sidebar for components-->
     <aside class="component-sidebar">
       <h2>Components</h2>
 
@@ -120,6 +122,7 @@
       }
     </aside>
 
+    <!--Main canvas area-->
     <section class="architecture-canvas-section">
 
       <div class="canvas-toolbar">
@@ -219,8 +222,6 @@
         </button>
       </div>
 
-
-
       <div class="architecture-canvas"
            [class.panning]="isPanning"
            (wheel)="onCanvasWheel($event)"
@@ -245,16 +246,44 @@
           <svg class="connection-layer"
                aria-label="Architecture connections"
                role="img">
+            <defs>
+              <marker id="connection-arrow"
+                      markerWidth="12"
+                      markerHeight="12"
+                      refX="10"
+                      refY="6"
+                      orient="auto-start-reverse"
+                      markerUnits="userSpaceOnUse"
+                      overflow="visible">
+                <path d="M 1 1 L 11 6 L 1 11 L 4 6 Z"
+                      fill="#a5a0ff"
+                      stroke="#a5a0ff"
+                      stroke-width="1" />
+              </marker>
+              <marker id="connection-arrow-start"
+                      markerWidth="12"
+                      markerHeight="12"
+                      refX="10"
+                      refY="6"
+                      orient="auto-start-reverse"
+                      markerUnits="userSpaceOnUse"
+                      overflow="visible">
+                <path d="M 1 1 L 11 6 L 1 11 L 4 6 Z"
+                      fill="#a5a0ff"
+                      stroke="#a5a0ff"
+                      stroke-width="1" />
+              </marker>
+            </defs>
 
             @for (connection of project.connections; track connection.id) {
-
-            <path [attr.d]="getConnectionPath(connection.sourceComponentId,connection.targetComponentId)"
+            <line [attr.x1]="getConnectionPoint(connection.sourceComponentId, 'x', connection.targetComponentId)"
+                  [attr.y1]="getConnectionPoint(connection.sourceComponentId, 'y', connection.targetComponentId)"
+                  [attr.x2]="getConnectionPoint(connection.targetComponentId, 'x', connection.sourceComponentId)"
+                  [attr.y2]="getConnectionPoint(connection.targetComponentId, 'y', connection.sourceComponentId)"
+                  [attr.marker-start]="connection.direction === 'backward' || connection.direction === 'both' ? 'url(#connection-arrow-start)' : null"
+                  [attr.marker-end]="!connection.direction || connection.direction === 'forward' || connection.direction === 'both' ? 'url(#connection-arrow)' : null"
                   [attr.stroke]="getConnectionColor(connection.type)"
-                  stroke-width="2"
-                  fill="none" />
-
-            <polygon [attr.points]="getConnectionArrowHead(connection.sourceComponentId,connection.targetComponentId)"
-                     [attr.fill]="getConnectionColor(connection.type)" />
+                  stroke-width="2" />
 
             <text [attr.x]="getConnectionLabelX(connection)"
                   [attr.y]="getConnectionLabelY(connection)"
@@ -268,7 +297,6 @@
                   paint-order="stroke">
               {{ connection.label || connection.type }}
             </text>
-
             }
           </svg>
 
@@ -277,12 +305,19 @@
                    [attr.data-component-id]="component.id"
                    [style.left.px]="component.x"
                    [style.top.px]="component.y"
+                   [style.width.px]="component.width ?? 190"
+                   [style.height.px]="component.height ?? 72"
                    (mousedown)="startDragging($event, component.id)">
             <div class="canvas-component-icon">◇</div>
             <div class="canvas-component-details">
               <strong>{{ component.name }}</strong>
               <span>{{ component.type || 'Component' }}</span>
             </div>
+            <button class="component-resize-handle"
+                    type="button"
+                    aria-label="Resize component"
+                    title="Drag to resize"
+                    (mousedown)="startResizing($event, component.id)"></button>
           </article>
           }
         </div>
@@ -296,6 +331,7 @@
     </section>
   </main>
 
+  <!--Connections Section-->
   <section class="connections-section">
 
     <div class="section-heading">
@@ -351,6 +387,20 @@
       </div>
 
       <div class="form-field">
+        <label for="connectionDirection">Arrow Direction</label>
+        <select id="connectionDirection"
+                name="connectionDirection"
+                [(ngModel)]="newConnectionDirection"
+                required>
+          @for (direction of connectionDirections; track direction.value) {
+          <option [value]="direction.value">
+            {{ direction.label }}
+          </option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
         <label for="connectionLabel">Label</label>
         <input id="connectionLabel"
                name="connectionLabel"
@@ -379,6 +429,68 @@
     <div class="connection-list">
       @for (connection of project.connections; track connection.id) {
       <article class="connection-item">
+        @if (editingConnectionId === connection.id) {
+        <form class="edit-connection-form" (ngSubmit)="saveConnectionEdit()">
+          <div class="form-field">
+            <label [for]="'editSource-' + connection.id">Source Component</label>
+            <select [id]="'editSource-' + connection.id" name="editSource"
+                    [(ngModel)]="editConnectionSourceId" required>
+              @for (component of project.components; track component.id) {
+              <option [value]="component.id">{{ component.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label [for]="'editTarget-' + connection.id">Target Component</label>
+            <select [id]="'editTarget-' + connection.id" name="editTarget"
+                    [(ngModel)]="editConnectionTargetId" required>
+              @for (component of project.components; track component.id) {
+              <option [value]="component.id">{{ component.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label [for]="'editType-' + connection.id">Connection Type</label>
+            <select [id]="'editType-' + connection.id" name="editType"
+                    [(ngModel)]="editConnectionType" required>
+              @for (type of connectionTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label [for]="'editDirection-' + connection.id">Arrow Direction</label>
+            <select [id]="'editDirection-' + connection.id" name="editDirection"
+                    [(ngModel)]="editConnectionDirection" required>
+              @for (direction of connectionDirections; track direction.value) {
+              <option [value]="direction.value">{{ direction.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label [for]="'editLabel-' + connection.id">Label</label>
+            <input [id]="'editLabel-' + connection.id" name="editLabel"
+                   [(ngModel)]="editConnectionLabel"
+                   maxlength="100" placeholder="e.g. REST API" />
+          </div>
+
+          <div class="edit-connection-actions">
+            <button class="btn-primary" type="submit"
+                    [disabled]="!editConnectionSourceId || !editConnectionTargetId ||
+                                  editConnectionSourceId === editConnectionTargetId">
+              Save
+            </button>
+            <button class="btn-secondary" type="button"
+                    (click)="cancelConnectionEdit()">
+              Cancel
+            </button>
+          </div>
+        </form>
+        } @else {
         <div class="connection-endpoint connection-source">
           <span class="endpoint-label">Source</span>
           <strong>{{ getComponentName(connection.sourceComponentId) }}</strong>
@@ -395,11 +507,17 @@
           <strong>{{ getComponentName(connection.targetComponentId) }}</strong>
         </div>
 
-        <button class="btn-delete-connection"
-                type="button"
-                (click)="deleteConnection(connection.id)">
-          Delete
-        </button>
+        <div class="connection-actions">
+          <button class="btn-edit-connection" type="button"
+                  (click)="editConnection(connection.id)">
+            Edit
+          </button>
+          <button class="btn-delete-connection" type="button"
+                  (click)="deleteConnection(connection.id)">
+            Delete
+          </button>
+        </div>
+        }
       </article>
       }
     </div>
