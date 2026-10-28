@@ -982,177 +982,203 @@ export class ArchitectureEditorComponent implements OnInit {
 
   // Export architecture as PNG
   exportArchitecture(): void {
-    if (!this.project) {
+    if (!this.project || this.project.components.length === 0) {
       this.errorMessage = 'No architecture project is loaded.';
       return;
     }
 
-    const canvas = document.querySelector(
-      '.canvas-content'
-    ) as HTMLElement | null;
-
-    if (!canvas) {
-      this.errorMessage = 'Architecture canvas could not be found.';
-      return;
-    }
-
-    const componentElements = Array.from(
-      canvas.querySelectorAll('.canvas-component')
-    ) as HTMLElement[];
-
-    const svg = canvas.querySelector(
-      'svg.connection-layer'
-    ) as SVGSVGElement | null;
-
-    if (!svg) {
-      this.errorMessage = 'Architecture connections could not be found.';
-      return;
-    }
-
-    const componentWidth = 190;
-    const componentHeight = 72;
-    const padding = 40;
-
-    const minX = Math.min(
-      0,
-      ...this.project.components.map(component => component.x)
-    );
-
-    const minY = Math.min(
-      0,
-      ...this.project.components.map(component => component.y)
-    );
-
-    const maxX = Math.max(
-      canvas.clientWidth,
-      ...this.project.components.map(
-        component => component.x + (component.width ?? componentWidth)
-      )
-    );
-
-    const maxY = Math.max(
-      canvas.clientHeight,
-      ...this.project.components.map(
-        component => component.y + (component.height ?? componentHeight)
-      )
-    );
-
-    const width = maxX - minX + padding;
-    const height = maxY - minY + padding;
-
+    const components = this.project.components;
+    const connections = this.project.connections;
+    const padding = 50;
     const scale = 2;
-    const exportCanvas = document.createElement('canvas');
+    const gap = 70;
 
-    exportCanvas.width = width * scale;
-    exportCanvas.height = height * scale;
+    const componentWidth = (c: typeof components[number]) => c.width ?? 190;
+    const componentHeight = (c: typeof components[number]) => c.height ?? 72;
 
-    const context = exportCanvas.getContext('2d');
+    const minX = Math.min(...components.map(c => c.x));
+    const minY = Math.min(...components.map(c => c.y));
+    const maxX = Math.max(...components.map(c => c.x + componentWidth(c)));
+    const maxY = Math.max(...components.map(c => c.y + componentHeight(c)));
 
-    if (!context) {
-      this.errorMessage = 'Could not create the export image.';
+    const width = maxX - minX + padding * 2;
+    const height = maxY - minY + padding * 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      this.errorMessage = 'Failed to create the export image.';
       return;
     }
 
-    context.scale(scale, scale);
-    context.fillStyle = '#151720';
-    context.fillRect(0, 0, width, height);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#151720';
+    ctx.fillRect(0, 0, width, height);
 
-    const svgClone = svg.cloneNode(true) as SVGSVGElement;
+    const getCenter = (c: typeof components[number]) => ({
+      x: c.x - minX + componentWidth(c) / 2 + padding,
+      y: c.y - minY + componentHeight(c) / 2 + padding
+    });
 
-    svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svgClone.setAttribute('width', String(width));
-    svgClone.setAttribute('height', String(height));
-    svgClone.setAttribute(
-      'viewBox',
-      `${minX} ${minY} ${width} ${height}`
-    );
+    const getEdge = (
+      from: typeof components[number],
+      to: typeof components[number]
+    ) => {
+      const a = getCenter(from);
+      const b = getCenter(to);
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const hw = componentWidth(from) / 2;
+      const hh = componentHeight(from) / 2;
+      const factor = Math.min(
+        hw / Math.max(Math.abs(dx), 0.001),
+        hh / Math.max(Math.abs(dy), 0.001)
+      );
 
-    const svgData = new XMLSerializer().serializeToString(svgClone);
-    const svgBlob = new Blob(
-      [svgData],
-      { type: 'image/svg+xml;charset=utf-8' }
-    );
+      return { x: a.x + dx * factor, y: a.y + dy * factor };
+    };
 
-    const svgUrl = URL.createObjectURL(svgBlob);
-    const image = new Image();
+    // Draw straight connection lines.
+    for (const connection of connections) {
+      const source = components.find(c => c.id === connection.sourceComponentId);
+      const target = components.find(c => c.id === connection.targetComponentId);
+      if (!source || !target) continue;
 
-    image.onload = async () => {
-      context.drawImage(image, 0, 0, width, height);
-      URL.revokeObjectURL(svgUrl);
+      const start = getEdge(source, target);
+      const end = getEdge(target, source);
+      const color = this.getConnectionColor(connection.type);
 
-      for (const element of componentElements) {
-        const component = this.project?.components.find(
-          item => item.id === element.getAttribute('data-component-id')
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+
+      const drawArrow = (from: { x: number; y: number }, to: { x: number; y: number }) => {
+        const angle = Math.atan2(to.y - from.y, to.x - from.x);
+        const length = 10;
+        ctx.beginPath();
+        ctx.moveTo(to.x, to.y);
+        ctx.lineTo(
+          to.x - length * Math.cos(angle - Math.PI / 6),
+          to.y - length * Math.sin(angle - Math.PI / 6)
         );
-
-        if (!component) {
-          continue;
-        }
-
-        const x = component.x - minX;
-        const y = component.y - minY;
-
-        context.fillStyle = '#25283a';
-        context.strokeStyle = '#8175f5';
-        context.lineWidth = 1;
-        context.beginPath();
-        const componentWidth = component.width ?? 190;
-        const componentHeight = component.height ?? 72;
-        context.roundRect(x, y, componentWidth, componentHeight, 10);
-        context.fill();
-        context.stroke();
-
-        context.fillStyle = '#343853';
-        context.beginPath();
-        context.roundRect(x + 12, y + 16, 32, 32, 7);
-        context.fill();
-
-        context.fillStyle = '#b9b5ff';
-        context.font = '24px Arial';
-        context.fillText('◇', x + 18, y + 39);
-
-        context.fillStyle = '#ffffff';
-        context.font = 'bold 11px Arial';
-        context.fillText(component.name, x + 54, y + 27);
-
-        context.fillStyle = '#c7c9d8';
-        context.font = '10px Arial';
-        context.fillText(
-          component.type || 'Component',
-          x + 54,
-          y + 47
+        ctx.lineTo(
+          to.x - length * Math.cos(angle + Math.PI / 6),
+          to.y - length * Math.sin(angle + Math.PI / 6)
         );
+        ctx.closePath();
+        ctx.fill();
+      };
+
+      if (!connection.direction || connection.direction === 'forward' || connection.direction === 'both') {
+        drawArrow(start, end);
+      }
+      if (connection.direction === 'backward' || connection.direction === 'both') {
+        drawArrow(end, start);
       }
 
-      exportCanvas.toBlob(blob => {
-        if (!blob) {
-          this.errorMessage = 'PNG export failed.';
-          this.cdr.detectChanges();
-          return;
+      const label = connection.label || connection.type;
+      const midX = (start.x + end.x) / 2;
+      const midY = (start.y + end.y) / 2;
+
+      ctx.font = 'bold 11px Arial';
+      const labelWidth = ctx.measureText(label).width + 14;
+      ctx.fillStyle = '#151720';
+      ctx.fillRect(midX - labelWidth / 2, midY - 10, labelWidth, 20);
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, midX, midY);
+    }
+
+    // Draw components with wrapped text.
+    for (const component of components) {
+      const x = component.x - minX + padding;
+      const y = component.y - minY + padding;
+      const w = componentWidth(component);
+      const h = componentHeight(component);
+
+      ctx.fillStyle = '#252938';
+      ctx.strokeStyle = '#8175f5';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#343853';
+      ctx.beginPath();
+      ctx.roundRect(x + 12, y + 16, 32, 32, 7);
+      ctx.fill();
+
+      ctx.fillStyle = '#b9b5ff';
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText('◇', x + 18, y + 39);
+
+      const textX = x + 54;
+      const textWidth = Math.max(40, w - 66);
+
+      const drawWrappedText = (
+        text: string,
+        startY: number,
+        font: string,
+        color: string,
+        lineHeight: number,
+        maxLines: number
+      ) => {
+        ctx.font = font;
+        ctx.fillStyle = color;
+        const words = text.split(/\s+/);
+        let line = '';
+        let lineCount = 0;
+
+        for (const word of words) {
+          const test = line ? `${line} ${word}` : word;
+          if (ctx.measureText(test).width > textWidth && line) {
+            ctx.fillText(line, textX, startY + lineCount * lineHeight);
+            line = word;
+            lineCount++;
+            if (lineCount >= maxLines - 1) break;
+          } else {
+            line = test;
+          }
         }
 
-        const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        if (line && lineCount < maxLines) {
+          ctx.fillText(line, textX, startY + lineCount * lineHeight);
+        }
+      };
 
-        link.href = downloadUrl;
-        link.download = 'architecture.png';
-        link.click();
+      drawWrappedText(component.name, y + 27, 'bold 11px Arial', '#ffffff', 14, 2);
+      drawWrappedText(component.type || 'Komponens', y + 48, '10px Arial', '#c7c9d8', 12, 2);
+    }
 
-        URL.revokeObjectURL(downloadUrl);
-
-        this.successMessage = 'Architecture exported successfully.';
-        this.errorMessage = '';
+    canvas.toBlob(blob => {
+      if (!blob) {
+        this.errorMessage = 'PNG export failed.';
         this.cdr.detectChanges();
-      }, 'image/png');
-    };
+        return;
+      }
 
-    image.onerror = () => {
-      URL.revokeObjectURL(svgUrl);
-      this.errorMessage = 'Could not render the architecture image.';
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'devworkspace-architecture.png';
+      link.click();
+      URL.revokeObjectURL(url);
+
+      this.successMessage = 'Architecture exported successfully.';
+      this.errorMessage = '';
       this.cdr.detectChanges();
-    };
-
-    image.src = svgUrl;
+    }, 'image/png');
   }
 
   // Save the project to the backend

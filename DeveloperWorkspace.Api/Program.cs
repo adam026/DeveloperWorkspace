@@ -35,9 +35,6 @@ namespace DeveloperWorkspace.Api
             // MarkdownDocumentService registration for dependency injection
             builder.Services.AddScoped<MarkdownDocumentService>();
 
-            // AgentService registration for dependency injection
-            builder.Services.AddScoped<AgentService>();
-
             // ArchitectureProjectService registration for dependency injection
             builder.Services.AddScoped<ArchitectureProjectService>();
 
