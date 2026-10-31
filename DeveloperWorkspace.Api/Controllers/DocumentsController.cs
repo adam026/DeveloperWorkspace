@@ -7,7 +7,7 @@ using MongoDB.Bson;
 namespace DeveloperWorkspace.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/documents")]
     public class DocumentsController : ControllerBase
     {
         private readonly DocumentService _documentService;

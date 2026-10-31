@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, inject, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -32,8 +32,6 @@ export class WorkspaceComponent implements OnInit {
   private readonly promptService = inject(PromptService);
   private readonly markdownDocumentService = inject(MarkdownDocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  @Output() navigateToPage = new EventEmitter<'prompts' | 'markdown-generator'>();
 
   items: WorkspaceItem[] = [];
   searchTerm = '';

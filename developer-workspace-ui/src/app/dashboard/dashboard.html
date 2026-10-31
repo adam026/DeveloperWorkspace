@@ -42,15 +42,6 @@
     </div>
   </article>
 
-  <article class="stat-card">
-    <div class="stat-icon green">⌘</div>
-    <div>
-      <p>Agents</p>
-      <h3>{{ isLoadingDashboard ? '...' : agentCount }}</h3>
-    </div>
-  </article>
-</section>
-
 <section class="recently-updated">
   <div class="section-heading">
     <div>
@@ -58,11 +49,10 @@
       <p>Your latest workspace items across all modules.</p>
     </div>
 
-    <button type="button"
-            class="secondary-button"
-            (click)="navigateTo('workspace')">
+    <a class="secondary-button"
+       routerLink="/workspace">
       View all
-    </button>
+    </a>
   </div>
 
   @if (isLoadingDashboard) {
@@ -102,7 +92,7 @@
 </section>
 
 <section class="module-grid">
-  <article class="module-card" (click)="navigateTo('documents')">
+  <article class="module-card" routerLink="/documents">
     <div class="module-icon purple">▤</div>
     <div class="card-heading">
       <h4>Documents</h4>
@@ -112,7 +102,7 @@
     <span class="card-footer">Knowledge base</span>
   </article>
 
-  <article class="module-card" (click)="navigateTo('prompts')">
+  <article class="module-card" routerLink="/prompts">
     <div class="module-icon blue">✧</div>
     <div class="card-heading">
       <h4>Prompt Library</h4>
@@ -122,17 +112,17 @@
     <span class="card-footer">Reusable prompts</span>
   </article>
 
-  <article class="module-card" (click)="navigateTo('markdown-generator')">
+  <article class="module-card" routerLink="/markdown-generator">
     <div class="module-icon green">⌘</div>
     <div class="card-heading">
       <h4>Agent & Markdown Generator</h4>
       <span class="card-arrow">↗</span>
     </div>
-    <p>Create Markdown instructions for your development agents.</p>
+    <p>Create reusable Markdown documents for your development workflow.</p>
     <span class="card-footer">AI development tools</span>
   </article>
 
-  <article class="module-card">
+  <article class="module-card" routerLink="/architecture-library">
     <div class="module-icon orange">◈</div>
     <div class="card-heading">
       <h4>Architecture Library</h4>

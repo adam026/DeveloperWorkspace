@@ -1,4 +1,3 @@
-@if (currentRouteIsHome) {
 <div class="app-shell">
   <aside class="sidebar">
     <div class="brand">
@@ -13,48 +12,44 @@
 
     <nav class="navigation">
       <a class="nav-item"
-         [class.active]="currentPage === 'dashboard'"
-         href="#"
-         (click)="navigateTo('dashboard'); $event.preventDefault()">
+         routerLink="/dashboard"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
         <span>⌂</span> Dashboard
       </a>
 
       <a class="nav-item"
-         [class.active]="currentPage === 'documents'"
-         href="#"
-         (click)="navigateTo('documents'); $event.preventDefault()">
+         routerLink="/documents"
+         routerLinkActive="active">
         <span>▤</span> Documents
       </a>
 
-      <!-- Prompt Library navigation -->
       <a class="nav-item"
-         [class.active]="currentPage === 'prompts'"
-         href="#"
-         (click)="navigateTo('prompts'); $event.preventDefault()">
+         routerLink="/prompts"
+         routerLinkActive="active">
         <span>✧</span> Prompt Library
       </a>
-      <!-- Agent & Markdown Generator navigation-->
+
       <a class="nav-item"
-         [class.active]="currentPage === 'markdown-generator'"
-         href="#"
-         (click)="navigateTo('markdown-generator'); $event.preventDefault()">
-        <span>⚙</span> Agent & Markdown Generator
+         routerLink="/markdown-generator"
+         routerLinkActive="active">
+        <span>⚙</span> Agent &amp; Markdown Generator
       </a>
 
-      <!-- Architecture Library navigation -->
       <a class="nav-item"
-         [class.active]="currentPage === 'architecture-library'"
-         href="#"
-         (click)="navigateTo('architecture-library'); $event.preventDefault()">
+         routerLink="/architecture-library"
+         routerLinkActive="active">
         <span>◈</span> Architecture Library
       </a>
 
       <a class="nav-item" href="#" (click)="$event.preventDefault()">
         <span>▧</span> Documentation
       </a>
+
       <a class="nav-item" href="#" (click)="$event.preventDefault()">
         <span>✓</span> Task Manager
       </a>
+
       <a class="nav-item" href="#" (click)="$event.preventDefault()">
         <span>&lt;/&gt;</span> Code Snippets
       </a>
@@ -75,26 +70,8 @@
       <div class="user-avatar">DW</div>
     </header>
 
-
     <section class="page-content">
-      @if (currentPage === 'dashboard') {
-      <app-dashboard (navigateToPage)="navigateTo($event)" />
-      } @else if (currentPage === 'documents') {
-      <app-documents />
-      } @else if (currentPage === 'prompts') {
-      <app-prompt-library />
-      } @else if (currentPage === 'markdown-generator') {
-      <app-markdown-generator />
-      } @else if (currentPage === 'workspace') {
-      <app-workspace (navigateToPage)="navigateTo($event)" />
-      } @else if (currentPage === 'architecture-library') {
-      <app-architecture-library />
-      }
+      <router-outlet></router-outlet>
     </section>
-
   </main>
 </div>
-
-} @else {
-<router-outlet></router-outlet>
-}

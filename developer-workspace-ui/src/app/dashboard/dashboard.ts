@@ -1,15 +1,10 @@
-import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { DocumentService, Document } from '../services/document';
 import { PromptService, Prompt } from '../services/prompt';
 import { MarkdownDocument, MarkdownDocumentService } from '../services/markdown-document';
-
-type DashboardPage =
-  | 'documents'
-  | 'prompts'
-  | 'markdown-generator'
-  | 'workspace';
 
 interface RecentWorkspaceItem {
   id: string | undefined;
@@ -23,16 +18,13 @@ interface RecentWorkspaceItem {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class DashboardComponent implements OnInit {
-  @Output() navigateToPage = new EventEmitter<DashboardPage>();
-
   documentCount = 0;
   promptCount = 0;
-  agentCount = 0;
 
   recentlyUpdatedItems: RecentWorkspaceItem[] = [];
 
@@ -49,10 +41,6 @@ export class DashboardComponent implements OnInit {
     this.loadDashboardStats();
   }
 
-  navigateTo(page: DashboardPage): void {
-    this.navigateToPage.emit(page);
-  }
-
   private loadDashboardStats(): void {
     this.isLoadingDashboard = true;
 
@@ -64,9 +52,6 @@ export class DashboardComponent implements OnInit {
       next: ({ documents, prompts, markdownDocuments }) => {
         this.documentCount = documents.length;
         this.promptCount = prompts.length;
-        this.agentCount = markdownDocuments.filter(
-          item => item.fileType === 'Agent'
-        ).length;
 
         this.updateRecentlyUpdatedItems(
           documents,

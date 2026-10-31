@@ -1,82 +1,57 @@
-import { Component, inject, ChangeDetectorRef, OnInit} from '@angular/core';
-import { Router, NavigationEnd, RouterOutlet} from '@angular/router';
-import { filter } from 'rxjs';
-import { PromptLibrary } from './prompt-library/prompt-library';
-import { ArchitectureLibraryComponent } from './architecture-library/architecture-library';
-import { MarkdownGenerator } from './markdown-generator/markdown-generator';
-import { WorkspaceComponent } from './workspace/workspace';
-import { DocumentsComponent } from './documents/documents';
-import { DashboardComponent } from './dashboard/dashboard';
-
-type AppPage =
-  | 'dashboard'
-  | 'documents'
-  | 'prompts'
-  | 'markdown-generator'
-  | 'workspace'
-  | 'architecture-library';
+import { Component, inject } from '@angular/core';
+import {
+  Router,
+  RouterOutlet,
+  RouterLink,
+  RouterLinkActive
+} from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     RouterOutlet,
-    DocumentsComponent,
-    MarkdownGenerator,
-    PromptLibrary,
-    WorkspaceComponent,
-    ArchitectureLibraryComponent,
-    DashboardComponent
+    RouterLink,
+    RouterLinkActive
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit {
+export class App {
   private readonly router = inject(Router);
-  private readonly cdr = inject(ChangeDetectorRef);
-
-  protected currentRouteIsHome = true;
-
-  currentPage: AppPage = 'dashboard';
-
-  ngOnInit(): void {
-    this.currentRouteIsHome = this.router.url === '/';
-    if (this.router.url === '/') {
-      this.currentPage = 'architecture-library';
-    }
-
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(event => {
-        if (event instanceof NavigationEnd) {
-          this.currentRouteIsHome =
-            event.urlAfterRedirects === '/';
-
-          this.cdr.markForCheck();
-        }
-      });
-  }
-
-  protected navigateTo(page: AppPage): void {
-    this.currentPage = page;
-    this.cdr.markForCheck();
-  }
-
-  protected returnToWorkspace(): void {
-    this.currentPage = 'workspace';
-    this.cdr.markForCheck();
-  }
 
   get currentPageTitle(): string {
-    const pageTitles: Record<AppPage, string> = {
-      dashboard: 'Dashboard',
-      documents: 'Documents',
-      prompts: 'Prompt Library',
-      'markdown-generator': 'Agent & Markdown Generator',
-      workspace: 'Workspace',
-      'architecture-library': 'Architecture Library'
-    };
+    const url = this.router.url;
 
-    return pageTitles[this.currentPage];
+    if (url.startsWith('/documents')) {
+      return 'Documents';
+    }
+
+    if (url.startsWith('/prompts')) {
+      return 'Prompt Library';
+    }
+
+    if (url.startsWith('/markdown-generator')) {
+      return 'Agent & Markdown Generator';
+    }
+
+    if (url.startsWith('/workspace')) {
+      return 'Workspace';
+    }
+
+    if (url.startsWith('/architecture-library')
+      || url.startsWith('/architecture-projects')) {
+      return 'Architecture Library';
+    }
+
+    if (url.startsWith('/dashboard')) {
+      return 'Dashboard';
+    }
+
+    if (url.startsWith('/markdown-documents')) {
+      return 'Markdown Document';
+    }
+
+    return 'Dashboard';
   }
 }

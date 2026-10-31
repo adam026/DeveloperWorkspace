@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DeveloperWorkspace.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/architectureprojects")]
     public class ArchitectureProjectsController : ControllerBase
     {
         private readonly ArchitectureProjectService _service;
