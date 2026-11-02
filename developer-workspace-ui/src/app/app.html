@@ -11,48 +11,80 @@
     <div class="nav-label">WORKSPACE</div>
 
     <nav class="navigation">
+
       <a class="nav-item"
          routerLink="/dashboard"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">
-        <span>⌂</span> Dashboard
+
+        <lucide-icon [img]="House" [size]="18"></lucide-icon>
+        Dashboard
       </a>
 
       <a class="nav-item"
          routerLink="/documents"
          routerLinkActive="active">
-        <span>▤</span> Documents
+
+        <lucide-icon [img]="FileText" [size]="18"></lucide-icon>
+        Documents
       </a>
 
       <a class="nav-item"
          routerLink="/prompts"
          routerLinkActive="active">
-        <span>✧</span> Prompt Library
+
+        <lucide-icon [img]="Sparkles" [size]="18"></lucide-icon>
+        Prompt Library
       </a>
 
       <a class="nav-item"
          routerLink="/markdown-generator"
          routerLinkActive="active">
-        <span>⚙</span> Agent &amp; Markdown Generator
+
+        <lucide-icon [img]="Bot" [size]="18"></lucide-icon>
+        Agent & Markdown Generator
       </a>
 
       <a class="nav-item"
          routerLink="/architecture-library"
          routerLinkActive="active">
-        <span>◈</span> Architecture Library
+
+        <lucide-icon [img]="Workflow" [size]="18"></lucide-icon>
+        Architecture Library
       </a>
 
-      <a class="nav-item" href="#" (click)="$event.preventDefault()">
-        <span>▧</span> Documentation
+      <a class="nav-item"
+         href="#"
+         (click)="$event.preventDefault()">
+
+        <lucide-icon [img]="BookOpen" [size]="18"></lucide-icon>
+        Documentation
       </a>
 
-      <a class="nav-item" href="#" (click)="$event.preventDefault()">
-        <span>✓</span> Task Manager
+      <a class="nav-item"
+         href="#"
+         (click)="$event.preventDefault()">
+
+        <lucide-icon [img]="ListTodo" [size]="18"></lucide-icon>
+        Task Manager
       </a>
 
-      <a class="nav-item" href="#" (click)="$event.preventDefault()">
-        <span>&lt;/&gt;</span> Code Snippets
+      <a class="nav-item"
+         href="#"
+         (click)="$event.preventDefault()">
+
+        <lucide-icon [img]="Code2" [size]="18"></lucide-icon>
+        Code Snippets
       </a>
+
+      <a class="nav-item"
+         routerLink="/workspace"
+         routerLinkActive="active">
+
+        <lucide-icon [img]="Layers" [size]="18"></lucide-icon>
+        Workspace
+      </a>
+
     </nav>
 
     <div class="sidebar-footer">

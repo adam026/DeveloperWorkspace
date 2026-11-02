@@ -1,251 +1,413 @@
-<section class="generator-page">
-  <header class="page-header">
+<section class="container-fluid p-0">
+
+  <!-- Page header -->
+  <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div>
-      <h1>Markdown Generator</h1>
-      <p>Generate AI-powered development instructions and knowledge files.</p>
+      <h1 class="h3 fw-bold mb-2">Markdown Generator</h1>
+      <p class="text-secondary mb-0">
+        Generate AI-powered development instructions and knowledge files.
+      </p>
     </div>
-  </header>
-
-  <div class="page-actions">
-    <button type="button" (click)="startNewDocument()">
-      + Generate new MD file
-    </button>
-  </div>
-
-  @if (successMessage) {
-  <div class="message success-message" role="status">
-    {{ successMessage }}
-  </div>
-  }
-
-  @if (errorMessage) {
-  <div class="message error-message" role="alert">
-    {{ errorMessage }}
-  </div>
-  }
-
-  <!-- Saved documents are always visible. -->
-  <section class="generator-card saved-documents-card">
-    <h2>Saved Markdown files</h2>
-
-    <div class="document-filters">
-      <div class="form-field search-field">
-        <label for="documentSearch">Search files</label>
-        <input id="documentSearch"
-               name="documentSearch"
-               type="search"
-               [(ngModel)]="searchTerm"
-               placeholder="Search by name, description or path..." />
-      </div>
-
-      <div class="form-field type-filter">
-        <label for="documentTypeFilter">File type</label>
-        <select id="documentTypeFilter"
-                name="documentTypeFilter"
-                [(ngModel)]="selectedFileType">
-          @for (type of availableFileTypes; track type) {
-          <option [value]="type">
-            {{ type === 'All' ? 'All types' : type }}
-          </option>
-          }
-        </select>
-      </div>
-    </div>
-
-    <p class="document-count">
-      {{ filteredDocuments.length }}
-      {{ filteredDocuments.length === 1 ? 'file' : 'files' }}
-    </p>
-
-    @if (isLoadingDocuments) {
-    <p role="status">Loading saved files...</p>
-    } @else if (filteredDocuments.length === 0) {
-    <p class="empty-results">
-      No matching files found. Try another search or file type.
-    </p>
-    } @else {
-    <div class="saved-document-list">
-      @for (document of filteredDocuments; track document.id) {
-      <div class="saved-document-item"
-           [class.selected]="generatedDocument?.id === document.id">
-
-        <button type="button"
-                class="open-saved-document"
-                [disabled]="!document.id"
-                (click)="openSavedDocument(document.id ?? '')">
-          <span class="saved-document-info">
-            <strong>{{ document.name }}</strong>
-            <span>{{ document.fileType }}</span>
-            <small>{{ document.filePath }}</small>
-          </span>
-          <span class="open-label">Open →</span>
-        </button>
-
-        <button type="button"
-                class="delete-button"
-                [disabled]="!document.id"
-                (click)="deleteSavedDocument(document)">
-          Delete
-        </button>
-      </div>
-      }
-    </div>
-    }
 
     <button type="button"
-            class="secondary-button"
-            (click)="loadSavedDocuments()"
-            [disabled]="isLoadingDocuments">
-      Refresh list
+            class="btn btn-primary d-inline-flex align-items-center gap-2"
+            (click)="startNewDocument()">
+      <lucide-icon [img]="Plus" [size]="17"></lucide-icon>
+      Generate new MD file
     </button>
+  </header>
+
+  <!-- Success message -->
+  @if (successMessage) {
+  <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+    <lucide-icon [img]="Check" [size]="18"></lucide-icon>
+    <span>{{ successMessage }}</span>
+  </div>
+  }
+
+  <!-- Error message -->
+  @if (errorMessage) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+  }
+
+  <!-- Saved documents -->
+  <section class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body p-4">
+
+      <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+        <div>
+          <h2 class="h5 fw-bold mb-1">Saved Markdown files</h2>
+          <p class="text-secondary small mb-0">
+            Browse and manage your generated documents.
+          </p>
+        </div>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+                (click)="loadSavedDocuments()"
+                [disabled]="isLoadingDocuments">
+          <lucide-icon [img]="RefreshCw" [size]="15"></lucide-icon>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Search and filter -->
+      <div class="row g-3 mb-3">
+
+        <div class="col-12 col-lg-8">
+          <label for="documentSearch" class="form-label fw-semibold">
+            Search files
+          </label>
+
+          <div class="input-group">
+            <span class="input-group-text bg-white">
+              <lucide-icon [img]="Search" [size]="17"></lucide-icon>
+            </span>
+
+            <input id="documentSearch"
+                   name="documentSearch"
+                   type="search"
+                   class="form-control"
+                   [(ngModel)]="searchTerm"
+                   placeholder="Search by name, description or path..." />
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <label for="documentTypeFilter" class="form-label fw-semibold">
+            File type
+          </label>
+
+          <select id="documentTypeFilter"
+                  name="documentTypeFilter"
+                  class="form-select"
+                  [(ngModel)]="selectedFileType">
+            @for (type of availableFileTypes; track type) {
+            <option [value]="type">
+              {{ type === 'All' ? 'All types' : type }}
+            </option>
+            }
+          </select>
+        </div>
+
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <span class="text-secondary small">
+          {{ filteredDocuments.length }}
+          {{ filteredDocuments.length === 1 ? 'file' : 'files' }}
+        </span>
+      </div>
+
+      <!-- Loading -->
+      @if (isLoadingDocuments) {
+      <div class="d-flex justify-content-center align-items-center gap-2 py-4" role="status">
+        <span class="spinner-border spinner-border-sm text-primary"></span>
+        <span class="text-secondary small">Loading saved files...</span>
+      </div>
+      }
+
+      <!-- Empty state -->
+      @else if (filteredDocuments.length === 0) {
+      <div class="text-center py-4">
+        <lucide-icon [img]="FileSearch" [size]="28" class="text-secondary mb-3"></lucide-icon>
+        <p class="text-secondary small mb-0">
+          No matching files found. Try another search or file type.
+        </p>
+      </div>
+      }
+
+      <!-- Document list -->
+      @else {
+      <div class="list-group list-group-flush">
+
+        @for (document of filteredDocuments; track document.id) {
+        <div class="saved-document-item list-group-item px-0 py-3"
+             [class.selected]="generatedDocument?.id === document.id">
+
+          <div class="d-flex align-items-start gap-3">
+
+            <div class="document-icon bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+              <lucide-icon [img]="FileCode" [size]="20"></lucide-icon>
+            </div>
+
+            <div class="flex-grow-1 min-width-0">
+
+              <button type="button"
+                      class="document-name btn btn-link text-decoration-none fw-semibold text-start p-0"
+                      [disabled]="!document.id"
+                      (click)="openSavedDocument(document.id ?? '')">
+                {{ document.name }}
+              </button>
+
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                <span class="category-label badge rounded-pill">
+                  {{ document.fileType }}
+                </span>
+                <small class="text-secondary document-path">
+                  {{ document.filePath }}
+                </small>
+              </div>
+
+            </div>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 flex-shrink-0"
+                    [disabled]="!document.id"
+                    (click)="deleteSavedDocument(document)">
+              <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+              <span class="d-none d-sm-inline">Delete</span>
+            </button>
+
+          </div>
+        </div>
+        }
+
+      </div>
+      }
+
+    </div>
   </section>
 
-  <!-- The generation form is visible only when requested. -->
+  <!-- Generate form -->
   @if (showGeneratorForm) {
-  <section class="generator-card">
-    <h2>Generate new Markdown file</h2>
+  <section class="card border-0 shadow-sm mb-4">
 
-    <form #generatorForm="ngForm" (ngSubmit)="generate()">
-      <div class="form-field">
-        <label for="fileType">File type</label>
-        <select id="fileType"
-                name="fileType"
-                [(ngModel)]="selectedType"
-                (ngModelChange)="onFileTypeChange()"
-                required>
-          @for (type of fileTypes; track type.value) {
-          <option [value]="type.value">{{ type.label }}</option>
-          }
-        </select>
+    <div class="card-body p-4">
+
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <div>
+          <h2 class="h5 fw-bold mb-1">Generate new Markdown file</h2>
+          <p class="text-secondary small mb-0">
+            Describe your requirements and let the local AI generate the file.
+          </p>
+        </div>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm"
+                [disabled]="isGenerating"
+                (click)="cancelGeneration()">
+          <lucide-icon [img]="X" [size]="18"></lucide-icon>
+        </button>
       </div>
 
-      <div class="form-field">
-        <label for="name">Name</label>
-        <input id="name"
-               name="name"
-               [(ngModel)]="name"
+      <form #generatorForm="ngForm" (ngSubmit)="generate()">
+
+        <div class="mb-3">
+          <label for="fileType" class="form-label fw-semibold">
+            File type <span class="text-danger">*</span>
+          </label>
+
+          <select id="fileType"
+                  name="fileType"
+                  class="form-select"
+                  [(ngModel)]="selectedType"
+                  (ngModelChange)="onFileTypeChange()"
+                  required>
+            @for (type of fileTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="name" class="form-label fw-semibold">
+            Name <span class="text-danger">*</span>
+          </label>
+
+          <input id="name"
+                 name="name"
+                 type="text"
+                 class="form-control"
+                 [(ngModel)]="name"
+                 maxlength="150"
+                 required
+                 placeholder="e.g. Code Reviewer" />
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label fw-semibold">
+            Description
+          </label>
+
+          <textarea id="description"
+                    name="description"
+                    class="form-control"
+                    [(ngModel)]="description"
+                    maxlength="1000"
+                    rows="2"
+                    placeholder="Describe the purpose of this file."></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="requirements" class="form-label fw-semibold">
+            Requirements <span class="text-danger">*</span>
+          </label>
+
+          <textarea id="requirements"
+                    name="requirements"
+                    class="form-control"
+                    [(ngModel)]="requirements"
+                    minlength="10"
+                    maxlength="20000"
+                    rows="7"
+                    required
+                    placeholder="Describe the expected behavior, rules and workflow."></textarea>
+
+          <div class="form-text">At least 10 characters.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="filePath" class="form-label fw-semibold">
+            Target file path
+          </label>
+
+          <input id="filePath"
+                 name="filePath"
+                 type="text"
+                 class="form-control"
+                 [(ngModel)]="filePath"
+                 maxlength="500"
+                 placeholder="Relative path inside your repository." />
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="isGenerating"
+                  (click)="cancelGeneration()">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2"
+                  [disabled]="generatorForm.invalid || isGenerating">
+            @if (isGenerating) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+            Generating...
+            } @else {
+            <lucide-icon [img]="Sparkles" [size]="16"></lucide-icon>
+            Generate Markdown
+            }
+          </button>
+
+        </div>
+
+      </form>
+    </div>
+  </section>
+  }
+
+  <!-- Generation progress -->
+  @if (isGenerating) {
+  <div class="alert alert-info d-flex align-items-center gap-2" role="status">
+    <span class="spinner-border spinner-border-sm"></span>
+    <span>The AI is generating your Markdown file. This may take a moment.</span>
+  </div>
+  }
+
+  <!-- Markdown editor -->
+  @if (generatedDocument && !showGeneratorForm) {
+  <section class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body p-4">
+
+      <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+        <div>
+          <h2 class="h5 fw-bold mb-1">Edit Markdown file</h2>
+          <p class="text-secondary small mb-0">
+            Review and update the generated content.
+          </p>
+        </div>
+
+        <span class="category-label badge rounded-pill align-self-start">
+          {{ generatedDocument.fileType }}
+        </span>
+      </div>
+
+      <div class="mb-3">
+        <label for="editName" class="form-label fw-semibold">Name</label>
+        <input id="editName"
+               name="editName"
+               type="text"
+               class="form-control"
+               [(ngModel)]="generatedDocument.name"
                maxlength="150"
-               required
-               placeholder="e.g. Code Reviewer" />
+               required />
       </div>
 
-      <div class="form-field">
-        <label for="description">Description</label>
-        <textarea id="description"
-                  name="description"
-                  [(ngModel)]="description"
+      <div class="mb-3">
+        <label for="editDescription" class="form-label fw-semibold">Description</label>
+        <textarea id="editDescription"
+                  name="editDescription"
+                  class="form-control"
+                  [(ngModel)]="generatedDocument.description"
                   maxlength="1000"
-                  rows="2"
-                  placeholder="Describe the purpose of this file."></textarea>
+                  rows="2"></textarea>
       </div>
 
-      <div class="form-field">
-        <label for="requirements">Requirements</label>
-        <textarea id="requirements"
-                  name="requirements"
-                  [(ngModel)]="requirements"
-                  minlength="10"
-                  maxlength="20000"
-                  rows="7"
-                  required
-                  placeholder="Describe the expected behavior, rules and workflow."></textarea>
-        <small>At least 10 characters.</small>
+      <div class="mb-3">
+        <label for="editFilePath" class="form-label fw-semibold">File path</label>
+        <input id="editFilePath"
+               name="editFilePath"
+               type="text"
+               class="form-control"
+               [(ngModel)]="generatedDocument.filePath"
+               maxlength="500" />
       </div>
 
-      <div class="form-field">
-        <label for="filePath">Target file path</label>
-        <input id="filePath"
-               name="filePath"
-               [(ngModel)]="filePath"
-               maxlength="500"
-               placeholder="Relative path inside your repository." />
+      <div class="mb-3">
+        <label for="markdownContent" class="form-label fw-semibold">
+          Markdown content
+        </label>
+        <textarea id="markdownContent"
+                  name="markdownContent"
+                  class="form-control markdown-preview"
+                  aria-label="Markdown content"
+                  [(ngModel)]="generatedDocument.content"
+                  rows="20"></textarea>
       </div>
 
-      <div class="editor-actions">
-        <button type="submit" [disabled]="generatorForm.invalid || isGenerating">
-          {{ isGenerating ? 'Generating...' : 'Generate Markdown' }}
+      <p class="text-secondary small mb-3">
+        Remember to save your changes before leaving this document.
+      </p>
+
+      <div class="d-flex flex-column flex-sm-row flex-wrap gap-2">
+
+        <button type="button"
+                class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2"
+                (click)="saveChanges()"
+                [disabled]="isSaving || !generatedDocument.id">
+          @if (isSaving) {
+          <span class="spinner-border spinner-border-sm" role="status"></span>
+          Saving...
+          } @else {
+          <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+          Save changes
+          }
         </button>
 
         <button type="button"
-                class="secondary-button"
-                [disabled]="isGenerating"
-                (click)="cancelGeneration()">
-          Cancel
+                class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
+                (click)="downloadMarkdown()">
+          <lucide-icon [img]="Download" [size]="16"></lucide-icon>
+          Download .md
         </button>
+
+        <button type="button"
+                class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
+                (click)="generatedDocument = null; selectedDocumentId = ''">
+          <lucide-icon [img]="X" [size]="16"></lucide-icon>
+          Close editor
+        </button>
+
       </div>
-    </form>
-  </section>
-  }
 
-  @if (isGenerating) {
-  <p class="loading-message" role="status">
-    The AI is generating your Markdown file. This may take a moment.
-  </p>
-  }
-
-  <!-- The editor is visible only when a document is open. -->
-  @if (generatedDocument && !showGeneratorForm) {
-  <section class="result-card">
-    <h2>Edit Markdown file</h2>
-
-    <div class="form-field">
-      <label for="editName">Name</label>
-      <input id="editName"
-             name="editName"
-             [(ngModel)]="generatedDocument.name"
-             maxlength="150"
-             required />
-    </div>
-
-    <div class="form-field">
-      <label for="editDescription">Description</label>
-      <textarea id="editDescription"
-                name="editDescription"
-                [(ngModel)]="generatedDocument.description"
-                maxlength="1000"
-                rows="2"></textarea>
-    </div>
-
-    <div class="form-field">
-      <label for="editFilePath">File path</label>
-      <input id="editFilePath"
-             name="editFilePath"
-             [(ngModel)]="generatedDocument.filePath"
-             maxlength="500" />
-    </div>
-
-    <div class="form-field">
-      <label for="markdownContent">Markdown content</label>
-      <textarea id="markdownContent"
-                name="markdownContent"
-                class="markdown-preview"
-                aria-label="Markdown content"
-                [(ngModel)]="generatedDocument.content"
-                rows="20"></textarea>
-    </div>
-
-    <p class="result-note">
-      Remember to save your changes before leaving this document.
-    </p>
-
-    <div class="editor-actions">
-      <button type="button"
-              (click)="saveChanges()"
-              [disabled]="isSaving || !generatedDocument.id">
-        {{ isSaving ? 'Saving...' : 'Save changes' }}
-      </button>
-
-      <button type="button"
-              class="secondary-button"
-              (click)="downloadMarkdown()">
-        Download .md
-      </button>
-
-      <button type="button"
-              class="secondary-button"
-              (click)="generatedDocument = null; selectedDocumentId = ''">
-        Close editor
-      </button>
     </div>
   </section>
   }

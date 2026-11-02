@@ -1,129 +1,203 @@
-<div class="detail-page">
-  <a href="#" class="back-link" (click)="$event.preventDefault(); goBack()">
-    <span aria-hidden="true">←</span>
+<div class="container-fluid p-0">
+
+  <!-- Back navigation -->
+  <a href="#"
+     class="btn btn-link text-decoration-none d-inline-flex align-items-center gap-2 px-0 mb-4"
+     (click)="$event.preventDefault(); goBack()">
+    <lucide-icon [img]="ArrowLeft" [size]="17"></lucide-icon>
     {{ returnToWorkspace ? 'Back to Workspace' : 'Back to documents' }}
   </a>
 
+  <!-- Loading -->
   @if (loading) {
-  <section class="detail-panel">
-    <p class="status-message" role="status">Loading document...</p>
+  <section class="card border-0 shadow-sm">
+    <div class="card-body d-flex justify-content-center align-items-center gap-2 py-5">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span class="text-secondary small" role="status">
+        Loading document...
+      </span>
+    </div>
   </section>
-  } @else if (errorMessage) {
-  <section class="detail-panel error-panel">
-    <div class="error-icon" aria-hidden="true">!</div>
-    <h2>Document unavailable</h2>
-    <p class="status-message">{{ errorMessage }}</p>
-    <a href="#" class="back-button" (click)="$event.preventDefault(); goBack()">Back to documents</a>
+  }
+
+  <!-- Error -->
+  @else if (errorMessage) {
+  <section class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="detail-icon bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center">
+          <lucide-icon [img]="AlertCircle" [size]="22"></lucide-icon>
+        </div>
+        <h2 class="h5 fw-bold mb-0">Document unavailable</h2>
+      </div>
+
+      <p class="text-secondary small mb-3">
+        {{ errorMessage }}
+      </p>
+
+      <button type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              (click)="goBack()">
+        <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>
+        Back to documents
+      </button>
+    </div>
   </section>
-  } @else if (document) {
+  }
+
+  <!-- Document details -->
+  @else if (document) {
+
   <!-- Document header -->
-  <header class="detail-header">
-    <div class="document-heading">
-      <div class="detail-icon" aria-hidden="true">▤</div>
-      <div class="heading-copy">
-        <p class="eyebrow">KNOWLEDGE BASE</p>
-        <h1>{{ document.title }}</h1>
-        <p class="detail-subtitle">
+  <header class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-4">
+        <div class="d-flex align-items-start gap-3 flex-grow-1 min-width-0">
+          <div class="detail-icon bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+            <lucide-icon [img]="FileText" [size]="24"></lucide-icon>
+          </div>
+
+          <div class="min-width-0">
+            <p class="eyebrow mb-2">KNOWLEDGE BASE</p>
+            <h1 class="h3 fw-bold mb-2">
+              {{ document.title }}
+            </h1>
+            <p class="text-secondary small mb-0">
+              {{ document.description || 'No description provided.' }}
+            </p>
+          </div>
+        </div>
+
+        <span class="category-label badge rounded-pill align-self-start">
+          {{ document.category || 'Uncategorized' }}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Document information -->
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+
+      <div class="mb-4">
+        <p class="eyebrow mb-2">DOCUMENT INFORMATION</p>
+        <h2 class="h5 fw-bold mb-0">Details</h2>
+      </div>
+
+      <div class="detail-field py-3 border-bottom">
+        <span class="field-label d-block mb-2">Title</span>
+        <p class="mb-0">{{ document.title }}</p>
+      </div>
+
+      <div class="detail-field py-3 border-bottom">
+        <span class="field-label d-block mb-2">Description</span>
+        <p class="description-content mb-0">
           {{ document.description || 'No description provided.' }}
         </p>
       </div>
-    </div>
 
-    <span class="category-label">
-      {{ document.category || 'Uncategorized' }}
-    </span>
-  </header>
-
-  <!-- Document metadata -->
-  <section class="detail-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">DOCUMENT INFORMATION</p>
-        <h2>Details</h2>
-      </div>
-    </div>
-
-    <div class="detail-field">
-      <span class="field-label">Title</span>
-      <p>{{ document.title }}</p>
-    </div>
-
-    <div class="detail-field">
-      <span class="field-label">Description</span>
-      <p class="description-content">
-        {{ document.description || 'No description provided.' }}
-      </p>
-    </div>
-
-    <div class="detail-field">
-      <span class="field-label">Category</span>
-      <p>{{ document.category || 'Uncategorized' }}</p>
-    </div>
-
-    <div class="metadata-grid">
-      <div class="metadata-item">
-        <span class="field-label">Created</span>
-        <p>
-          {{ document.createdAt ? (document.createdAt | date:'medium') : 'Not available' }}
-        </p>
+      <div class="detail-field py-3 border-bottom">
+        <span class="field-label d-block mb-2">Category</span>
+        <p class="mb-0">{{ document.category || 'Uncategorized' }}</p>
       </div>
 
-      <div class="metadata-item">
-        <span class="field-label">Last updated</span>
-        <p>
-          {{ document.updatedAt ? (document.updatedAt | date:'medium') : 'Not updated' }}
-        </p>
+      <div class="row g-3 mt-2">
+
+        <div class="col-12 col-md-6">
+          <div class="metadata-item card h-100">
+            <div class="card-body p-3">
+              <span class="field-label d-block mb-2">Created</span>
+              <p class="mb-0">
+                {{ document.createdAt ? (document.createdAt | date:'medium') : 'Not available' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="metadata-item card h-100">
+            <div class="card-body p-3">
+              <span class="field-label d-block mb-2">Last updated</span>
+              <p class="mb-0">
+                {{ document.updatedAt ? (document.updatedAt | date:'medium') : 'Not updated' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
   <!-- AI summary -->
-  <section class="detail-panel ai-summary">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">LOCAL AI</p>
-        <h2>AI Summary</h2>
+  <section class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+
+      <div class="mb-4">
+        <p class="eyebrow mb-2">LOCAL AI</p>
+        <h2 class="h5 fw-bold mb-2">AI Summary</h2>
+        <p class="text-secondary small mb-0">
+          Generate a concise summary of this document using your local AI model.
+        </p>
       </div>
-    </div>
 
-    <p class="summary-intro">
-      Generate a concise summary of this document using your local AI model.
-    </p>
+      <button type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              [disabled]="summarizing || loading || !document"
+              (click)="generateSummary()">
 
-    <button type="button"
-            class="primary-button"
-            [disabled]="summarizing || loading || !document"
-            (click)="generateSummary()">
-      {{
- summarizing
-          ? 'Generating summary...'
-          : (summary ? 'Regenerate summary' : 'Generate AI summary')
-      }}
-    </button>
+        @if (summarizing) {
+        <span class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Generating...</span>
+        </span>
+        Generating summary...
+        } @else {
+        <lucide-icon [img]="Sparkles" [size]="16"></lucide-icon>
+        {{ summary ? 'Regenerate summary' : 'Generate AI summary' }}
+        }
 
-    @if (summaryError) {
-    <p class="error-message" role="alert">{{ summaryError }}</p>
-    }
+      </button>
 
-    @if (summarizing) {
-    <p class="status-message" role="status">
-      The AI is processing the document. This may take a few seconds.
-    </p>
-    }
-
-    @if (summary) {
-    <div class="summary-result">
-      <h3>Generated summary</h3>
-      <p>{{ summary }}</p>
-
-      @if (document.aiSummaryUpdatedAt) {
-      <p class="summary-date">
-        Last generated:
-        {{ document.aiSummaryUpdatedAt | date:'medium' }}
-      </p>
+      @if (summaryError) {
+      <div class="alert alert-danger d-flex align-items-start gap-2 mt-3 mb-0" role="alert">
+        <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+        <span>{{ summaryError }}</span>
+      </div>
       }
+
+      @if (summarizing) {
+      <div class="alert alert-info d-flex align-items-start gap-2 mt-3 mb-0" role="status">
+        <lucide-icon [img]="Info" [size]="18"></lucide-icon>
+        <span>The AI is processing the document. This may take a few seconds.</span>
+      </div>
+      }
+
+      @if (summary) {
+      <div class="summary-result card mt-4">
+        <div class="card-body p-3 p-md-4">
+
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <lucide-icon [img]="FileText" [size]="18" class="text-primary"></lucide-icon>
+            <h3 class="h6 fw-bold mb-0">Generated summary</h3>
+          </div>
+
+          <p class="mb-0">{{ summary }}</p>
+
+          @if (document.aiSummaryUpdatedAt) {
+          <p class="summary-date text-secondary small mt-3 mb-0">
+            <lucide-icon [img]="Clock" [size]="14"></lucide-icon>
+            Last generated:
+            {{ document.aiSummaryUpdatedAt | date:'medium' }}
+          </p>
+          }
+
+        </div>
+      </div>
+      }
+
     </div>
-    }
   </section>
   }
 </div>

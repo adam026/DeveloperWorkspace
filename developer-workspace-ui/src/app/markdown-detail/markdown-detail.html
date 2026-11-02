@@ -1,93 +1,224 @@
-<section class="detail-page">
-  <header class="page-header">
-    <a href="#" class="back-link" (click)="$event.preventDefault(); goBack()">
-      <span aria-hidden="true">←</span>
-      {{ returnToWorkspace ? 'Back to Workspace' : 'Back to Agent & Markdown generator' }}
-    </a>
+<section class="container-fluid py-4 px-3 px-lg-4">
+
+  <!-- Header -->
+  <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+
+    <button type="button"
+            class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
+            (click)="goBack()">
+
+      <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+
+      {{ returnToWorkspace ? 'Back to Workspace' : 'Back to Markdown Generator' }}
+
+    </button>
 
     @if (document) {
     <button type="button"
-            class="copy-button"
+            class="btn btn-outline-primary d-inline-flex align-items-center gap-2"
             (click)="copyContent()">
+
+      <lucide-icon [img]="Copy" [size]="16"></lucide-icon>
+
       Copy Markdown
+
     </button>
     }
+
   </header>
 
+  <!-- Loading state -->
   @if (isLoading) {
-  <div class="state-card">
-    <p>Loading Markdown document...</p>
-  </div>
-  } @else if (errorMessage && !document) {
-  <div class="state-card error-state">
-    <h2>Unable to load Markdown document</h2>
-    <p>{{ errorMessage }}</p>
 
-    <button type="button"
-            class="back-button"
-            (click)="goBack()">
-      Back to Workspace
-    </button>
-  </div>
-  } @else if (document) {
-  <article class="markdown-card">
-    <div class="title-row">
-      <div class="title-content">
-        <span class="item-type">Markdown document</span>
-        <h1>{{ document.name }}</h1>
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-4 p-lg-5 text-center">
+
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
 
-      <span class="type-badge">{{ document.fileType }}</span>
-    </div>
-
-    @if (document.description) {
-    <p class="description">{{ document.description }}</p>
-    }
-
-    @if (document.filePath) {
-    <div class="file-path">
-      <span class="metadata-label">File path</span>
-      <code>{{ document.filePath }}</code>
-    </div>
-    }
-
-    <div class="metadata">
-      @if (document.createdAt) {
-      <span>
-        Created {{ document.createdAt | date:'mediumDate' }}
-      </span>
-      }
-
-      @if (document.updatedAt) {
-      <span>
-        Updated {{ document.updatedAt | date:'mediumDate' }}
-      </span>
-      }
-    </div>
-
-    <section class="content-section">
-      <div class="content-heading">
-        <h2>Markdown content</h2>
-
-        <button type="button"
-                class="copy-button"
-                (click)="copyContent()">
-          Copy content
-        </button>
-      </div>
-
-      <pre class="markdown-content">{{ document.content }}</pre>
-
-      @if (copySuccess) {
-      <p class="success-message">
-        Markdown content copied to clipboard.
+      <p class="text-secondary mb-0">
+        Loading Markdown document...
       </p>
+
+    </div>
+  </div>
+
+  <!-- Error state -->
+  } @else if (errorMessage && !document) {
+
+  <div class="card border-danger-subtle shadow-sm rounded-3">
+    <div class="card-body p-4 p-lg-5 text-center">
+
+      <lucide-icon [img]="AlertCircle"
+                   [size]="40"
+                   class="text-danger mb-3">
+      </lucide-icon>
+
+      <h2 class="h5 fw-semibold mb-2">
+        Unable to load document
+      </h2>
+
+      <p class="text-secondary mb-4">
+        {{ errorMessage }}
+      </p>
+
+      <button type="button"
+              class="btn btn-primary"
+              (click)="goBack()">
+        Go Back
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Document content -->
+  } @else if (document) {
+
+  <article class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-4 p-lg-5">
+
+      <!-- Document title -->
+      <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
+
+        <div class="min-w-0">
+
+          <div class="d-flex align-items-center gap-2 text-primary small fw-semibold text-uppercase mb-2">
+
+            <lucide-icon [img]="FileCode" [size]="16"></lucide-icon>
+
+            Markdown Document
+
+          </div>
+
+          <h1 class="h3 fw-bold text-dark mb-0 text-break">
+            {{ document.name }}
+          </h1>
+
+        </div>
+
+        <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2 flex-shrink-0">
+          {{ document.fileType }}
+        </span>
+
+      </div>
+
+      <!-- Description -->
+      @if (document.description) {
+
+      <p class="text-secondary lh-lg mb-4 text-break">
+        {{ document.description }}
+      </p>
+
       }
 
-      @if (errorMessage) {
-      <p class="error-message">{{ errorMessage }}</p>
+      <!-- File path -->
+      @if (document.filePath) {
+
+      <div class="bg-body-tertiary rounded-3 border p-3 mb-4">
+
+        <div class="small text-secondary fw-semibold mb-2">
+
+          <lucide-icon [img]="Folder" [size]="14" class="me-1"></lucide-icon>
+
+          File Path
+
+        </div>
+
+        <code class="text-primary text-break">
+          {{ document.filePath }}
+        </code>
+
+      </div>
+
       }
-    </section>
+
+      <!-- Dates -->
+      <div class="d-flex flex-wrap gap-3 small text-secondary border-bottom pb-4 mb-4">
+
+        @if (document.createdAt) {
+
+        <span class="d-inline-flex align-items-center gap-1">
+
+          <lucide-icon [img]="CalendarDays" [size]="15"></lucide-icon>
+
+          Created: {{ document.createdAt | date:'mediumDate' }}
+
+        </span>
+
+        }
+
+        @if (document.updatedAt) {
+
+        <span class="d-inline-flex align-items-center gap-1">
+
+          <lucide-icon [img]="Clock" [size]="15"></lucide-icon>
+
+          Updated: {{ document.updatedAt | date:'mediumDate' }}
+
+        </span>
+
+        }
+
+      </div>
+
+      <!-- Markdown content -->
+      <section>
+
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3">
+
+          <h2 class="h5 fw-semibold text-dark mb-0">
+
+            <lucide-icon [img]="Code2" [size]="20" class="me-2 text-primary"></lucide-icon>
+
+            Markdown Content
+
+          </h2>
+
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2"
+                  (click)="copyContent()">
+
+            <lucide-icon [img]="Copy" [size]="15"></lucide-icon>
+
+            Copy Content
+
+          </button>
+
+        </div>
+
+        <pre class="markdown-content bg-body-tertiary border rounded-3 p-3 p-lg-4 mb-0">{{ document.content }}</pre>
+
+        <!-- Copy success -->
+        @if (copySuccess) {
+
+        <div class="alert alert-success d-flex align-items-center gap-2 mt-3 mb-0">
+
+          <lucide-icon [img]="CheckCircle" [size]="18"></lucide-icon>
+
+          Markdown content copied to clipboard successfully.
+
+        </div>
+
+        }
+
+        <!-- Copy error -->
+        @if (errorMessage) {
+
+        <div class="alert alert-danger d-flex align-items-center gap-2 mt-3 mb-0">
+
+          <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+
+          {{ errorMessage }}
+
+        </div>
+
+        }
+
+      </section>
+
+    </div>
   </article>
+
   }
 </section>

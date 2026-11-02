@@ -1,271 +1,414 @@
-<section class="prompt-library">
+<section class="container-fluid p-0">
+
   <!-- Page header -->
-  <header class="page-header">
+  <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div>
-      <h1>Prompt Library</h1>
-      <p>Keep your frequently used AI prompts in one place.</p>
+      <h1 class="h3 fw-bold mb-2">Prompt Library</h1>
+      <p class="text-secondary mb-0">
+        Keep your frequently used AI prompts in one place.
+      </p>
     </div>
 
     <button type="button"
-            class="primary-button"
+            class="btn btn-primary d-inline-flex align-items-center gap-2"
             (click)="openCreateForm()">
-      ＋ New prompt
+      <lucide-icon [img]="Plus" [size]="17"></lucide-icon>
+      New prompt
     </button>
   </header>
 
   <!-- Operation feedback -->
   @if (successMessage) {
-  <p class="success-message" role="status">{{ successMessage }}</p>
+  <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+    <lucide-icon [img]="Check" [size]="18"></lucide-icon>
+    <span>{{ successMessage }}</span>
+  </div>
   }
 
   @if (errorMessage) {
-  <p class="error-message" role="alert">{{ errorMessage }}</p>
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
   }
 
   @if (copyErrorMessage) {
-  <p class="error-message" role="alert">{{ copyErrorMessage }}</p>
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    <span>{{ copyErrorMessage }}</span>
+  </div>
   }
 
   <!-- Create prompt form -->
   @if (showCreateForm) {
-  <section class="create-prompt-panel">
-    <div class="form-heading">
-      <div>
-        <h2>New prompt</h2>
-        <p>Add a reusable prompt to your library.</p>
-      </div>
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
 
-      <button type="button"
-              class="close-button"
-              aria-label="Close form"
-              [disabled]="isSaving"
-              (click)="closeCreateForm()">
-        ×
-      </button>
-    </div>
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <div>
+          <h2 class="h5 fw-bold mb-1">New prompt</h2>
+          <p class="text-secondary small mb-0">
+            Add a reusable prompt to your library.
+          </p>
+        </div>
 
-    <form class="prompt-form"
-          (ngSubmit)="createPrompt()"
-          #promptForm="ngForm">
-
-      <label for="prompt-title">Title *</label>
-      <input id="prompt-title"
-             name="title"
-             type="text"
-             [(ngModel)]="newPrompt.title"
-             placeholder="e.g. C# code review"
-             required
-             maxlength="150" />
-
-      <label for="prompt-description">Description</label>
-      <input id="prompt-description"
-             name="description"
-             type="text"
-             [(ngModel)]="newPrompt.description"
-             placeholder="What is this prompt used for?"
-             maxlength="500" />
-
-      <label for="prompt-category">Category</label>
-      <input id="prompt-category"
-             name="category"
-             type="text"
-             [(ngModel)]="newPrompt.category"
-             placeholder="e.g. C#, Code Review, Testing"
-             maxlength="100" />
-
-      <label for="prompt-content">Prompt content *</label>
-      <textarea id="prompt-content"
-                name="content"
-                [(ngModel)]="newPrompt.content"
-                placeholder="Write the prompt you want to save..."
-                rows="8"
-                required
-                maxlength="20000"></textarea>
-
-      <div class="character-count">
-        {{ newPrompt.content.length }} / 20000 characters
-      </div>
-
-      <div class="form-actions">
         <button type="button"
-                class="secondary-button"
+                class="btn btn-outline-secondary btn-sm"
+                aria-label="Close form"
                 [disabled]="isSaving"
                 (click)="closeCreateForm()">
-          Cancel
-        </button>
-
-        <button type="submit"
-                class="primary-button"
-                [disabled]="isSaving || promptForm.invalid">
-          {{ isSaving ? 'Saving...' : 'Save prompt' }}
+          <lucide-icon [img]="X" [size]="18"></lucide-icon>
         </button>
       </div>
-    </form>
+
+      <form (ngSubmit)="createPrompt()" #promptForm="ngForm">
+
+        <div class="mb-3">
+          <label for="prompt-title" class="form-label fw-semibold">
+            Title <span class="text-danger">*</span>
+          </label>
+          <input id="prompt-title"
+                 name="title"
+                 type="text"
+                 class="form-control"
+                 [(ngModel)]="newPrompt.title"
+                 placeholder="e.g. C# code review"
+                 required
+                 maxlength="150" />
+        </div>
+
+        <div class="mb-3">
+          <label for="prompt-description" class="form-label fw-semibold">
+            Description
+          </label>
+          <input id="prompt-description"
+                 name="description"
+                 type="text"
+                 class="form-control"
+                 [(ngModel)]="newPrompt.description"
+                 placeholder="What is this prompt used for?"
+                 maxlength="500" />
+        </div>
+
+        <div class="mb-3">
+          <label for="prompt-category" class="form-label fw-semibold">
+            Category
+          </label>
+          <input id="prompt-category"
+                 name="category"
+                 type="text"
+                 class="form-control"
+                 [(ngModel)]="newPrompt.category"
+                 placeholder="e.g. C#, Code Review, Testing"
+                 maxlength="100" />
+        </div>
+
+        <div class="mb-3">
+          <label for="prompt-content" class="form-label fw-semibold">
+            Prompt content <span class="text-danger">*</span>
+          </label>
+          <textarea id="prompt-content"
+                    name="content"
+                    class="form-control"
+                    [(ngModel)]="newPrompt.content"
+                    placeholder="Write the prompt you want to save..."
+                    rows="8"
+                    required
+                    maxlength="20000"></textarea>
+
+          <div class="form-text text-end">
+            {{ newPrompt.content.length }} / 20000 characters
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="isSaving"
+                  (click)="closeCreateForm()">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary d-inline-flex align-items-center gap-2"
+                  [disabled]="isSaving || promptForm.invalid">
+            @if (isSaving) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+            Saving...
+            } @else {
+            <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+            Save prompt
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
   </section>
   }
 
   <!-- Search and category filters -->
-  <section class="prompt-filters">
-    <div class="search-box">
-      <span class="search-icon" aria-hidden="true">⌕</span>
-      <input type="search"
-             aria-label="Search prompts"
-             placeholder="Search by title, description, category, or content..."
-             [(ngModel)]="searchTerm" />
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+
+        <div class="col-12 col-lg-8">
+          <div class="input-group">
+            <span class="input-group-text bg-white">
+              <lucide-icon [img]="Search" [size]="17"></lucide-icon>
+            </span>
+            <input type="search"
+                   class="form-control"
+                   aria-label="Search prompts"
+                   placeholder="Search by title, description, category, or content..."
+                   [(ngModel)]="searchTerm" />
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <select class="form-select"
+                  aria-label="Filter by category"
+                  [(ngModel)]="selectedCategory">
+            <option value="">All categories</option>
+            @for (category of categories; track category) {
+            <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </div>
+
+        @if (searchTerm || selectedCategory) {
+        <div class="col-12">
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2"
+                  (click)="clearFilters()">
+            <lucide-icon [img]="X" [size]="15"></lucide-icon>
+            Clear filters
+          </button>
+        </div>
+        }
+
+      </div>
     </div>
-
-    <select class="category-filter"
-            aria-label="Filter by category"
-            [(ngModel)]="selectedCategory">
-      <option value="">All categories</option>
-      @for (category of categories; track category) {
-      <option [value]="category">{{ category }}</option>
-      }
-    </select>
-
-    @if (searchTerm || selectedCategory) {
-    <button type="button"
-            class="secondary-button"
-            (click)="clearFilters()">
-      Clear filters
-    </button>
-    }
   </section>
 
   <!-- Prompt list heading -->
-  <div class="section-heading">
+  <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
-      <h2>Your prompts</h2>
-      <p>{{ filteredPrompts.length }} of {{ prompts.length }} prompts</p>
+      <h2 class="h5 fw-bold mb-1">Your prompts</h2>
+      <p class="text-secondary small mb-0">
+        {{ filteredPrompts.length }} of {{ prompts.length }} prompts
+      </p>
     </div>
   </div>
 
   <!-- Loading, empty, and list states -->
   @if (isLoading) {
-  <p class="loading-message" role="status">Loading prompts...</p>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body d-flex justify-content-center align-items-center gap-2 py-5">
+      <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+      <span class="text-secondary small">Loading prompts...</span>
+    </div>
+  </div>
   } @else if (filteredPrompts.length === 0) {
-  <div class="empty-state">
-    @if (prompts.length === 0) {
-    <h3>No prompts yet</h3>
-    <p>Create your first prompt using the New prompt button.</p>
-    } @else {
-    <h3>No results found</h3>
-    <p>Try a different search term or category.</p>
-    }
+  <div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+      <div class="empty-icon bg-primary-subtle text-primary rounded-3 d-inline-flex align-items-center justify-content-center mb-3">
+        <lucide-icon [img]="Sparkles" [size]="26"></lucide-icon>
+      </div>
+
+      @if (prompts.length === 0) {
+      <h3 class="h5 fw-bold mb-2">No prompts yet</h3>
+      <p class="text-secondary mb-0">
+        Create your first prompt using the New prompt button.
+      </p>
+      } @else {
+      <h3 class="h5 fw-bold mb-2">No results found</h3>
+      <p class="text-secondary mb-0">
+        Try a different search term or category.
+      </p>
+      }
+    </div>
   </div>
   } @else {
-  <div class="prompt-grid">
+
+  <div class="row g-4">
+
     @for (prompt of filteredPrompts; track prompt.id) {
-    <article class="prompt-card">
-      @if (editingPromptId === prompt.id) {
-      <!-- Inline prompt editor -->
-      <form class="prompt-form" (ngSubmit)="updatePrompt()">
-        <label [for]="'edit-title-' + prompt.id">Title *</label>
-        <input [id]="'edit-title-' + prompt.id"
-               name="editTitle"
-               [(ngModel)]="editPrompt.title"
-               required
-               maxlength="150" />
+    <div class="col-12 col-xl-6">
 
-        <label [for]="'edit-description-' + prompt.id">Description</label>
-        <input [id]="'edit-description-' + prompt.id"
-               name="editDescription"
-               [(ngModel)]="editPrompt.description"
-               maxlength="500" />
+      <article class="prompt-card card border-0 shadow-sm h-100">
 
-        <label [for]="'edit-category-' + prompt.id">Category</label>
-        <input [id]="'edit-category-' + prompt.id"
-               name="editCategory"
-               [(ngModel)]="editPrompt.category"
-               maxlength="100" />
+        <div class="card-body p-4">
 
-        <label [for]="'edit-content-' + prompt.id">Prompt content *</label>
-        <textarea [id]="'edit-content-' + prompt.id"
-                  name="editContent"
-                  [(ngModel)]="editPrompt.content"
-                  required
-                  maxlength="20000"
-                  rows="8"></textarea>
+          @if (editingPromptId === prompt.id) {
 
-        <div class="form-actions">
-          <button type="button"
-                  class="secondary-button"
-                  [disabled]="isSaving"
-                  (click)="cancelEditing()">
-            Cancel
-          </button>
+          <!-- Inline prompt editor -->
+          <form (ngSubmit)="updatePrompt()">
 
-          <button type="submit"
-                  class="primary-button"
-                  [disabled]="isSaving || !editPrompt.title.trim() || !editPrompt.content.trim()">
-            {{ isSaving ? 'Saving...' : 'Save changes' }}
-          </button>
+            <div class="mb-3">
+              <label [for]="'edit-title-' + prompt.id"
+                     class="form-label fw-semibold">
+                Title <span class="text-danger">*</span>
+              </label>
+              <input [id]="'edit-title-' + prompt.id"
+                     name="editTitle"
+                     class="form-control"
+                     [(ngModel)]="editPrompt.title"
+                     required
+                     maxlength="150" />
+            </div>
+
+            <div class="mb-3">
+              <label [for]="'edit-description-' + prompt.id"
+                     class="form-label fw-semibold">
+                Description
+              </label>
+              <input [id]="'edit-description-' + prompt.id"
+                     name="editDescription"
+                     class="form-control"
+                     [(ngModel)]="editPrompt.description"
+                     maxlength="500" />
+            </div>
+
+            <div class="mb-3">
+              <label [for]="'edit-category-' + prompt.id"
+                     class="form-label fw-semibold">
+                Category
+              </label>
+              <input [id]="'edit-category-' + prompt.id"
+                     name="editCategory"
+                     class="form-control"
+                     [(ngModel)]="editPrompt.category"
+                     maxlength="100" />
+            </div>
+
+            <div class="mb-3">
+              <label [for]="'edit-content-' + prompt.id"
+                     class="form-label fw-semibold">
+                Prompt content <span class="text-danger">*</span>
+              </label>
+              <textarea [id]="'edit-content-' + prompt.id"
+                        name="editContent"
+                        class="form-control"
+                        [(ngModel)]="editPrompt.content"
+                        required
+                        maxlength="20000"
+                        rows="8"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button"
+                      class="btn btn-outline-secondary"
+                      [disabled]="isSaving"
+                      (click)="cancelEditing()">
+                Cancel
+              </button>
+
+              <button type="submit"
+                      class="btn btn-primary d-inline-flex align-items-center gap-2"
+                      [disabled]="isSaving || !editPrompt.title.trim() || !editPrompt.content.trim()">
+                @if (isSaving) {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                Saving...
+                } @else {
+                <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+                Save changes
+                }
+              </button>
+            </div>
+
+          </form>
+
+          } @else {
+
+          <!-- Prompt card content -->
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="category-label badge rounded-pill">
+              {{ prompt.category || 'General' }}
+            </span>
+            <lucide-icon [img]="Sparkles" [size]="17" class="text-primary"></lucide-icon>
+          </div>
+
+          <h3 class="h5 fw-bold mb-2">{{ prompt.title }}</h3>
+
+          <p class="text-secondary small mb-3">
+            {{ prompt.description || 'No description provided.' }}
+          </p>
+
+          <div class="prompt-content bg-light rounded-3 p-3 mb-4">
+            {{ prompt.content }}
+          </div>
+
+          <!-- Prompt actions -->
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button"
+                    class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2"
+                    [disabled]="isSaving"
+                    (click)="startEditing(prompt)">
+              <lucide-icon [img]="Pencil" [size]="15"></lucide-icon>
+              Edit
+            </button>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-2"
+                    [disabled]="isSaving"
+                    (click)="confirmDelete(prompt)">
+              <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+              Delete
+            </button>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2"
+                    [disabled]="isSaving"
+                    (click)="copyPrompt(prompt)">
+              @if (copiedPromptId === prompt.id) {
+              <lucide-icon [img]="Check" [size]="15"></lucide-icon>
+              Copied
+              } @else {
+              <lucide-icon [img]="Copy" [size]="15"></lucide-icon>
+              Copy
+              }
+            </button>
+          </div>
+
+          <!-- Delete confirmation -->
+          @if (deletingPromptId === prompt.id) {
+          <div class="alert alert-warning mt-3 mb-0">
+            <p class="small mb-3">
+              Are you sure you want to delete this prompt?
+              This action cannot be undone.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary"
+                      [disabled]="isSaving"
+                      (click)="cancelDelete()">
+                Cancel
+              </button>
+
+              <button type="button"
+                      class="btn btn-sm btn-danger d-inline-flex align-items-center gap-2"
+                      [disabled]="isSaving"
+                      (click)="prompt.id && deletePrompt(prompt.id)">
+                @if (isSaving) {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                Deleting...
+                } @else {
+                <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+                Delete permanently
+                }
+              </button>
+            </div>
+          </div>
+          }
+
+          }
+
         </div>
-      </form>
-      } @else {
-      <!-- Prompt card content -->
-      <div class="prompt-card-header">
-        <span class="category">
-          {{ prompt.category || 'General' }}
-        </span>
-      </div>
+      </article>
 
-      <h3>{{ prompt.title }}</h3>
-
-      <p class="description">
-        {{ prompt.description || 'No description provided.' }}
-      </p>
-
-      <div class="prompt-content">{{ prompt.content }}</div>
-
-      <!-- Prompt actions -->
-      <div class="form-actions prompt-actions">
-        <button type="button"
-                class="secondary-button"
-                [disabled]="isSaving"
-                (click)="startEditing(prompt)">
-          Edit
-        </button>
-
-        <button type="button"
-                class="secondary-button"
-                [disabled]="isSaving"
-                (click)="confirmDelete(prompt)">
-          Delete
-        </button>
-
-        <button type="button"
-                class="secondary-button"
-                [disabled]="isSaving"
-                (click)="copyPrompt(prompt)">
-          {{ copiedPromptId === prompt.id ? 'Copied ✓' : 'Copy' }}
-        </button>
-      </div>
-
-      <!-- Delete confirmation -->
-      @if (deletingPromptId === prompt.id) {
-      <div class="delete-confirmation">
-        <p>Are you sure you want to delete this prompt? This action cannot be undone.</p>
-
-        <div class="form-actions">
-          <button type="button"
-                  class="secondary-button"
-                  [disabled]="isSaving"
-                  (click)="cancelDelete()">
-            Cancel
-          </button>
-
-          <button type="button"
-                  class="primary-button"
-                  [disabled]="isSaving"
-                  (click)="prompt.id && deletePrompt(prompt.id)">
-            {{ isSaving ? 'Deleting...' : 'Delete permanently' }}
-          </button>
-        </div>
-      </div>
-      }
-      }
-    </article>
+    </div>
     }
   </div>
   }

@@ -1,24 +1,32 @@
+
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ArchitectureProject, ArchitectureProjectService } from '../services/architecture-project.service';
+import { LucideAngularModule,Plus,AlertCircle,Workflow,CalendarDays,Trash2,Copy,ArrowUpRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-architecture-library',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './architecture-library.html',
-  styleUrl: './architecture-library.css'
+  styleUrl: './architecture-library.scss'
 })
 export class ArchitectureLibraryComponent implements OnInit {
-
   private readonly projectService = inject(ArchitectureProjectService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
 
-  projects: ArchitectureProject[] = [];
+  protected readonly Plus = Plus;
+  protected readonly AlertCircle = AlertCircle;
+  protected readonly Workflow = Workflow;
+  protected readonly CalendarDays = CalendarDays;
+  protected readonly Trash2 = Trash2;
+  protected readonly Copy = Copy;
+  protected readonly ArrowUpRight = ArrowUpRight;
 
+  projects: ArchitectureProject[] = [];
   loading = false;
   errorMessage = '';
   showCreateForm = false;
@@ -43,8 +51,7 @@ export class ArchitectureLibraryComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load architecture projects.', error);
-        this.errorMessage =
-          'Failed to load projects. Please check whether the backend is running.';
+        this.errorMessage = 'Failed to load projects. Please check whether the backend is running.';
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -134,10 +141,7 @@ export class ArchitectureLibraryComponent implements OnInit {
 
     this.projectService.delete(project.id).subscribe({
       next: () => {
-        this.projects = this.projects.filter(
-          item => item.id !== project.id
-        );
-
+        this.projects = this.projects.filter(item => item.id !== project.id);
         this.errorMessage = '';
         this.cdr.detectChanges();
       },

@@ -1,143 +1,115 @@
-
-<div class="architecture-library">
-  <header class="page-header">
+<div class="container-fluid py-4 px-3 px-lg-4">
+  <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div>
-      <h1>Architecture Library</h1>
-      <p class="page-description">
-        Design, organize, and manage your software architecture projects.
-      </p>
+      <h1 class="h3 fw-bold text-dark mb-2">Architecture Library</h1>
+      <p class="text-secondary mb-0">Design, organize, and manage your software architecture projects.</p>
     </div>
-
-    <button class="btn-primary"
-            type="button"
-            (click)="showCreateForm = !showCreateForm">
-      <span class="button-icon">+</span>
+    <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2" (click)="showCreateForm = !showCreateForm">
+      <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
       New Project
     </button>
   </header>
 
   @if (showCreateForm) {
-  <section class="create-project-panel">
-    <h2>Create New Project</h2>
-
-    <form (ngSubmit)="createProject()">
-      <div class="form-group">
-        <label for="projectName">Project Name</label>
-        <input id="projectName"
-               name="projectName"
-               type="text"
-               [(ngModel)]="newProjectName"
-               placeholder="e.g. SmartPantry Architecture"
-               required
-               maxlength="100" />
-      </div>
-
-      <div class="form-group">
-        <label for="projectDescription">Description</label>
-        <textarea id="projectDescription"
-                  name="projectDescription"
-                  [(ngModel)]="newProjectDescription"
-                  placeholder="Describe the purpose of this architecture..."
-                  rows="3"
-                  maxlength="1000"></textarea>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-secondary"
-                type="button"
-                (click)="showCreateForm = false">
-          Cancel
-        </button>
-
-        <button class="btn-primary"
-                type="submit"
-                [disabled]="!newProjectName.trim()">
-          Create Project
-        </button>
-      </div>
-    </form>
+  <section class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+      <h2 class="h5 fw-semibold text-dark mb-4">Create New Project</h2>
+      <form (ngSubmit)="createProject()">
+        <div class="mb-3">
+          <label for="projectName" class="form-label fw-semibold">Project Name</label>
+          <input id="projectName" name="projectName" type="text" class="form-control" [(ngModel)]="newProjectName" placeholder="e.g. SmartPantry Architecture" required maxlength="100" />
+        </div>
+        <div class="mb-4">
+          <label for="projectDescription" class="form-label fw-semibold">Description</label>
+          <textarea id="projectDescription" name="projectDescription" class="form-control" [(ngModel)]="newProjectDescription" placeholder="Describe the purpose of this architecture..." rows="3" maxlength="1000"></textarea>
+        </div>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="showCreateForm = false">Cancel</button>
+          <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" [disabled]="!newProjectName.trim()">
+            <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+            Create Project
+          </button>
+        </div>
+      </form>
+    </div>
   </section>
   }
 
   @if (errorMessage) {
-  <div class="error-message" role="alert">
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
     {{ errorMessage }}
   </div>
   }
 
   @if (loading) {
-  <div class="state-message">
-    <span class="loading-spinner"></span>
-    <p>Loading architecture projects...</p>
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-5 text-center">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-secondary mb-0">Loading architecture projects...</p>
+    </div>
   </div>
   } @else if (projects.length === 0) {
-  <section class="empty-state">
-    <div class="empty-state-icon">◇</div>
-    <h2>No architecture projects yet</h2>
-    <p>
-      Start documenting your software architecture by creating your first project.
-    </p>
-    <button class="btn-primary"
-            type="button"
-            (click)="showCreateForm = true">
-      Create Your First Project
-    </button>
-  </section>
-  } @else {
-  <section class="projects-section">
-    <div class="section-header">
-      <h2>Your Projects</h2>
-      <span class="project-count">
-        {{ projects.length }} projects
-      </span>
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-4 p-lg-5 text-center">
+      <div class="empty-state-icon mx-auto mb-3">
+        <lucide-icon [img]="Workflow" [size]="32"></lucide-icon>
+      </div>
+      <h2 class="h5 fw-semibold text-dark mb-2">No Architecture Projects Yet</h2>
+      <p class="text-secondary mb-4">Start documenting your software architecture by creating your first project.</p>
+      <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2" (click)="showCreateForm = true">
+        <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+        Create Your First Project
+      </button>
     </div>
-
-    <div class="project-grid">
+  </div>
+  } @else {
+  <section>
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <h2 class="h5 fw-semibold text-dark mb-0">Your Projects</h2>
+      <span class="badge rounded-pill bg-body-secondary text-secondary">{{ projects.length }}</span>
+    </div>
+    <div class="row g-4">
       @for (project of projects; track project.id) {
-      <!--Project Card-->
-      <article class="project-card">
-        <div class="project-card-header">
-          <div class="project-icon">◇</div>
-          <span class="component-count">
-            {{ project.components.length }} components
-          </span>
-        </div>
-
-        <h3>{{ project.name }}</h3>
-
-        <p class="project-description">
-          {{ project.description || 'No description provided.' }}
-        </p>
-
-        <div class="project-card-footer">
-          <span class="project-date">
-            Created {{ project.createdAt | date:'mediumDate' }}
-          </span>
-
-          <button class="btn-secondary delete-button"
-                  type="button"
-                  (click)="deleteProject(project)">
-            <i class="bi bi-trash"></i>
-            Delete
-          </button>
-
-          <div class="project-card-actions">
-            <button class="btn-secondary duplicate-button"
-                    type="button"
-                    (click)="duplicateProject(project)">
-              <i class="bi bi-copy"></i>
-              Duplicate
-            </button>
-
-            <button class="btn-primary open-project-button"
-                    type="button"
-                    (click)="openProject(project)">
-              Open Project
-              <i class="bi bi-arrow-up-right"></i>
-            </button>
+      <div class="col-12 col-md-6 col-xl-4">
+        <article class="card project-card h-100 border rounded-3 shadow-sm">
+          <div class="card-body p-4 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+              <div class="project-icon">
+                <lucide-icon [img]="Workflow" [size]="22"></lucide-icon>
+              </div>
+              <span class="badge rounded-pill bg-body-secondary text-secondary">
+                {{ project.components.length }}
+                {{ project.components.length === 1 ? 'component' : 'components' }}
+              </span>
+            </div>
+            <h3 class="h6 fw-bold text-dark mb-2 text-break">{{ project.name }}</h3>
+            <p class="text-secondary small project-description mb-3">{{ project.description || 'No description provided.' }}</p>
+            <div class="mt-auto pt-3 border-top">
+              <div class="small text-secondary mb-3">
+                <lucide-icon [img]="CalendarDays" [size]="14" class="me-1"></lucide-icon>
+                Created {{ project.createdAt | date:'mediumDate' }}
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1" (click)="deleteProject(project)">
+                  <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+                  Delete
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" (click)="duplicateProject(project)">
+                  <lucide-icon [img]="Copy" [size]="15"></lucide-icon>
+                  Duplicate
+                </button>
+                <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 flex-grow-1 justify-content-center" (click)="openProject(project)">
+                  Open Project
+                  <lucide-icon [img]="ArrowUpRight" [size]="15"></lucide-icon>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </div>
       }
     </div>
   </section>

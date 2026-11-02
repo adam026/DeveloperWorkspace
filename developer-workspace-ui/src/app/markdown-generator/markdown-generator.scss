@@ -1,0 +1,63 @@
+:host {
+  display: block;
+  color: #263248;
+}
+
+.saved-document-item {
+  border-color: #e9ebf3;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8f9fc;
+  }
+
+  &.selected {
+    background-color: #f6f4ff;
+    border-color: #d9d4ff;
+  }
+}
+
+.document-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.document-name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.document-path {
+  overflow-wrap: anywhere;
+}
+
+.category-label {
+  border: 1px solid #e7e3ff;
+  background: #f6f4ff;
+  color: #6d5de7;
+  font-size: 11px;
+}
+
+.markdown-preview {
+  min-height: 400px;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+@media (max-width: 576px) {
+  .document-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .markdown-preview {
+    min-height: 300px;
+    font-size: 12px;
+  }
+}

@@ -3,10 +3,10 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
-
 import { DocumentService, Document } from '../services/document';
 import { PromptService, Prompt } from '../services/prompt';
-import { MarkdownDocumentService,MarkdownDocument } from '../services/markdown-document';
+import { MarkdownDocumentService, MarkdownDocument } from '../services/markdown-document';
+import { LucideAngularModule,Search,RefreshCw,FileText,Sparkles,FileCode,CalendarDays,FolderOpen,AlertCircle,ChevronRight } from 'lucide-angular';
 
 type WorkspaceItemType = 'Document' | 'Prompt' | 'Markdown';
 
@@ -22,20 +22,39 @@ interface WorkspaceItem {
 @Component({
   selector: 'app-workspace',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DatePipe,
+    LucideAngularModule
+  ],
   templateUrl: './workspace.html',
-  styleUrl: './workspace.css'
+  styleUrl: './workspace.scss'
 })
 export class WorkspaceComponent implements OnInit {
+
   private readonly router = inject(Router);
   private readonly documentService = inject(DocumentService);
   private readonly promptService = inject(PromptService);
   private readonly markdownDocumentService = inject(MarkdownDocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  // Lucide icons
+  protected readonly Search = Search;
+  protected readonly RefreshCw = RefreshCw;
+  protected readonly FileText = FileText;
+  protected readonly Sparkles = Sparkles;
+  protected readonly FileCode = FileCode;
+  protected readonly CalendarDays = CalendarDays;
+  protected readonly FolderOpen = FolderOpen;
+  protected readonly AlertCircle = AlertCircle;
+  protected readonly ChevronRight = ChevronRight;
+
   items: WorkspaceItem[] = [];
+
   searchTerm = '';
   selectedType = 'All';
+
   isLoading = true;
   errorMessage = '';
 
@@ -46,7 +65,8 @@ export class WorkspaceComponent implements OnInit {
 
     return this.items.filter(item => {
       const matchesType =
-        this.selectedType === 'All' || item.type === this.selectedType;
+        this.selectedType === 'All' ||
+        item.type === this.selectedType;
 
       const matchesSearch =
         !search ||
@@ -98,8 +118,6 @@ export class WorkspaceComponent implements OnInit {
     }
   }
 
-
-
   loadItems(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -110,6 +128,7 @@ export class WorkspaceComponent implements OnInit {
       markdownDocuments: this.markdownDocumentService.getAll()
     }).subscribe({
       next: ({ documents, prompts, markdownDocuments }) => {
+
         const documentItems: WorkspaceItem[] = documents.map(
           (document: Document) => ({
             id: document.id ?? '',
@@ -148,18 +167,27 @@ export class WorkspaceComponent implements OnInit {
           ...promptItems,
           ...markdownItems
         ].sort((a, b) => {
-          const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-          const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+          const dateA = a.updatedAt
+            ? new Date(a.updatedAt).getTime()
+            : 0;
+
+          const dateB = b.updatedAt
+            ? new Date(b.updatedAt).getTime()
+            : 0;
+
           return dateB - dateA;
         });
 
         this.isLoading = false;
         this.cdr.markForCheck();
       },
+
       error: error => {
         console.error('Failed to load workspace items:', error);
+
         this.errorMessage =
           'Failed to load workspace items. Please try again.';
+
         this.isLoading = false;
         this.cdr.markForCheck();
       }

@@ -1,0 +1,28 @@
+@use "variables" as *;
+
+// Újrafelhasználható komponensstílusok
+
+.dw-card {
+  background-color: $card-bg;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-sm;
+}
+
+.dw-page-title {
+  color: $body-color;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.dw-muted {
+  color: #858ca0;
+}
+
+.dw-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+}

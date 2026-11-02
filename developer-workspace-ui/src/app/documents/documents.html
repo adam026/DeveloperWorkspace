@@ -1,250 +1,365 @@
-<div class="welcome-section">
-  <div>
-    <p class="eyebrow">KNOWLEDGE BASE</p>
-    <h2>Documents</h2>
-    <p class="subtitle">
-      Manage your technical books, notes and useful documents.
-    </p>
-  </div>
+<div class="container-fluid p-0">
 
-  <div class="documents-actions">
-    <div class="date-label">
-      {{ documents.length }} DOCUMENTS
-    </div>
-
-    <button class="primary-button"
-            (click)="openCreateForm()">
-      <span>＋</span> New document
-    </button>
-  </div>
-</div>
-
-
-@if (showCreateForm) {
-<section class="create-document-panel">
-  <div class="create-document-heading">
+  <!-- Page header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-      <p class="eyebrow">KNOWLEDGE BASE</p>
-      <h3>New document</h3>
-      <p class="subtitle">Add a document to your personal workspace.</p>
+      <p class="eyebrow mb-2">KNOWLEDGE BASE</p>
+      <h2 class="fw-bold mb-2">Documents</h2>
+      <p class="subtitle mb-0">
+        Manage your technical books, notes and useful documents.
+      </p>
     </div>
 
-    <button type="button"
-            class="close-button"
-            aria-label="Close form"
-            (click)="closeCreateForm()">
-      ×
-    </button>
-  </div>
-
-
-  <form class="document-form" (ngSubmit)="createDocument()" #documentForm="ngForm">
-    <label for="document-title">Title *</label>
-    <input id="document-title"
-           name="title"
-           type="text"
-           [(ngModel)]="newDocument.title"
-           placeholder="e.g. C# best practices"
-           required
-           maxlength="150" />
-
-    <label for="document-description">Description</label>
-    <textarea id="document-description"
-              name="description"
-              [(ngModel)]="newDocument.description"
-              placeholder="What is this document about?"
-              rows="4"
-              maxlength="2000"></textarea>
-
-    <label for="document-category">Category</label>
-    <input id="document-category"
-           name="category"
-           type="text"
-           [(ngModel)]="newDocument.category"
-           placeholder="e.g. C#, .NET, Architecture"
-           maxlength="100" />
-
-    @if (errorMessage) {
-    <p class="error-message">{{ errorMessage }}</p>
-    }
-
-    <div class="form-actions">
-      <button type="button"
-              class="secondary-button"
-              (click)="closeCreateForm()">
-        Cancel
-      </button>
-
-      <button type="submit"
-              class="primary-button"
-              [disabled]="saving || documentForm.invalid">
-        {{ saving ? 'Saving...' : 'Save document' }}
-      </button>
-    </div>
-  </form>
-</section>
-}
-
-<section class="documents-panel">
-
-  <div class="document-filters">
-    <div class="search-box">
-      <span class="search-icon">⌕</span>
-      <input type="search"
-             aria-label="Search documents"
-             placeholder="Search by title, description or category..."
-             [(ngModel)]="searchTerm" />
-    </div>
-
-    <select class="category-filter"
-            aria-label="Filter by category"
-            [(ngModel)]="selectedCategory">
-      <option value="">All categories</option>
-      @for (category of categories; track category) {
-      <option [value]="category">{{ category }}</option>
-      }
-    </select>
-
-    <select class="category-filter"
-            aria-label="Sort documents"
-            [(ngModel)]="sortOrder">
-      <option value="newest">Newest first</option>
-      <option value="oldest">Oldest first</option>
-      <option value="titleAsc">Title A–Z</option>
-      <option value="titleDesc">Title Z–A</option>
-    </select>
-
-    @if (searchTerm || selectedCategory) {
-    <button type="button"
-            class="secondary-button"
-            (click)="searchTerm = ''; selectedCategory = ''; sortOrder = 'newest'">
-      Clear filters
-    </button>
-    }
-
-    <div class="document-results-info">
-      <span>
-        @if (searchTerm || selectedCategory) {
-        {{ filteredDocuments.length }} matching documents
-        } @else {
-        {{ filteredDocuments.length }} documents
-        }
+    <div class="d-flex align-items-center flex-wrap gap-3">
+      <span class="date-label">
+        {{ documents.length }} DOCUMENTS
       </span>
+
+      <button type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              (click)="openCreateForm()">
+        <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+        New document
+      </button>
     </div>
   </div>
 
-  @if (loading) {
-  <p>Loading documents...</p>
-  } @else if (errorMessage) {
-  <p class="error-message">{{ errorMessage }}</p>
-  <button class="primary-button" (click)="loadDocuments()">
-    Try again
-  </button>
-  } @else if (filteredDocuments.length === 0) {
-  <p>
-    {{
-    documents.length === 0
-      ? 'No documents found.'
-      : 'No documents match your filters.'
-    }}
-  </p>
-  }
-  @else {
-  <div class="documents-list">
-    @for (document of filteredDocuments; track document.id) {
-    <article class="document-card">
-      <div class="document-icon">▤</div>
-      <div class="document-details">
+  <!-- Create document -->
+  @if (showCreateForm) {
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
 
-        @if (editingDocumentId === document.id) {
-        <form class="document-form" (ngSubmit)="updateDocument()">
-          <label>Title *</label>
-          <input name="editTitle"
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <p class="eyebrow mb-2">KNOWLEDGE BASE</p>
+          <h3 class="h5 fw-bold mb-2">New document</h3>
+          <p class="subtitle mb-0">
+            Add a document to your personal workspace.
+          </p>
+        </div>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                aria-label="Close form"
+                title="Close"
+                (click)="closeCreateForm()">
+          <lucide-icon [img]="X" [size]="18"></lucide-icon>
+        </button>
+      </div>
+
+      <form class="document-form" (ngSubmit)="createDocument()" #documentForm="ngForm">
+
+        <div class="mb-3">
+          <label for="document-title" class="form-label">
+            Title <span class="text-danger">*</span>
+          </label>
+          <input id="document-title"
+                 name="title"
                  type="text"
-                 [(ngModel)]="editDocument.title"
+                 class="form-control"
+                 [(ngModel)]="newDocument.title"
+                 placeholder="e.g. C# best practices"
                  required
                  maxlength="150" />
+        </div>
 
-          <label>Description</label>
-          <textarea name="editDescription"
-                    [(ngModel)]="editDocument.description"
-                    rows="3"
+        <div class="mb-3">
+          <label for="document-description" class="form-label">
+            Description
+          </label>
+          <textarea id="document-description"
+                    name="description"
+                    class="form-control"
+                    [(ngModel)]="newDocument.description"
+                    placeholder="What is this document about?"
+                    rows="4"
                     maxlength="2000"></textarea>
+        </div>
 
-          <label>Category</label>
-          <input name="editCategory"
+        <div class="mb-3">
+          <label for="document-category" class="form-label">
+            Category
+          </label>
+          <input id="document-category"
+                 name="category"
                  type="text"
-                 [(ngModel)]="editDocument.category"
+                 class="form-control"
+                 [(ngModel)]="newDocument.category"
+                 placeholder="e.g. C#, .NET, Architecture"
                  maxlength="100" />
+        </div>
 
-          <div class="form-actions">
-            <button type="button"
-                    class="secondary-button"
-                    (click)="cancelEditing()">
-              Cancel
-            </button>
-
-            <button type="submit"
-                    class="primary-button"
-                    [disabled]="saving || !editDocument.title.trim()">
-              {{ saving ? 'Saving...' : 'Save changes' }}
-            </button>
-          </div>
-        </form>
-        } @else {
-        <h3>{{ document.title }}</h3>
-
-        <p>{{ document.description || 'No description provided.' }}</p>
-        <span class="category-label">
-          {{ document.category || 'Uncategorized' }}
-        </span>
+        @if (errorMessage) {
+        <div class="alert alert-danger py-2" role="alert">
+          {{ errorMessage }}
+        </div>
         }
 
-        <div class="document-actions">
+        <div class="d-flex justify-content-end flex-wrap gap-2 mt-4">
           <button type="button"
-                  class="secondary-button"
-                  [disabled]="saving"
-                  (click)="startEditing(document)">
-            Edit
+                  class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
+                  (click)="closeCreateForm()">
+            <lucide-icon [img]="X" [size]="16"></lucide-icon>
+            Cancel
           </button>
 
-          <button type="button"
-                  class="secondary-button"
-                  [disabled]="deleting"
-                  (click)="deletingDocumentId = document.id ?? null">
-            Delete
+          <button type="submit"
+                  class="btn btn-primary d-inline-flex align-items-center gap-2"
+                  [disabled]="saving || documentForm.invalid">
+            <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+            {{ saving ? 'Saving...' : 'Save document' }}
           </button>
+        </div>
 
-          @if (deletingDocumentId === document.id) {
-          <div class="delete-confirmation">
-            <p>Are you sure you want to delete this document?</p>
+      </form>
+    </div>
+  </section>
+  }
 
-            <button type="button"
-                    class="secondary-button"
-                    (click)="deletingDocumentId = null">
-              Cancel
-            </button>
+  <!-- Documents panel -->
+  <section class="card border-0 shadow-sm">
+    <div class="card-body p-4">
 
+      <!-- Filters -->
+      <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 mb-4">
 
-            <button type="button"
-                    class="primary-button"
-                    [disabled]="deleting"
-                    (click)="document.id && deleteDocument(document.id)">
-              {{ deleting ? 'Deleting...' : 'Confirm delete' }}
-            </button>
+        <div class="input-group flex-grow-1">
+          <span class="input-group-text bg-white">
+            <lucide-icon [img]="Search" [size]="17"></lucide-icon>
+          </span>
+
+          <input type="search"
+                 class="form-control"
+                 aria-label="Search documents"
+                 placeholder="Search by title, description or category..."
+                 [(ngModel)]="searchTerm" />
+        </div>
+
+        <select class="form-select"
+                aria-label="Filter by category"
+                [(ngModel)]="selectedCategory">
+          <option value="">All categories</option>
+          @for (category of categories; track category) {
+          <option [value]="category">{{ category }}</option>
+          }
+        </select>
+
+        <select class="form-select"
+                aria-label="Sort documents"
+                [(ngModel)]="sortOrder">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="titleAsc">Title A–Z</option>
+          <option value="titleDesc">Title Z–A</option>
+        </select>
+
+        @if (searchTerm || selectedCategory || sortOrder !== 'newest') {
+        <button type="button"
+                class="btn btn-outline-secondary text-nowrap d-inline-flex align-items-center gap-2"
+                (click)="searchTerm = ''; selectedCategory = ''; sortOrder = 'newest'">
+          <lucide-icon [img]="X" [size]="16"></lucide-icon>
+          Clear filters
+        </button>
+        }
+      </div>
+
+      <!-- Results count -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="document-results-info">
+          @if (searchTerm || selectedCategory) {
+          {{ filteredDocuments.length }} matching documents
+          } @else {
+          {{ filteredDocuments.length }} documents
+          }
+        </span>
+      </div>
+
+      <!-- Loading -->
+      @if (loading) {
+      <div class="d-flex justify-content-center align-items-center gap-2 py-5">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="text-secondary small">Loading documents...</span>
+      </div>
+      }
+
+      <!-- Error -->
+      @else if (errorMessage) {
+      <div class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
+
+      <button type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              (click)="loadDocuments()">
+        <lucide-icon [img]="RefreshCw" [size]="16"></lucide-icon>
+        Try again
+      </button>
+      }
+
+      <!-- Empty state -->
+      @else if (filteredDocuments.length === 0) {
+      <div class="text-center py-5">
+        <lucide-icon [img]="FileText"
+                     [size]="36"
+                     class="text-secondary mb-3"></lucide-icon>
+
+        <p class="text-secondary mb-0">
+          {{
+            documents.length === 0
+              ? 'No documents found.'
+              : 'No documents match your filters.'
+          }}
+        </p>
+      </div>
+      }
+
+      <!-- Document list -->
+      @else {
+      <div class="d-flex flex-column gap-3">
+
+        @for (document of filteredDocuments; track document.id) {
+        <article class="document-card card">
+
+          <div class="card-body d-flex align-items-start gap-3">
+
+            <div class="document-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+              <lucide-icon [img]="FileText" [size]="21"></lucide-icon>
+            </div>
+
+            <div class="document-details flex-grow-1 min-w-0">
+
+              <!-- Edit form -->
+              @if (editingDocumentId === document.id) {
+              <form class="document-form" (ngSubmit)="updateDocument()">
+
+                <div class="mb-3">
+                  <label class="form-label">Title <span class="text-danger">*</span></label>
+                  <input name="editTitle"
+                         type="text"
+                         class="form-control"
+                         [(ngModel)]="editDocument.title"
+                         required
+                         maxlength="150" />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea name="editDescription"
+                            class="form-control"
+                            [(ngModel)]="editDocument.description"
+                            rows="3"
+                            maxlength="2000"></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Category</label>
+                  <input name="editCategory"
+                         type="text"
+                         class="form-control"
+                         [(ngModel)]="editDocument.category"
+                         maxlength="100" />
+                </div>
+
+                <div class="d-flex justify-content-end flex-wrap gap-2">
+                  <button type="button"
+                          class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+                          (click)="cancelEditing()">
+                    <lucide-icon [img]="X" [size]="15"></lucide-icon>
+                    Cancel
+                  </button>
+
+                  <button type="submit"
+                          class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
+                          [disabled]="saving || !editDocument.title.trim()">
+                    <lucide-icon [img]="Save" [size]="15"></lucide-icon>
+                    {{ saving ? 'Saving...' : 'Save changes' }}
+                  </button>
+                </div>
+
+              </form>
+              }
+
+              <!-- Document details -->
+              @else {
+              <h3 class="h6 fw-bold mb-2">{{ document.title }}</h3>
+
+              <p class="text-secondary small mb-3">
+                {{ document.description || 'No description provided.' }}
+              </p>
+
+              <span class="category-label badge rounded-pill">
+                {{ document.category || 'Uncategorized' }}
+              </span>
+
+              <!-- Actions -->
+              <div class="d-flex flex-wrap gap-2 mt-3">
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+                        [disabled]="saving"
+                        (click)="startEditing(document)">
+                  <lucide-icon [img]="Pencil" [size]="15"></lucide-icon>
+                  Edit
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2"
+                        [disabled]="deleting"
+                        (click)="deletingDocumentId = document.id ?? null">
+                  <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+                  Delete
+                </button>
+
+              </div>
+
+              <!-- Delete confirmation -->
+              @if (deletingDocumentId === document.id) {
+              <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-3 mb-0">
+
+                <p class="small mb-0">
+                  Are you sure you want to delete this document?
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 flex-shrink-0">
+                  <button type="button"
+                          class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+                          (click)="deletingDocumentId = null">
+                    <lucide-icon [img]="X" [size]="15"></lucide-icon>
+                    Cancel
+                  </button>
+
+                  <button type="button"
+                          class="btn btn-danger btn-sm d-inline-flex align-items-center gap-2"
+                          [disabled]="deleting"
+                          (click)="document.id && deleteDocument(document.id)">
+                    <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+                    {{ deleting ? 'Deleting...' : 'Confirm delete' }}
+                  </button>
+                </div>
+
+              </div>
+              }
+              }
+
+            </div>
+
+            <!-- Details link -->
+            <a class="document-arrow btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center flex-shrink-0"
+               [routerLink]="['/documents', document.id]"
+               [attr.aria-label]="'View details: ' + document.title"
+               title="View details">
+              <lucide-icon [img]="ArrowUpRight" [size]="17"></lucide-icon>
+            </a>
 
           </div>
-          }
-        </div>
+        </article>
+        }
+
       </div>
-      <a class="document-arrow"
-         [routerLink]="['/documents', document.id]"
-         [attr.aria-label]="'View details: ' + document.title"
-         title="View details">
-        ↗
-      </a>
-    </article>
-    }
-  </div>
-  }
-</section>
+      }
+
+    </div>
+  </section>
+</div>

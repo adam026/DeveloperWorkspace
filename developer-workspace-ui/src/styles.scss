@@ -1,0 +1,26 @@
+@use "styles/variables" as *;
+
+// Bootstrap
+@use "../node_modules/bootstrap/scss/bootstrap";
+@use "bootstrap-icons/font/bootstrap-icons";
+
+// DevWorkspace saját stílusai
+@use "styles/layout";
+@use "styles/components";
+
+// Globális alapbeállítások
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family: $font-family-base;
+  background-color: $body-bg;
+  color: $body-color;
+}
+
+* {
+  box-sizing: border-box;
+}

@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  color: #263248;
+}
+
+.eyebrow {
+  color: #7464ed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.prompt-card {
+  border-color: #e5e7eb;
+  border-radius: 13px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: #d9d4ff;
+    box-shadow: 0 8px 24px rgb(38 52 90 / 6%) !important;
+  }
+}
+
+.category-label {
+  border: 1px solid #e7e3ff;
+  background: #f6f4ff;
+  color: #6d5de7;
+  font-size: 11px;
+}
+
+.prompt-content {
+  max-height: 220px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.empty-icon {
+  width: 52px;
+  height: 52px;
+}
+
+@media (max-width: 576px) {
+  .prompt-content {
+    max-height: 180px;
+  }
+}

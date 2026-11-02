@@ -2,17 +2,30 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Prompt, PromptService } from '../services/prompt';
+import { LucideAngularModule,Plus,X,Save,Search,AlertCircle,Sparkles,Pencil,Trash2,Check,Copy } from 'lucide-angular';
 
 @Component({
   selector: 'app-prompt-library',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './prompt-library.html',
-  styleUrl: './prompt-library.css'
+  styleUrl: './prompt-library.scss'
 })
 export class PromptLibrary implements OnInit {
   private readonly promptService = inject(PromptService);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Icons from lucide-angular
+  readonly Plus = Plus;
+  readonly X = X;
+  readonly Save = Save;
+  readonly Search = Search;
+  readonly AlertCircle = AlertCircle;
+  readonly Sparkles = Sparkles;
+  readonly Pencil = Pencil;
+  readonly Trash2 = Trash2;
+  readonly Check = Check;
+  readonly Copy = Copy;
 
   protected prompts: Prompt[] = [];
 
@@ -114,11 +127,13 @@ export class PromptLibrary implements OnInit {
         this.showCreateForm = false;
         this.isSaving = false;
         this.successMessage = 'Prompt saved successfully.';
+        this.cdr.detectChanges();
       },
       error: error => {
         console.error('Failed to save prompt.', error);
         this.errorMessage = 'Failed to save the prompt.';
         this.isSaving = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -188,11 +203,13 @@ export class PromptLibrary implements OnInit {
         this.editPrompt = this.createEmptyPrompt();
         this.isSaving = false;
         this.successMessage = 'Prompt updated successfully.';
+        this.cdr.detectChanges();
       },
       error: error => {
         console.error('Failed to update prompt.', error);
         this.errorMessage = 'Failed to update the prompt.';
         this.isSaving = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -228,6 +245,7 @@ export class PromptLibrary implements OnInit {
         this.deletingPromptId = null;
         this.isSaving = false;
         this.successMessage = 'Prompt deleted successfully.';
+        this.cdr.detectChanges();
 
         if (this.copiedPromptId === id) {
           this.copiedPromptId = null;
@@ -237,6 +255,7 @@ export class PromptLibrary implements OnInit {
         console.error('Failed to delete prompt.', error);
         this.errorMessage = 'Failed to delete the prompt.';
         this.isSaving = false;
+        this.cdr.detectChanges();
       }
     });
   }

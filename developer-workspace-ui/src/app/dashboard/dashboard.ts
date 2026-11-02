@@ -5,6 +5,7 @@ import { forkJoin } from 'rxjs';
 import { DocumentService, Document } from '../services/document';
 import { PromptService, Prompt } from '../services/prompt';
 import { MarkdownDocument, MarkdownDocumentService } from '../services/markdown-document';
+import { LucideAngularModule,FileText,Sparkles,Bot,FileCode,Workflow,BookOpen,ListTodo,Code2,Layers,Search,FolderOpen,ArrowRight}  from 'lucide-angular';
 
 interface RecentWorkspaceItem {
   id: string | undefined;
@@ -18,11 +19,27 @@ interface RecentWorkspaceItem {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterLink],
+  imports: [CommonModule, DatePipe, RouterLink, LucideAngularModule],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css'
+  styleUrl: './dashboard.scss'
 })
 export class DashboardComponent implements OnInit {
+  // Module icons
+  readonly FileText = FileText;
+  readonly Sparkles = Sparkles;
+  readonly Bot = Bot;
+  readonly FileCode = FileCode;
+  readonly Workflow = Workflow;
+  readonly BookOpen = BookOpen;
+  readonly ListTodo = ListTodo;
+  readonly Code2 = Code2;
+  readonly Layers = Layers;
+
+  // Action icons
+  readonly Search = Search;
+  readonly FolderOpen = FolderOpen;
+  readonly ArrowRight = ArrowRight;
+
   documentCount = 0;
   promptCount = 0;
 

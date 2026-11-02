@@ -1,12 +1,9 @@
+
 :host {
   display: block;
   min-height: 100vh;
   color: #202536;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 .app-shell {
@@ -40,6 +37,7 @@
   place-items: center;
   width: 42px;
   height: 42px;
+  flex-shrink: 0;
   border-radius: 13px;
   background: #7668f5;
   color: #fff;
@@ -78,32 +76,32 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 0.75rem;
+  padding: 0.75rem;
   border-radius: 9px;
   color: #aeb5c9;
   text-decoration: none;
   font-size: 13px;
   transition: background 0.2s, color 0.2s;
-}
 
-  .nav-item > span {
-    display: inline-flex;
-    justify-content: center;
-    width: 20px;
-    font-size: 17px;
-  }
-
-  .nav-item:hover {
+  &:hover {
     color: #fff;
     background: #252b40;
   }
 
-  .nav-item.active {
+  &.active {
     color: #fff;
     background: #6557e8;
     box-shadow: 0 5px 16px #6557e833;
   }
+
+  lucide-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+}
 
 .sidebar-footer {
   display: flex;
@@ -119,6 +117,7 @@
 .status-dot {
   width: 7px;
   height: 7px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #52d6a0;
 }
@@ -138,25 +137,26 @@
   height: 78px;
   padding: 0 48px;
   border-bottom: 1px solid #e2e6f0;
-  background: #ffffff;
+  background: #fff;
 }
 
 .breadcrumb {
   color: #59647a;
   font-size: 13px;
   font-weight: 500;
-}
 
-  .breadcrumb span {
+  span {
     margin: 0 10px;
     color: #a1a9ba;
   }
+}
 
 .user-avatar {
   display: grid;
   place-items: center;
   width: 37px;
   height: 37px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #ece9ff;
   color: #5145cd;
@@ -188,6 +188,24 @@
 @media (max-width: 700px) {
   .app-shell {
     flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .brand {
+    padding-bottom: 20px;
+  }
+
+  .navigation {
+    gap: 4px;
+  }
+
+  .sidebar-footer {
+    margin-top: 20px;
   }
 
   .topbar {

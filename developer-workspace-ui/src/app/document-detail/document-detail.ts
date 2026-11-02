@@ -3,13 +3,14 @@ import { DatePipe, Location} from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { DocumentService, Document } from '../services/document';
 import { AiService } from '../services/ai';
+import { LucideAngularModule,ArrowLeft,AlertCircle,FileText,Sparkles,Info,Clock } from 'lucide-angular';
 
 @Component({
   selector: 'app-document-detail',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, LucideAngularModule],
   templateUrl: './document-detail.html',
-  styleUrl: './document-detail.css'
+  styleUrl: './document-detail.scss'
 })
 export class DocumentDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -17,6 +18,14 @@ export class DocumentDetail implements OnInit {
   private readonly documentService = inject(DocumentService);
   private readonly aiService = inject(AiService);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Icons from lucide-angular
+  readonly ArrowLeft = ArrowLeft;
+  readonly AlertCircle = AlertCircle;
+  readonly FileText = FileText;
+  readonly Sparkles = Sparkles;
+  readonly Info = Info;
+  readonly Clock = Clock;
 
   protected document: Document | null = null;
   protected loading = true;

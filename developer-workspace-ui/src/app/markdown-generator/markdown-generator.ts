@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule,Plus,Check,AlertCircle,RefreshCw,Search,FileSearch,FileCode,Trash2,X,Sparkles,Save,Download } from 'lucide-angular';
 
 import {
   MarkdownDocument,
@@ -11,13 +12,27 @@ import {
 @Component({
   selector: 'app-markdown-generator',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './markdown-generator.html',
-  styleUrl: './markdown-generator.css'
+  styleUrl: './markdown-generator.scss'
 })
 export class MarkdownGenerator implements OnInit {
   private readonly markdownService = inject(MarkdownDocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Icons from lucide-angular
+  readonly Plus = Plus;
+  readonly Check = Check;
+  readonly AlertCircle = AlertCircle;
+  readonly RefreshCw = RefreshCw;
+  readonly Search = Search;
+  readonly FileSearch = FileSearch;
+  readonly FileCode = FileCode;
+  readonly Trash2 = Trash2;
+  readonly X = X;
+  readonly Sparkles = Sparkles;
+  readonly Save = Save;
+  readonly Download = Download;
 
   protected readonly fileTypes: {
     value: MarkdownFileType;

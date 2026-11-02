@@ -1,0 +1,88 @@
+:host {
+  display: block;
+  color: #263248;
+}
+
+/* Page header */
+
+.eyebrow {
+  color: #7464ed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.subtitle {
+  color: #7d89a0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.date-label {
+  color: #8490a6;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+}
+
+/* Document cards */
+
+.document-card {
+  border-color: #e2e7f1;
+  border-radius: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: #d2ccff;
+    box-shadow: 0 4px 14px rgb(31 41 55 / 4%);
+  }
+}
+
+.document-icon {
+  width: 42px;
+  height: 42px;
+  background: #f0ebff;
+  color: #6955ef;
+}
+
+.document-details {
+  overflow-wrap: anywhere;
+}
+
+.category-label {
+  border: 1px solid #e7e3ff;
+  background: #f6f4ff;
+  color: #6d5de7;
+  font-size: 10px;
+}
+
+/* Document details link */
+
+.document-arrow {
+  width: 34px;
+  height: 34px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    border-color: #d2ccff;
+    background: #f6f4ff;
+  }
+}
+
+/* Responsive adjustments */
+
+@media (max-width: 760px) {
+  .document-card .card-body {
+    gap: 12px !important;
+  }
+
+  .document-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .document-arrow {
+    width: 30px;
+    height: 30px;
+  }
+}

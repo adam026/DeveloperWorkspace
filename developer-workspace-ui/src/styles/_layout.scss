@@ -1,0 +1,38 @@
+@use "variables" as *;
+
+// Globális elrendezési segédosztályok
+
+.dw-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.dw-section {
+  margin-bottom: 2rem;
+}
+
+.dw-grid {
+  display: grid;
+  gap: 1.125rem;
+}
+
+.dw-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dw-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 992px) {
+  .dw-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .dw-grid-2,
+  .dw-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

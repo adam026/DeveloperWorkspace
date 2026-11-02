@@ -1,0 +1,92 @@
+:host {
+  display: block;
+  color: #263248;
+}
+
+/* Page header */
+
+.eyebrow {
+  color: #7464ed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+/* Document icon */
+
+.detail-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+/* Category badge */
+
+.category-label {
+  border: 1px solid #e7e3ff;
+  background: #f6f4ff;
+  color: #6d5de7;
+  font-size: 11px;
+}
+
+/* Document information */
+
+.detail-field {
+  color: #263248;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.field-label {
+  color: #8490a6;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.description-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Metadata */
+
+.metadata-item {
+  border-color: #e2e7f1;
+  border-radius: 10px;
+  background: #f8f9fc;
+
+  p {
+    color: #47536b;
+    font-size: 12px;
+  }
+}
+
+/* AI summary */
+
+.summary-result {
+  border-color: #e2e7f1;
+  border-radius: 12px;
+  background: #f8f9fc;
+
+  p {
+    color: #47536b;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+}
+
+.summary-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Responsive adjustments */
+
+@media (max-width: 576px) {
+  .detail-icon {
+    width: 40px;
+    height: 40px;
+  }
+}

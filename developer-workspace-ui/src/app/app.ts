@@ -1,24 +1,32 @@
 import { Component, inject } from '@angular/core';
-import {
-  Router,
-  RouterOutlet,
-  RouterLink,
-  RouterLinkActive
-} from '@angular/router';
+import { LucideAngularModule,House,FileText,Sparkles,Bot,Workflow,BookOpen,ListTodo,Code2,Layers } from 'lucide-angular';
+import { Router,RouterOutlet,RouterLink,RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
+    LucideAngularModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive
   ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.scss'
 })
 export class App {
   private readonly router = inject(Router);
+
+  // Navigation icons
+  readonly House = House;
+  readonly FileText = FileText;
+  readonly Sparkles = Sparkles;
+  readonly Bot = Bot;
+  readonly Workflow = Workflow;
+  readonly BookOpen = BookOpen;
+  readonly ListTodo = ListTodo;
+  readonly Code2 = Code2;
+  readonly Layers = Layers;
 
   get currentPageTitle(): string {
     const url = this.router.url;
@@ -39,8 +47,10 @@ export class App {
       return 'Workspace';
     }
 
-    if (url.startsWith('/architecture-library')
-      || url.startsWith('/architecture-projects')) {
+    if (
+      url.startsWith('/architecture-library') ||
+      url.startsWith('/architecture-projects')
+    ) {
       return 'Architecture Library';
     }
 

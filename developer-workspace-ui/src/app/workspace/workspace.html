@@ -1,109 +1,230 @@
-<section class="workspace-page">
-  <header class="page-header">
+
+<section class="workspace-page container-fluid">
+
+  <!-- Header -->
+  <header class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
     <div>
-      <h1>Workspace</h1>
-      <p class="page-description">
+      <h1 class="mb-2">Workspace</h1>
+      <p class="page-description mb-0">
         Browse and manage your development knowledge in one place.
       </p>
     </div>
 
-    <button class="refresh-button"
+    <button class="btn btn-primary refresh-button d-flex align-items-center gap-2"
             type="button"
             (click)="loadItems()"
             [disabled]="isLoading">
+
+      <lucide-icon [img]="RefreshCw"
+                   [size]="16"
+                   [class.spin]="isLoading">
+      </lucide-icon>
+
       Refresh
     </button>
+
   </header>
 
-  <div class="workspace-toolbar">
-    <div class="search-box">
-      <span class="search-icon">⌕</span>
+  <!-- Search and filter -->
+  <div class="workspace-toolbar d-flex flex-wrap gap-3 mb-3">
+
+    <div class="search-box d-flex align-items-center flex-grow-1">
+
+      <lucide-icon [img]="Search"
+                   [size]="18"
+                   class="search-icon">
+      </lucide-icon>
+
       <input type="search"
+             class="form-control"
              placeholder="Search workspace..."
              aria-label="Search workspace"
              [(ngModel)]="searchTerm">
+
     </div>
 
-    <select class="type-filter"
+    <select class="form-select type-filter"
             aria-label="Filter by type"
             [(ngModel)]="selectedType">
+
       @for (type of types; track type) {
       <option [value]="type">{{ type }}</option>
       }
+
     </select>
+
   </div>
 
-  <div class="workspace-summary">
+  <!-- Results summary -->
+  <div class="workspace-summary d-flex justify-content-between align-items-center flex-wrap mb-2">
+
     <span>{{ filteredItems.length }} items</span>
+
     <span>All your development resources</span>
+
   </div>
 
+  <!-- Loading -->
   @if (isLoading) {
-  <div class="workspace-state">
-    <p>Loading workspace items...</p>
+
+  <div class="workspace-state text-center">
+
+    <lucide-icon [img]="RefreshCw"
+                 [size]="28"
+                 class="state-icon spin">
+    </lucide-icon>
+
+    <p class="mb-0">Loading workspace items...</p>
+
   </div>
+
   } @else if (errorMessage) {
-  <div class="workspace-state error-state">
+
+  <!-- Error -->
+  <div class="workspace-state error-state text-center">
+
+    <lucide-icon [img]="AlertCircle"
+                 [size]="28"
+                 class="state-icon">
+    </lucide-icon>
+
     <p>{{ errorMessage }}</p>
-    <button type="button" class="refresh-button" (click)="loadItems()">
+
+    <button type="button"
+            class="btn btn-primary refresh-button d-inline-flex align-items-center gap-2"
+            (click)="loadItems()">
+
+      <lucide-icon [img]="RefreshCw"
+                   [size]="15">
+      </lucide-icon>
+
       Try again
     </button>
+
   </div>
+
   } @else if (filteredItems.length === 0) {
-  <div class="workspace-state empty-state">
-    <h2>No items found</h2>
-    <p>
+
+  <!-- Empty state -->
+  <div class="workspace-state empty-state text-center">
+
+    <lucide-icon [img]="FolderOpen"
+                 [size]="36"
+                 class="state-icon">
+    </lucide-icon>
+
+    <h2 class="h5">No items found</h2>
+
+    <p class="mb-0">
       @if (searchTerm || selectedType !== 'All') {
       Try changing your search or filter.
       } @else {
       Your workspace items will appear here when you create them.
       }
     </p>
+
   </div>
+
   } @else {
-  <div class="workspace-list">
+
+  <!-- Workspace items -->
+  <div class="workspace-list d-flex flex-column gap-2">
+
     @for (item of filteredItems; track item.type + '-' + item.id) {
-    <article class="workspace-item" [class.clickable-item]="true" (click)="openItem(item)">
-      <div class="item-icon"
+
+    <article class="workspace-item d-flex align-items-start gap-3"
+             role="button"
+             tabindex="0"
+             (click)="openItem(item)"
+             (keydown.enter)="openItem(item)"
+             (keydown.space)="openItem(item); $event.preventDefault()">
+
+      <!-- Item icon -->
+      <div class="item-icon d-flex align-items-center justify-content-center flex-shrink-0"
            [class.document-icon]="item.type === 'Document'"
            [class.prompt-icon]="item.type === 'Prompt'"
            [class.markdown-icon]="item.type === 'Markdown'">
+
         @switch (item.type) {
+
         @case ('Document') {
-        <span>D</span>
+        <lucide-icon [img]="FileText"
+                     [size]="21">
+        </lucide-icon>
         }
+
         @case ('Prompt') {
-        <span>P</span>
+        <lucide-icon [img]="Sparkles"
+                     [size]="21">
+        </lucide-icon>
         }
+
         @case ('Markdown') {
-        <span>M</span>
+        <lucide-icon [img]="FileCode"
+                     [size]="21">
+        </lucide-icon>
         }
+
         }
+
       </div>
 
-      <div class="item-content">
-        <div class="item-title-row">
-          <h2>{{ item.title }}</h2>
-          <span class="item-type">{{ item.type }}</span>
+      <!-- Item content -->
+      <div class="item-content flex-grow-1">
+
+        <div class="item-title-row d-flex align-items-center flex-wrap gap-2">
+
+          <h2 class="mb-0">{{ item.title }}</h2>
+
+          <span class="badge item-type">
+            {{ item.type }}
+          </span>
+
         </div>
 
         <p class="item-description">
           {{ item.description || 'No description available.' }}
         </p>
 
-        <div class="item-meta">
+        <div class="item-meta d-flex align-items-center flex-wrap gap-2">
+
           @if (item.category) {
-          <span class="item-category">{{ item.category }}</span>
-          }
-          @if (item.updatedAt) {
-          <span>
-            Updated {{ item.updatedAt | date:'mediumDate' }}
+          <span class="item-category badge">
+            {{ item.category }}
           </span>
           }
+
+          @if (item.updatedAt) {
+          <span class="item-date d-inline-flex align-items-center gap-1">
+
+            <lucide-icon [img]="CalendarDays"
+                         [size]="13">
+            </lucide-icon>
+
+            Updated {{ item.updatedAt | date:'mediumDate' }}
+
+          </span>
+          }
+
         </div>
+
       </div>
+
+      <!-- Navigation indicator -->
+      <div class="item-action d-flex align-items-center align-self-center">
+
+        <lucide-icon [img]="ChevronRight"
+                     [size]="18">
+        </lucide-icon>
+
+      </div>
+
     </article>
+
     }
+
   </div>
+
   }
 </section>

@@ -2,13 +2,14 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Prompt, PromptService } from '../services/prompt';
+import { LucideAngularModule,ArrowLeft,Copy,Check,AlertCircle,Sparkles,CalendarDays,Clock } from 'lucide-angular';
 
 @Component({
   selector: 'app-prompt-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './prompt-detail.html',
-  styleUrl: './prompt-detail.css'
+  styleUrl: './prompt-detail.scss'
 })
 export class PromptDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -21,6 +22,15 @@ export class PromptDetail implements OnInit {
   protected errorMessage = '';
   protected copySuccess = false;
   protected returnToWorkspace = false;
+
+  // Icons from lucide-angular
+  readonly ArrowLeft = ArrowLeft;
+  readonly Copy = Copy;
+  readonly Check = Check;
+  readonly AlertCircle = AlertCircle;
+  readonly Sparkles = Sparkles;
+  readonly CalendarDays = CalendarDays;
+  readonly Clock = Clock;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

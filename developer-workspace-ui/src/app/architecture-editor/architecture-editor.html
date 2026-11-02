@@ -1,527 +1,430 @@
-<div class="architecture-editor">
-  <header class="editor-header">
-    <button class="btn-secondary" type="button" (click)="goBack()">
-      ← Back to Architecture Library
+<div class="container-fluid py-3 px-3 px-lg-4">
+  <!-- Header -->
+  <header class="mb-4">
+    <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 mb-3" (click)="goBack()">
+      <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>
+      Back to Architecture Library
     </button>
 
-    @if (project) {
-    <div class="project-heading">
+    @if (project; as p) {
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
       <div>
-        <h1>{{ project.name }}</h1>
-        <p>{{ project.description || 'No description provided.' }}</p>
+        <h1 class="h3 fw-bold text-dark mb-2">{{ p.name }}</h1>
+        <p class="text-secondary mb-0">{{ p.description || 'No description provided.' }}</p>
       </div>
-
-      <div class="project-stats">
-        <span>{{ project.components.length }} components</span>
-        <span>{{ project.connections.length }} connections</span>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
+          <lucide-icon [img]="Boxes" [size]="14" class="me-1"></lucide-icon>
+          {{ p.components.length }} components
+        </span>
+        <span class="badge rounded-pill bg-info-subtle text-info-emphasis px-3 py-2">
+          <lucide-icon [img]="GitBranch" [size]="14" class="me-1"></lucide-icon>
+          {{ p.connections.length }} connections
+        </span>
       </div>
     </div>
     }
   </header>
 
+  <!-- Loading -->
   @if (loading) {
-  <div class="state-message">
-    <span class="loading-spinner"></span>
-    <p>Loading architecture project...</p>
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-5 text-center">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-secondary mb-0">Loading architecture project...</p>
+    </div>
   </div>
-  } @else if (errorMessage) {
-  <div class="error-message" role="alert">
-    <p>{{ errorMessage }}</p>
-    <button class="btn-secondary" type="button" (click)="goBack()">
-      Back to Projects
-    </button>
+  } @else if (!project && errorMessage) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    <span>{{ errorMessage }}</span>
+    <button type="button" class="btn btn-sm btn-outline-danger ms-auto" (click)="goBack()">Back to Projects</button>
   </div>
   } @else if (project) {
+  <!-- Notifications -->
   @if (successMessage) {
-  <div class="success-message" role="status">
+  <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+    <lucide-icon [img]="CheckCircle" [size]="18"></lucide-icon>
     {{ successMessage }}
   </div>
   }
 
   @if (errorMessage) {
-  <div class="error-message" role="alert">
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
     {{ errorMessage }}
   </div>
   }
 
-  <!--Editor Workspace-->
-  <main class="editor-workspace">
-    <!--Sidebar for components-->
-    <aside class="component-sidebar">
-      <h2>Components</h2>
+  <!-- Toolbar -->
+  <div class="card border-0 shadow-sm rounded-3 mb-3">
+    <div class="card-body d-flex flex-wrap align-items-center gap-2 p-3">
+      <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2" (click)="showAddComponentForm = !showAddComponentForm">
+        <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+        Add Component
+      </button>
 
-      <p class="sidebar-description">
-        Components included in this architecture.
-      </p>
+      <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2" (click)="showAddConnectionForm = !showAddConnectionForm">
+        <lucide-icon [img]="GitBranchPlus" [size]="16"></lucide-icon>
+        Add Connection
+      </button>
 
-      @if (project.components.length === 0) {
-      <div class="sidebar-empty">
-        <p>No components yet.</p>
-        <span>Add components in a future editing step.</span>
-      </div>
-      } @else {
+      <div class="vr mx-1 d-none d-md-block"></div>
 
-      <div class="component-list">
-        @for (component of project.components; track component.id) {
-        <article class="component-item">
-          <div class="component-type-icon">◇</div>
+      <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2" (click)="autoLayout()" title="Auto Layout">
+        <lucide-icon [img]="Workflow" [size]="16"></lucide-icon>
+        <span class="d-none d-sm-inline">Auto Layout</span>
+      </button>
 
-          @if (editingComponentId === component.id) {
-          <div class="component-edit-form">
-            <input type="text"
-                   [(ngModel)]="editComponentName"
-                   placeholder="Component name"
-                   aria-label="Component name" />
+      <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2" (click)="fitToScreen()" title="Fit to Screen">
+        <lucide-icon [img]="Scan" [size]="16"></lucide-icon>
+        <span class="d-none d-sm-inline">Fit to Screen</span>
+      </button>
 
-            <input type="text"
-                   [(ngModel)]="editComponentType"
-                   placeholder="Component type"
-                   aria-label="Component type" />
-
-            <div class="component-edit-actions">
-              <button type="button"
-                      class="btn-save-component"
-                      (click)="saveComponentEdit()">
-                Save
-              </button>
-
-              <button type="button"
-                      class="btn-cancel-component"
-                      (click)="cancelComponentEdit()">
-                Cancel
-              </button>
-            </div>
-          </div>
-          } @else {
-          <div class="component-info">
-            <h3>{{ component.name }}</h3>
-            <span>{{ component.type || 'Component' }}</span>
-          </div>
-
-          <div class="component-actions">
-            <button class="btn-edit-component"
-                    type="button"
-                    (click)="editComponent(component.id)"
-                    [attr.aria-label]="'Edit component ' + component.name"
-                    title="Edit component">
-              Edit
-            </button>
-
-            <button class="btn-delete-component"
-                    type="button"
-                    (click)="deleteComponent(component.id)"
-                    [attr.aria-label]="'Delete component ' + component.name"
-                    title="Delete component">
-              Delete
-            </button>
-          </div>
-          }
-        </article>
-        }
-      </div>
-      }
-    </aside>
-
-    <!--Main canvas area-->
-    <section class="architecture-canvas-section">
-
-      <div class="canvas-toolbar">
-        <div>
-          <h2>Architecture Canvas</h2>
-          <p>Drag components to arrange your architecture.</p>
-        </div>
-
-        <div class="toolbar-actions">
-          <button class="btn-secondary"
-                  type="button"
-                  (click)="showAddComponentForm = !showAddComponentForm">
-            + Add Component
-          </button>
-
-          <button class="btn-secondary"
-                  type="button"
-                  (click)="autoLayout()">
-            <i class="bi bi-diagram-3"></i>
-            Auto Layout
-          </button>
-
-          <button class="btn-secondary"
-                  type="button"
-                  (click)="exportArchitecture()">
-            <i class="bi bi-download"></i>
-            Export PNG
-          </button>
-
-          <button class="btn-primary"
-                  type="button"
-                  (click)="saveProject()"
-                  [disabled]="isSaving">
-            {{ isSaving ? 'Saving...' : 'Save Architecture' }}
-          </button>
-        </div>
-      </div>
-
-      @if (showAddComponentForm) {
-      <form class="add-component-form" (ngSubmit)="addComponent()">
-        <div class="form-field">
-          <label for="componentName">Component Name</label>
-          <input id="componentName"
-                 name="componentName"
-                 [(ngModel)]="newComponentName"
-                 placeholder="e.g. Authentication Service"
-                 required
-                 maxlength="100" />
-        </div>
-
-        <div class="form-field">
-          <label for="componentType">Component Type</label>
-          <select id="componentType"
-                  name="componentType"
-                  [(ngModel)]="newComponentType">
-            @for (type of componentTypes; track type) {
-            <option [value]="type">{{ type }}</option>
-            }
-          </select>
-        </div>
-
-        <button class="btn-primary"
-                type="submit"
-                [disabled]="!newComponentName.trim()">
-          Add Component
+      <div class="ms-md-auto d-flex align-items-center gap-1">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="zoomOut()" title="Zoom Out">
+          <lucide-icon [img]="Minus" [size]="16"></lucide-icon>
         </button>
-      </form>
-      }
-
-      <div class="canvas-zoom-controls">
-        <button class="zoom-button"
-                type="button"
-                (click)="zoomOut()"
-                title="Zoom out"
-                aria-label="Zoom out">
-          −
-        </button>
-
-        <span class="zoom-level">
-          {{ (zoomLevel * 100).toFixed(0) }}%
-        </span>
-
-        <button class="zoom-button"
-                type="button"
-                (click)="zoomIn()"
-                title="Zoom in"
-                aria-label="Zoom in">
-          +
-        </button>
-
-        <button class="btn-secondary"
-                type="button"
-                (click)="fitToScreen()"
-                title="Fit to screen">
-          <i class="bi bi-arrows-fullscreen"></i>
-          Fit to screen
+        <span class="small text-secondary px-2">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="zoomIn()" title="Zoom In">
+          <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
         </button>
       </div>
 
-      <div class="architecture-canvas"
-           [class.panning]="isPanning"
-           (wheel)="onCanvasWheel($event)"
-           (mousedown)="startPanning($event)"
-           (mousemove)="panCanvas($event); onCanvasMouseMove($event)"
-           (mouseup)="stopPanning(); stopDragging()"
-           (mouseleave)="stopPanning(); stopDragging()">
-        @if (project.components.length === 0) {
-        <div class="canvas-empty">
-          <div class="canvas-empty-icon">◇</div>
-          <h3>Your canvas is empty</h3>
-          <p>
-            Your architecture components will appear here.
-          </p>
-        </div>
+      <div class="vr mx-1 d-none d-md-block"></div>
+
+      <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2" (click)="exportArchitecture()">
+        <lucide-icon [img]="Download" [size]="16"></lucide-icon>
+        Export
+      </button>
+
+      <button type="button" class="btn btn-success btn-sm d-inline-flex align-items-center gap-2" (click)="saveProject()" [disabled]="isSaving">
+        @if (isSaving) {
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+        Saving...
         } @else {
-
-        <div class="canvas-content"
-             [style.transform]="'scale(' + zoomLevel + ')'"
-             [style.transform-origin]="'top left'">
-
-          <svg class="connection-layer"
-               aria-label="Architecture connections"
-               role="img">
-            <defs>
-              <marker id="connection-arrow"
-                      markerWidth="12"
-                      markerHeight="12"
-                      refX="10"
-                      refY="6"
-                      orient="auto-start-reverse"
-                      markerUnits="userSpaceOnUse"
-                      overflow="visible">
-                <path d="M 1 1 L 11 6 L 1 11 L 4 6 Z"
-                      fill="#a5a0ff"
-                      stroke="#a5a0ff"
-                      stroke-width="1" />
-              </marker>
-              <marker id="connection-arrow-start"
-                      markerWidth="12"
-                      markerHeight="12"
-                      refX="10"
-                      refY="6"
-                      orient="auto-start-reverse"
-                      markerUnits="userSpaceOnUse"
-                      overflow="visible">
-                <path d="M 1 1 L 11 6 L 1 11 L 4 6 Z"
-                      fill="#a5a0ff"
-                      stroke="#a5a0ff"
-                      stroke-width="1" />
-              </marker>
-            </defs>
-
-            @for (connection of project.connections; track connection.id) {
-            <line [attr.x1]="getConnectionPoint(connection.sourceComponentId, 'x', connection.targetComponentId)"
-                  [attr.y1]="getConnectionPoint(connection.sourceComponentId, 'y', connection.targetComponentId)"
-                  [attr.x2]="getConnectionPoint(connection.targetComponentId, 'x', connection.sourceComponentId)"
-                  [attr.y2]="getConnectionPoint(connection.targetComponentId, 'y', connection.sourceComponentId)"
-                  [attr.marker-start]="connection.direction === 'backward' || connection.direction === 'both' ? 'url(#connection-arrow-start)' : null"
-                  [attr.marker-end]="!connection.direction || connection.direction === 'forward' || connection.direction === 'both' ? 'url(#connection-arrow)' : null"
-                  [attr.stroke]="getConnectionColor(connection.type)"
-                  stroke-width="2" />
-
-            <text [attr.x]="getConnectionLabelX(connection)"
-                  [attr.y]="getConnectionLabelY(connection)"
-                  text-anchor="middle"
-                  [attr.fill]="getConnectionColor(connection.type)"
-                  font-size="11"
-                  font-weight="600"
-                  stroke="#151720"
-                  stroke-width="5"
-                  stroke-linejoin="round"
-                  paint-order="stroke">
-              {{ connection.label || connection.type }}
-            </text>
-            }
-          </svg>
-
-          @for (component of project.components; track component.id) {
-          <article class="canvas-component"
-                   [attr.data-component-id]="component.id"
-                   [style.left.px]="component.x"
-                   [style.top.px]="component.y"
-                   [style.width.px]="component.width ?? 190"
-                   [style.height.px]="component.height ?? 72"
-                   (mousedown)="startDragging($event, component.id)">
-            <div class="canvas-component-icon">◇</div>
-            <div class="canvas-component-details">
-              <strong>{{ component.name }}</strong>
-              <span>{{ component.type || 'Component' }}</span>
-            </div>
-            <button class="component-resize-handle"
-                    type="button"
-                    aria-label="Resize component"
-                    title="Drag to resize"
-                    (mousedown)="startResizing($event, component.id)"></button>
-          </article>
-          }
-        </div>
+        <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+        Save
         }
-      </div>
-
-      <div class="canvas-footer">
-        <span>Read-only preview</span>
-        <span>{{ project.components.length }} components loaded</span>
-      </div>
-    </section>
-  </main>
-
-  <!--Connections Section-->
-  <section class="connections-section">
-
-    <div class="section-heading">
-      <div>
-        <h2>Connections</h2>
-        <p>Relationships between architecture components.</p>
-      </div>
-
-      <button class="btn-primary"
-              type="button"
-              (click)="showAddConnectionForm = !showAddConnectionForm"
-              [disabled]="project.components.length < 2">
-        {{ showAddConnectionForm ? 'Cancel' : '+ Add Connection' }}
       </button>
     </div>
+  </div>
 
-    @if (showAddConnectionForm) {
-    <form class="add-connection-form" (ngSubmit)="addConnection()">
-      <div class="form-field">
-        <label for="sourceComponent">Source Component</label>
-        <select id="sourceComponent"
-                name="sourceComponent"
-                [(ngModel)]="newConnectionSourceId"
-                required>
-          @for (component of project.components; track component.id) {
-          <option [value]="component.id">{{ component.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="targetComponent">Target Component</label>
-        <select id="targetComponent"
-                name="targetComponent"
-                [(ngModel)]="newConnectionTargetId"
-                required>
-          @for (component of project.components; track component.id) {
-          <option [value]="component.id">{{ component.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="connectionType">Connection Type</label>
-        <select id="connectionType"
-                name="connectionType"
-                [(ngModel)]="newConnectionType"
-                required>
-          @for (type of connectionTypes; track type) {
-          <option [value]="type">{{ type }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="connectionDirection">Arrow Direction</label>
-        <select id="connectionDirection"
-                name="connectionDirection"
-                [(ngModel)]="newConnectionDirection"
-                required>
-          @for (direction of connectionDirections; track direction.value) {
-          <option [value]="direction.value">
-            {{ direction.label }}
-          </option>
-          }
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="connectionLabel">Label</label>
-        <input id="connectionLabel"
-               name="connectionLabel"
-               [(ngModel)]="newConnectionLabel"
-               placeholder="e.g. REST API"
-               maxlength="100" />
-      </div>
-
-      <button class="btn-primary"
-              type="submit"
-              [disabled]="
-        !newConnectionSourceId ||
-        !newConnectionTargetId ||
-        newConnectionSourceId === newConnectionTargetId
-      ">
-        Create Connection
-      </button>
-    </form>
-    }
-
-    @if (project.connections.length === 0) {
-    <div class="connections-empty">
-      No connections defined for this project.
+  <!-- Add Component Form -->
+  @if (showAddComponentForm) {
+  <div class="card border-0 shadow-sm rounded-3 mb-3">
+    <div class="card-body p-3 p-lg-4">
+      <h2 class="h6 fw-semibold mb-3">Add Component</h2>
+      <form (ngSubmit)="addComponent()">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label for="newComponentName" class="form-label">Component Name</label>
+            <input id="newComponentName" name="newComponentName" class="form-control" [(ngModel)]="newComponentName" placeholder="Enter component name" required maxlength="100">
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="newComponentType" class="form-label">Component Type</label>
+            <select id="newComponentType" name="newComponentType" class="form-select" [(ngModel)]="newComponentType">
+              @for (type of componentTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="showAddComponentForm = false">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newComponentName.trim()">Add Component</button>
+        </div>
+      </form>
     </div>
-    } @else {
-    <div class="connection-list">
-      @for (connection of project.connections; track connection.id) {
-      <article class="connection-item">
-        @if (editingConnectionId === connection.id) {
-        <form class="edit-connection-form" (ngSubmit)="saveConnectionEdit()">
-          <div class="form-field">
-            <label [for]="'editSource-' + connection.id">Source Component</label>
-            <select [id]="'editSource-' + connection.id" name="editSource"
-                    [(ngModel)]="editConnectionSourceId" required>
+  </div>
+  }
+
+  <!-- Add Connection Form -->
+  @if (showAddConnectionForm) {
+  <div class="card border-0 shadow-sm rounded-3 mb-3">
+    <div class="card-body p-3 p-lg-4">
+      <h2 class="h6 fw-semibold mb-3">Add Connection</h2>
+      <form (ngSubmit)="addConnection()">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label for="newConnectionSourceId" class="form-label">Source Component</label>
+            <select id="newConnectionSourceId" name="newConnectionSourceId" class="form-select" [(ngModel)]="newConnectionSourceId" required>
+              <option value="" disabled>Select source</option>
               @for (component of project.components; track component.id) {
               <option [value]="component.id">{{ component.name }}</option>
               }
             </select>
           </div>
-
-          <div class="form-field">
-            <label [for]="'editTarget-' + connection.id">Target Component</label>
-            <select [id]="'editTarget-' + connection.id" name="editTarget"
-                    [(ngModel)]="editConnectionTargetId" required>
+          <div class="col-12 col-md-6">
+            <label for="newConnectionTargetId" class="form-label">Target Component</label>
+            <select id="newConnectionTargetId" name="newConnectionTargetId" class="form-select" [(ngModel)]="newConnectionTargetId" required>
+              <option value="" disabled>Select target</option>
               @for (component of project.components; track component.id) {
               <option [value]="component.id">{{ component.name }}</option>
               }
             </select>
           </div>
-
-          <div class="form-field">
-            <label [for]="'editType-' + connection.id">Connection Type</label>
-            <select [id]="'editType-' + connection.id" name="editType"
-                    [(ngModel)]="editConnectionType" required>
+          <div class="col-12 col-md-6">
+            <label for="newConnectionType" class="form-label">Connection Type</label>
+            <select id="newConnectionType" name="newConnectionType" class="form-select" [(ngModel)]="newConnectionType">
               @for (type of connectionTypes; track type) {
               <option [value]="type">{{ type }}</option>
               }
             </select>
           </div>
-
-          <div class="form-field">
-            <label [for]="'editDirection-' + connection.id">Arrow Direction</label>
-            <select [id]="'editDirection-' + connection.id" name="editDirection"
-                    [(ngModel)]="editConnectionDirection" required>
+          <div class="col-12 col-md-6">
+            <label for="newConnectionLabel" class="form-label">Label (Optional)</label>
+            <input id="newConnectionLabel" name="newConnectionLabel" class="form-control" [(ngModel)]="newConnectionLabel" placeholder="Connection description">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Direction</label>
+            <div class="d-flex flex-wrap gap-3">
               @for (direction of connectionDirections; track direction.value) {
-              <option [value]="direction.value">{{ direction.label }}</option>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" [id]="'direction-' + direction.value" name="newConnectionDirection" [value]="direction.value" [(ngModel)]="newConnectionDirection">
+                <label class="form-check-label" [for]="'direction-' + direction.value">{{ direction.label }}</label>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="showAddConnectionForm = false">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newConnectionSourceId || !newConnectionTargetId || newConnectionSourceId === newConnectionTargetId">Add Connection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+
+  <!-- Main Editor -->
+  <main class="editor-workspace card border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="row g-0">
+      <!-- Component Sidebar -->
+      <aside class="col-12 col-lg-3 component-sidebar border-end">
+        <div class="p-3 border-bottom">
+          <h2 class="h6 fw-semibold mb-1">
+            <lucide-icon [img]="Boxes" [size]="17" class="me-2 text-primary"></lucide-icon>
+            Components
+          </h2>
+          <p class="small text-secondary mb-0">Components included in this architecture.</p>
+        </div>
+
+        <div class="p-3">
+          @if (project.components.length === 0) {
+          <div class="text-center py-4">
+            <lucide-icon [img]="Box" [size]="30" class="text-secondary mb-2"></lucide-icon>
+            <p class="small text-secondary mb-1">No components yet.</p>
+            <span class="small text-secondary">Add components using the toolbar.</span>
+          </div>
+          } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (component of project.components; track component.id) {
+            <div class="component-list-item border rounded-3 p-3">
+              <div class="d-flex align-items-start justify-content-between gap-2">
+                <div class="min-w-0">
+                  <div class="fw-semibold small text-break">{{ component.name }}</div>
+                  <span class="badge bg-body-secondary text-secondary mt-1">{{ component.type }}</span>
+                </div>
+                <div class="d-flex gap-1 flex-shrink-0">
+                  <button type="button" class="btn btn-outline-secondary btn-sm icon-button" (click)="editComponent(component.id)" title="Edit Component">
+                    <lucide-icon [img]="Pencil" [size]="14"></lucide-icon>
+                  </button>
+                  <button type="button" class="btn btn-outline-danger btn-sm icon-button" (click)="deleteComponent(component.id)" title="Delete Component">
+                    <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </aside>
+
+      <!-- Canvas -->
+      <div class="col-12 col-lg-9 canvas-container" (mousemove)="onCanvasMouseMove($event)" (mouseup)="stopDragging(); stopPanning()" (mouseleave)="stopDragging(); stopPanning()" (wheel)="onCanvasWheel($event)">
+        <div class="canvas-toolbar d-flex align-items-center gap-2 p-2 border-bottom bg-body-tertiary">
+          <span class="small text-secondary">
+            <lucide-icon [img]="MousePointer2" [size]="14" class="me-1"></lucide-icon>
+            Drag components to arrange · Scroll to zoom
+          </span>
+        </div>
+
+        <div class="architecture-canvas" #canvas (mousedown)="startPanning($event)" (mousemove)="panCanvas($event)" (mouseup)="stopPanning()" (mouseleave)="stopPanning()">
+          <div class="canvas-content" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'0 0'">
+            <!-- Connections -->
+            <svg class="connections-layer">
+              @for (connection of project.connections; track connection.id) {
+              <g>
+                <path [attr.d]="getConnectionPath(connection.sourceComponentId, connection.targetComponentId)" [attr.stroke]="getConnectionColor(connection.type)" stroke-width="2" fill="none" class="connection-path"></path>
+                <polygon [attr.points]="getConnectionArrowHead(connection.sourceComponentId, connection.targetComponentId)" [attr.fill]="getConnectionColor(connection.type)"></polygon>
+                <text class="connection-label" [attr.x]="getConnectionLabelX(connection)" [attr.y]="getConnectionLabelY(connection)">
+                  {{ connection.label || connection.type }}
+                </text>
+                <foreignObject [attr.x]="getConnectionLabelX(connection) - 15" [attr.y]="getConnectionLabelY(connection) - 30" width="30" height="25">
+                  <button xmlns="http://www.w3.org/1999/xhtml" class="connection-delete-btn" (click)="deleteConnection(connection.id)" title="Delete Connection">×</button>
+                </foreignObject>
+              </g>
+              }
+            </svg>
+
+            <!-- Canvas Components -->
+            @for (component of project.components; track component.id) {
+            <div class="canvas-component"
+                 [class.selected]="editingComponentId === component.id"
+                 [style.left.px]="component.x"
+                 [style.top.px]="component.y"
+                 [style.width.px]="component.width ?? 190"
+                 [style.height.px]="component.height ?? 72"
+                 (mousedown)="startDragging($event, component.id)">
+
+              @if (editingComponentId === component.id) {
+              <div class="component-edit-form">
+                <input type="text" class="form-control form-control-sm mb-2" [(ngModel)]="editComponentName" placeholder="Component name">
+                <select class="form-select form-select-sm mb-2" [(ngModel)]="editComponentType">
+                  @for (type of componentTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+                <div class="d-flex gap-1">
+                  <button type="button" class="btn btn-primary btn-sm flex-grow-1" (click)="saveComponentEdit()">Save</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelComponentEdit()">
+                    <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+              } @else {
+              <div class="canvas-component-header">
+                <span class="canvas-component-type">{{ component.type }}</span>
+                <div class="d-flex gap-1">
+                  <button type="button" class="canvas-action-btn" (click)="editComponent(component.id)" title="Edit">
+                    <lucide-icon [img]="Pencil" [size]="13"></lucide-icon>
+                  </button>
+                  <button type="button" class="canvas-action-btn text-danger" (click)="deleteComponent(component.id)" title="Delete">
+                    <lucide-icon [img]="Trash2" [size]="13"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="canvas-component-name">{{ component.name }}</div>
+              }
+
+              <div class="resize-handle" (mousedown)="startResizing($event, component.id)"></div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Connections Table -->
+  <section class="card border-0 shadow-sm rounded-3 mt-3">
+    <div class="card-body p-3">
+      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="h6 fw-semibold mb-0">
+          <lucide-icon [img]="GitBranch" [size]="17" class="me-2 text-primary"></lucide-icon>
+          Connections
+        </h2>
+        <span class="badge bg-body-secondary text-secondary">{{ project.connections.length }}</span>
+      </div>
+
+      @if (project.connections.length === 0) {
+      <p class="small text-secondary mb-0">No connections defined yet.</p>
+      } @else {
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Target</th>
+              <th>Type</th>
+              <th>Label</th>
+              <th>Direction</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (connection of project.connections; track connection.id) {
+            <tr>
+              <td>{{ getComponentName(connection.sourceComponentId) }}</td>
+              <td>{{ getComponentName(connection.targetComponentId) }}</td>
+              <td><span class="badge bg-body-secondary text-secondary">{{ connection.type }}</span></td>
+              <td class="text-secondary">{{ connection.label || '—' }}</td>
+              <td class="text-secondary">{{ connection.direction || 'forward' }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-outline-secondary btn-sm me-1" (click)="editConnection(connection.id)" title="Edit Connection">
+                  <lucide-icon [img]="Pencil" [size]="14"></lucide-icon>
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteConnection(connection.id)" title="Delete Connection">
+                  <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- Edit Connection Form -->
+  @if (editingConnectionId) {
+  <section class="card border-0 shadow-sm rounded-3 mt-3">
+    <div class="card-body p-3 p-lg-4">
+      <h2 class="h6 fw-semibold mb-3">Edit Connection</h2>
+      <form (ngSubmit)="saveConnectionEdit()">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label for="editConnectionSourceId" class="form-label">Source Component</label>
+            <select id="editConnectionSourceId" name="editConnectionSourceId" class="form-select" [(ngModel)]="editConnectionSourceId">
+              @for (component of project.components; track component.id) {
+              <option [value]="component.id">{{ component.name }}</option>
               }
             </select>
           </div>
-
-          <div class="form-field">
-            <label [for]="'editLabel-' + connection.id">Label</label>
-            <input [id]="'editLabel-' + connection.id" name="editLabel"
-                   [(ngModel)]="editConnectionLabel"
-                   maxlength="100" placeholder="e.g. REST API" />
+          <div class="col-12 col-md-6">
+            <label for="editConnectionTargetId" class="form-label">Target Component</label>
+            <select id="editConnectionTargetId" name="editConnectionTargetId" class="form-select" [(ngModel)]="editConnectionTargetId">
+              @for (component of project.components; track component.id) {
+              <option [value]="component.id">{{ component.name }}</option>
+              }
+            </select>
           </div>
-
-          <div class="edit-connection-actions">
-            <button class="btn-primary" type="submit"
-                    [disabled]="!editConnectionSourceId || !editConnectionTargetId ||
-                                  editConnectionSourceId === editConnectionTargetId">
-              Save
-            </button>
-            <button class="btn-secondary" type="button"
-                    (click)="cancelConnectionEdit()">
-              Cancel
-            </button>
+          <div class="col-12 col-md-6">
+            <label for="editConnectionType" class="form-label">Connection Type</label>
+            <select id="editConnectionType" name="editConnectionType" class="form-select" [(ngModel)]="editConnectionType">
+              @for (type of connectionTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+              }
+            </select>
           </div>
-        </form>
-        } @else {
-        <div class="connection-endpoint connection-source">
-          <span class="endpoint-label">Source</span>
-          <strong>{{ getComponentName(connection.sourceComponentId) }}</strong>
+          <div class="col-12 col-md-6">
+            <label for="editConnectionLabel" class="form-label">Label</label>
+            <input id="editConnectionLabel" name="editConnectionLabel" class="form-control" [(ngModel)]="editConnectionLabel">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Direction</label>
+            <div class="d-flex flex-wrap gap-3">
+              @for (direction of connectionDirections; track direction.value) {
+              <div class="form-check">
+                <input class="form-check-input" type="radio" [id]="'edit-direction-' + direction.value" name="editConnectionDirection" [value]="direction.value" [(ngModel)]="editConnectionDirection">
+                <label class="form-check-label" [for]="'edit-direction-' + direction.value">{{ direction.label }}</label>
+              </div>
+              }
+            </div>
+          </div>
         </div>
-
-        <div class="connection-type">
-          <span class="connection-line"></span>
-          <span>{{ connection.label || connection.type }}</span>
-          <span class="connection-line"></span>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelConnectionEdit()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
         </div>
-
-        <div class="connection-endpoint connection-target">
-          <span class="endpoint-label">Target</span>
-          <strong>{{ getComponentName(connection.targetComponentId) }}</strong>
-        </div>
-
-        <div class="connection-actions">
-          <button class="btn-edit-connection" type="button"
-                  (click)="editConnection(connection.id)">
-            Edit
-          </button>
-          <button class="btn-delete-connection" type="button"
-                  (click)="deleteConnection(connection.id)">
-            Delete
-          </button>
-        </div>
-        }
-      </article>
-      }
+      </form>
     </div>
-    }
   </section>
+  }
   }
 </div>

@@ -3,19 +3,40 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ArchitectureProject, ArchitectureProjectService } from '../services/architecture-project.service';
+import { LucideAngularModule,ArrowLeft,Boxes,GitBranch,GitBranchPlus,AlertCircle,CheckCircle,Plus,Workflow,Scan,Minus,Download,Save,MousePointer2,Box,Pencil,Trash2,X } from 'lucide-angular';
+
 
 @Component({
   selector: 'app-architecture-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './architecture-editor.html',
-  styleUrl: './architecture-editor.css'
+  styleUrl: './architecture-editor.scss'
 })
 export class ArchitectureEditorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
   private readonly projectService = inject(ArchitectureProjectService);
+
+  // Lucide icons
+  protected readonly ArrowLeft = ArrowLeft;
+  protected readonly Boxes = Boxes;
+  protected readonly GitBranch = GitBranch;
+  protected readonly GitBranchPlus = GitBranchPlus;
+  protected readonly AlertCircle = AlertCircle;
+  protected readonly CheckCircle = CheckCircle;
+  protected readonly Plus = Plus;
+  protected readonly Workflow = Workflow;
+  protected readonly Scan = Scan;
+  protected readonly Minus = Minus;
+  protected readonly Download = Download;
+  protected readonly Save = Save;
+  protected readonly MousePointer2 = MousePointer2;
+  protected readonly Box = Box;
+  protected readonly Pencil = Pencil;
+  protected readonly Trash2 = Trash2;
+  protected readonly X = X;
 
   project: ArchitectureProject | null = null;
   loading = false;

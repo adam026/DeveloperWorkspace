@@ -2,6 +2,7 @@ import { ChangeDetectorRef,Component,inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { LucideAngularModule,Plus,X,Save,Search,RefreshCw,FileText,Pencil,Trash2,ArrowUpRight } from 'lucide-angular';
 
 import {
   Document,
@@ -11,13 +12,24 @@ import {
 @Component({
   selector: 'app-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './documents.html',
-  styleUrl: './documents.css'
+  styleUrl: './documents.scss'
 })
 export class DocumentsComponent {
   private readonly documentService = inject(DocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Icons from lucide-angular
+  readonly Plus = Plus;
+  readonly X = X;
+  readonly Save = Save;
+  readonly Search = Search;
+  readonly RefreshCw = RefreshCw;
+  readonly FileText = FileText;
+  readonly Pencil = Pencil;
+  readonly Trash2 = Trash2;
+  readonly ArrowUpRight = ArrowUpRight;
 
   documents: Document[] = [];
 

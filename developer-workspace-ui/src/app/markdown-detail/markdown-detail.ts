@@ -2,19 +2,31 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { MarkdownDocument, MarkdownDocumentService } from '../services/markdown-document';
+import { LucideAngularModule,ArrowLeft,Copy,FileCode,AlertCircle,Folder,CalendarDays,Clock,Code2,CheckCircle}  from 'lucide-angular';
 
 @Component({
   selector: 'app-markdown-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './markdown-detail.html',
-  styleUrl: './markdown-detail.css'
+  styleUrl: './markdown-detail.scss'
 })
 export class MarkdownDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly markdownService = inject(MarkdownDocumentService);
   private readonly location = inject(Location);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Icons from lucide-angular
+  protected readonly ArrowLeft = ArrowLeft;
+  protected readonly Copy = Copy;
+  protected readonly FileCode = FileCode;
+  protected readonly AlertCircle = AlertCircle;
+  protected readonly Folder = Folder;
+  protected readonly CalendarDays = CalendarDays;
+  protected readonly Clock = Clock;
+  protected readonly Code2 = Code2;
+  protected readonly CheckCircle = CheckCircle;
 
   protected document: MarkdownDocument | null = null;
   protected isLoading = true;

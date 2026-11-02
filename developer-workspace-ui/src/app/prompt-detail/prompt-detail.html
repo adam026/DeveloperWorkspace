@@ -1,84 +1,162 @@
-<section class="detail-page">
-  <header class="page-header">
-    <a href="#" class="back-link" (click)="$event.preventDefault(); goBack()">
-      <span aria-hidden="true">←</span>
+<section class="container-fluid p-0">
+
+  <!-- Page header -->
+  <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+
+    <a href="#"
+       class="btn btn-link text-decoration-none d-inline-flex align-items-center gap-2 px-0"
+       (click)="$event.preventDefault(); goBack()">
+      <lucide-icon [img]="ArrowLeft" [size]="17"></lucide-icon>
       {{ returnToWorkspace ? 'Back to Workspace' : 'Back to Prompt Library' }}
     </a>
 
     @if (prompt) {
-    <div class="header-actions">
-      <button type="button"
-              class="copy-button"
-              (click)="copyPrompt()">
-        Copy prompt
-      </button>
-    </div>
+    <button type="button"
+            class="btn btn-outline-primary d-inline-flex align-items-center gap-2"
+            (click)="copyPrompt()">
+      @if (copySuccess) {
+      <lucide-icon [img]="Check" [size]="16"></lucide-icon>
+      Copied
+      } @else {
+      <lucide-icon [img]="Copy" [size]="16"></lucide-icon>
+      Copy prompt
+      }
+    </button>
     }
+
   </header>
 
+  <!-- Loading -->
   @if (isLoading) {
-  <div class="state-card">
-    <p>Loading prompt...</p>
-  </div>
-  } @else if (errorMessage && !prompt) {
-  <div class="state-card error-state">
-    <h2>Unable to load prompt</h2>
-    <p>{{ errorMessage }}</p>
-    <button type="button" class="back-button" (click)="goBack()">
-      Back to Workspace
-    </button>
-  </div>
-  } @else if (prompt) {
-  <article class="prompt-card">
-    <div class="title-row">
-      <div>
-        <span class="item-type">Prompt</span>
-        <h1>{{ prompt.title }}</h1>
+  <section class="card border-0 shadow-sm">
+    <div class="card-body d-flex justify-content-center align-items-center gap-2 py-5">
+      <span class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </span>
+      <span class="text-secondary small">Loading prompt...</span>
+    </div>
+  </section>
+  }
+
+  <!-- Error state -->
+  @else if (errorMessage && !prompt) {
+  <section class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="detail-icon bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center">
+          <lucide-icon [img]="AlertCircle" [size]="22"></lucide-icon>
+        </div>
+
+        <h2 class="h5 fw-bold mb-0">Unable to load prompt</h2>
       </div>
 
-      @if (prompt.category) {
-      <span class="category-badge">{{ prompt.category }}</span>
-      }
+      <p class="text-secondary small mb-3">{{ errorMessage }}</p>
+
+      <button type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              (click)="goBack()">
+        <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>
+        Back to Prompt Library
+      </button>
+
     </div>
+  </section>
+  }
 
-    @if (prompt.description) {
-    <p class="description">{{ prompt.description }}</p>
-    }
+  <!-- Prompt details -->
+  @else if (prompt) {
+  <article class="card border-0 shadow-sm">
 
-    <div class="metadata">
-      @if (prompt.createdAt) {
-      <span>
-        Created {{ prompt.createdAt | date:'mediumDate' }}
-      </span>
-      }
+    <div class="card-body p-4 p-md-5">
 
-      @if (prompt.updatedAt) {
-      <span>
-        Updated {{ prompt.updatedAt | date:'mediumDate' }}
-      </span>
-      }
-    </div>
+      <!-- Prompt header -->
+      <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3">
 
-    <div class="content-section">
-      <div class="content-heading">
-        <h2>Prompt content</h2>
+        <div class="flex-grow-1 min-width-0">
+          <p class="eyebrow mb-2">PROMPT LIBRARY</p>
 
-        <button type="button"
-                class="copy-button"
-                (click)="copyPrompt()">
-          Copy content
-        </button>
+          <h1 class="h3 fw-bold mb-0">
+            {{ prompt.title }}
+          </h1>
+        </div>
+
+        @if (prompt.category) {
+        <span class="category-label badge rounded-pill align-self-start">
+          {{ prompt.category }}
+        </span>
+        }
+
       </div>
 
-      <pre class="prompt-content">{{ prompt.content }}</pre>
-
-      @if (copySuccess) {
-      <p class="success-message">Prompt copied to clipboard.</p>
+      <!-- Description -->
+      @if (prompt.description) {
+      <p class="text-secondary mt-3 mb-0 description-content">
+        {{ prompt.description }}
+      </p>
       }
 
-      @if (errorMessage) {
-      <p class="error-message">{{ errorMessage }}</p>
-      }
+      <!-- Metadata -->
+      <div class="d-flex flex-wrap gap-3 mt-4 pt-3 border-top text-secondary small">
+
+        @if (prompt.createdAt) {
+        <div class="d-flex align-items-center gap-2">
+          <lucide-icon [img]="CalendarDays" [size]="15"></lucide-icon>
+          Created {{ prompt.createdAt | date:'mediumDate' }}
+        </div>
+        }
+
+        @if (prompt.updatedAt) {
+        <div class="d-flex align-items-center gap-2">
+          <lucide-icon [img]="Clock" [size]="15"></lucide-icon>
+          Updated {{ prompt.updatedAt | date:'mediumDate' }}
+        </div>
+        }
+
+      </div>
+
+      <!-- Prompt content -->
+      <section class="content-section mt-4 pt-4 border-top">
+
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-3">
+
+          <div class="d-flex align-items-center gap-2">
+            <lucide-icon [img]="Sparkles" [size]="19" class="text-primary"></lucide-icon>
+            <h2 class="h5 fw-bold mb-0">Prompt content</h2>
+          </div>
+
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2 align-self-start"
+                  (click)="copyPrompt()">
+            @if (copySuccess) {
+            <lucide-icon [img]="Check" [size]="15"></lucide-icon>
+            Copied
+            } @else {
+            <lucide-icon [img]="Copy" [size]="15"></lucide-icon>
+            Copy content
+            }
+          </button>
+
+        </div>
+
+        <pre class="prompt-content bg-light border rounded-3 p-3 p-md-4 mb-0">{{ prompt.content }}</pre>
+
+        @if (copySuccess) {
+        <div class="alert alert-success d-flex align-items-center gap-2 mt-3 mb-0" role="status">
+          <lucide-icon [img]="Check" [size]="17"></lucide-icon>
+          Prompt copied to clipboard.
+        </div>
+        }
+
+        @if (errorMessage) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mt-3 mb-0" role="alert">
+          <lucide-icon [img]="AlertCircle" [size]="17"></lucide-icon>
+          {{ errorMessage }}
+        </div>
+        }
+
+      </section>
+
     </div>
   </article>
   }

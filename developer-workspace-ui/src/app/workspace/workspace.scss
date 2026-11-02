@@ -1,0 +1,188 @@
+
+:host {
+  display: block;
+}
+
+.workspace-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.page-description,
+.item-description {
+  color: #7b879c;
+  font-size: 13px;
+}
+
+.refresh-button {
+  background-color: #6254ed;
+  border-color: #6254ed;
+}
+
+  .refresh-button:hover {
+    background-color: #5143dc;
+    border-color: #5143dc;
+  }
+
+/* Search */
+.search-box {
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+  .search-box:focus-within {
+    border-color: #8175f2;
+    box-shadow: 0 0 0 3px rgb(98 84 237 / 10%);
+  }
+
+  .search-box .form-control {
+    border: none;
+    box-shadow: none;
+  }
+
+/* Filter */
+.type-filter {
+  flex: 0 0 180px;
+}
+
+/* Summary */
+.workspace-summary {
+  color: #7b879c;
+  font-size: 13px;
+}
+
+/* Workspace items */
+.workspace-item {
+  padding: 20px;
+  border: 1px solid #e2e7f1;
+  border-radius: 12px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+  .workspace-item:hover {
+    border-color: #c7c0ff;
+    box-shadow: 0 4px 12px rgb(31 41 55 / 5%);
+  }
+
+  .workspace-item:focus-visible {
+    outline: 2px solid #8175f2;
+    outline-offset: 2px;
+  }
+
+/* Item icons */
+.item-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+}
+
+.document-icon {
+  background-color: #f0ebff;
+  color: #6955ef;
+}
+
+.prompt-icon {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary);
+}
+
+.markdown-icon {
+  background-color: #e9f3ff;
+  color: #3579d5;
+}
+
+/* Item content */
+.item-content {
+  min-width: 0;
+}
+
+.item-title-row h2 {
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.item-type {
+  background-color: #f1efff;
+  color: #6955ef;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.item-description {
+  margin: 8px 0 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.item-meta {
+  color: #929db2;
+  font-size: 12px;
+}
+
+.item-category {
+  background-color: #f6f4ff;
+  color: #6d5de7;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.item-action {
+  color: #a0a9bb;
+}
+
+.workspace-item:hover .item-action {
+  color: #6254ed;
+}
+
+/* States */
+.workspace-state {
+  padding: 48px 20px;
+  border: 1px dashed #dee2e6;
+  border-radius: 12px;
+  color: #8792a8;
+}
+
+.state-icon {
+  color: #8175f2;
+  margin-bottom: 12px;
+}
+
+.error-state {
+  color: #dc3545;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 650px) {
+  .workspace-page {
+    padding: 20px 16px;
+  }
+
+  .workspace-item {
+    padding: 16px;
+  }
+
+  .item-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .type-filter {
+    flex-basis: 100%;
+  }
+}
