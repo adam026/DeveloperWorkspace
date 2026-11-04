@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflows/">
-    <File Path="docker-build.yml" />
+    <File Path=".github/workflows/docker-build.yml" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
