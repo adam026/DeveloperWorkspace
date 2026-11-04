@@ -39,7 +39,7 @@ export class ArchitectureProjectService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://localhost:7102/api/architectureprojects';
+    'http://localhost:8080/api/architectureprojects';
 
   getAll(): Observable<ArchitectureProject[]> {
     return this.http.get<ArchitectureProject[]>(this.apiUrl);

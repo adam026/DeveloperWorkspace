@@ -20,7 +20,7 @@ export interface Document {
 export class DocumentService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'https://localhost:7102/api/Documents';
+  private readonly apiUrl = 'http://localhost:8080/api/Documents';
 
   getAll(): Observable<Document[]> {
     return this.http.get<Document[]>(this.apiUrl);

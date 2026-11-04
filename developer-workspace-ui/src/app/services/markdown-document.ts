@@ -34,7 +34,7 @@ export class MarkdownDocumentService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://localhost:7102/api/markdown-documents';
+    'http://localhost:8080/api/markdown-documents';
 
   getAll(): Observable<MarkdownDocument[]> {
     return this.http.get<MarkdownDocument[]>(this.apiUrl);

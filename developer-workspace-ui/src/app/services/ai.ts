@@ -12,7 +12,7 @@ export interface SummarizeResponse {
 })
 export class AiService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://localhost:7102/api/ai';
+  private readonly apiUrl = 'http://localhost:8080/api/ai';
 
   summarize(text: string): Observable<SummarizeResponse> {
     return this.http.post<SummarizeResponse>(

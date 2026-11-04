@@ -53,9 +53,13 @@ namespace DeveloperWorkspace.Api
             });
 
             // OllamaService registration with HttpClient configuration
+
             builder.Services.AddHttpClient<OllamaService>(client =>
             {
-                client.BaseAddress = new Uri("http://localhost:11434/");
+                var ollamaUrl = builder.Configuration["Ollama:BaseUrl"]
+                    ?? "http://localhost:11434/";
+
+                client.BaseAddress = new Uri(ollamaUrl);
                 client.Timeout = TimeSpan.FromMinutes(3);
             });
 
@@ -71,20 +75,16 @@ namespace DeveloperWorkspace.Api
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
+            app.MapOpenApi();
 
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/openapi/v1.json", "DeveloperWorkspace API v1");
-                });
-            }
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/openapi/v1.json", "DeveloperWorkspace API v1");
+            });
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
