@@ -23,7 +23,6 @@ namespace DeveloperWorkspace.Api
             });
 
             // Add services to the container.
-
             builder.Services.AddControllers();
 
             // DocumentService registration for dependency injection
@@ -37,6 +36,12 @@ namespace DeveloperWorkspace.Api
 
             // ArchitectureProjectService registration for dependency injection
             builder.Services.AddScoped<ArchitectureProjectService>();
+
+            // DocumentationProjectService registration for dependency injection
+            builder.Services.AddScoped<DocumentationProjectService>();
+
+            // ProjectDocumentationService registration for dependency injection
+            builder.Services.AddScoped<ProjectDocumentationService>();
 
             // MongoDbContext registration with configuration from appsettings.json
             builder.Services.AddSingleton<MongoDbContext>(sp =>
