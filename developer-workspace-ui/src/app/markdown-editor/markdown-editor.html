@@ -1,0 +1,73 @@
+<div class="markdown-editor">
+
+  <!-- Editor toolbar -->
+  <div class="editor-toolbar d-flex justify-content-between align-items-center gap-3 flex-wrap">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fw-semibold">Markdown Editor</span>
+      <span class="badge bg-secondary bg-opacity-10 text-secondary">
+        Markdown
+      </span>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-secondary small">
+        Live Preview
+      </span>
+      <span class="badge bg-success bg-opacity-10 text-success">
+        Active
+      </span>
+    </div>
+  </div>
+
+  <!-- Editor and preview -->
+  <div class="row g-0 editor-content">
+
+    <!-- Markdown input -->
+    <div class="col-12 col-lg-6 editor-panel">
+      <div class="panel-header">
+        <span class="fw-semibold">Write</span>
+        <span class="text-secondary small">Markdown source</span>
+      </div>
+
+      <textarea class="form-control markdown-textarea"
+                placeholder="# Project Architecture
+
+                ## Backend
+
+                Describe your backend architecture here...
+
+                ## Technologies
+
+                - ASP.NET Core
+                - MongoDB
+                - Angular
+
+                ## Example code
+
+                ```csharp
+                public class Example
+                {
+                    public string Name { get; set; }
+                }
+                ```"
+                [(ngModel)]="content"
+                (ngModelChange)="onContentChange()"
+                spellcheck="false">
+      </textarea>
+    </div>
+
+    <!-- Preview -->
+    <div class="col-12 col-lg-6 preview-panel">
+      <div class="panel-header">
+        <span class="fw-semibold">Preview</span>
+        <span class="text-secondary small">Rendered output</span>
+      </div>
+
+      <div class="markdown-preview"
+           [innerHTML]="previewHtml">
+      </div>
+    </div>
+
+  </div>
+
+</div>

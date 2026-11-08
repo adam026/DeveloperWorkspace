@@ -184,19 +184,12 @@
             </div>
           </div>
 
-          <!-- Content -->
+          <!-- Markdown Editor -->
           <div class="col-12">
-            <label for="documentContent" class="form-label">
-              Content
-            </label>
+            <label class="form-label">Documentation Content</label>
 
-            <textarea id="documentContent"
-                      class="form-control"
-                      rows="8"
-                      placeholder="Write your documentation here..."
-                      [(ngModel)]="newDocument.content"
-                      name="content">
-                  </textarea>
+            <app-markdown-editor [(content)]="newDocument.content">
+            </app-markdown-editor>
           </div>
 
         </div>
@@ -248,7 +241,11 @@
 
     <div class="col-12 col-md-6 col-xl-4">
 
-      <div class="card h-100 border-0 shadow-sm documentation-card">
+      <div class="card h-100 border-0 shadow-sm documentation-card"
+           role="button"
+           tabindex="0"
+           (click)="openDocument(document.id!)"
+           (keydown.enter)="openDocument(document.id!)">
         <div class="card-body p-4">
 
           <!-- Edit mode -->
@@ -298,18 +295,12 @@
               </select>
             </div>
 
-            <!-- Content -->
+            <!-- Markdown Editor -->
             <div class="mb-3">
-              <label class="form-label" for="editDocumentContent">
-                Content
-              </label>
+              <label class="form-label">Documentation Content</label>
 
-              <textarea id="editDocumentContent"
-                        class="form-control"
-                        rows="8"
-                        [(ngModel)]="editDocument.content"
-                        name="editContent">
-                        </textarea>
+              <app-markdown-editor [(content)]="editDocument.content">
+              </app-markdown-editor>
             </div>
 
             <!-- Tags -->
@@ -373,7 +364,8 @@
                         class="btn btn-sm btn-light border"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
-                        aria-label="Document actions">
+                        aria-label="Document actions"
+                        (click)="$event.stopPropagation()">
                   <lucide-icon [img]="MoreVertical" [size]="16"></lucide-icon>
                 </button>
 
@@ -381,7 +373,7 @@
                   <li>
                     <button type="button"
                             class="dropdown-item d-flex align-items-center gap-2"
-                            (click)="startEditing(document)">
+                            (click)="$event.stopPropagation(); startEditing(document)">
                       <lucide-icon [img]="Pencil" [size]="15"></lucide-icon>
                       Edit
                     </button>
@@ -390,7 +382,7 @@
                   <li>
                     <button type="button"
                             class="dropdown-item d-flex align-items-center gap-2 text-danger"
-                            (click)="confirmDelete(document.id!)">
+                            (click)="$event.stopPropagation(); confirmDelete(document.id!)">
                       <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
                       Delete
                     </button>
@@ -451,13 +443,13 @@
 
               <button type="button"
                       class="btn btn-sm btn-outline-secondary"
-                      (click)="cancelDelete()">
+                      (click)="$event.stopPropagation(); cancelDelete()">
                 Cancel
               </button>
 
               <button type="button"
                       class="btn btn-sm btn-danger d-inline-flex align-items-center gap-2"
-                      (click)="deleteDocument(document.id!)">
+                      (click)="$event.stopPropagation(); deleteDocument(document.id!)">
                 <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
                 Delete
               </button>

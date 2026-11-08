@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DocumentationProject, DocumentationProjectService } from '../services/documentation-project.service';
 import { ProjectDocumentation, ProjectDocumentationService } from '../services/project-documentation.service';
+import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor';
+import { Router } from '@angular/router';
 import {LucideAngularModule, ArrowLeft, FolderOpen, FileText, Search, CalendarDays, Tag, AlertCircle, Plus, MoreVertical,Pencil,Trash2,Save } from 'lucide-angular';
 
 @Component({
@@ -13,7 +15,8 @@ import {LucideAngularModule, ArrowLeft, FolderOpen, FileText, Search, CalendarDa
     CommonModule,
     FormsModule,
     RouterLink,
-    LucideAngularModule
+    LucideAngularModule,
+    MarkdownEditorComponent
   ],
   templateUrl: './documentation-project-details.html',
   styleUrl: './documentation-project-details.scss'
@@ -21,6 +24,7 @@ import {LucideAngularModule, ArrowLeft, FolderOpen, FileText, Search, CalendarDa
 export class DocumentationProjectDetailsComponent implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
   private readonly projectService =
@@ -224,6 +228,16 @@ export class DocumentationProjectDetailsComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // Open document
+  protected openDocument(documentId: string): void {
+    this.router.navigate([
+      '/documentation',
+      this.projectId,
+      'documents',
+      documentId
+    ]);
   }
 
   // Edit document
