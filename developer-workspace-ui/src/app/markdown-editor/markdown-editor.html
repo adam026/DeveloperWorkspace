@@ -10,9 +10,7 @@
     </div>
 
     <div class="d-flex align-items-center gap-2">
-      <span class="text-secondary small">
-        Live Preview
-      </span>
+      <span class="text-secondary small">Live Preview</span>
       <span class="badge bg-success bg-opacity-10 text-success">
         Active
       </span>
@@ -29,27 +27,136 @@
         <span class="text-secondary small">Markdown source</span>
       </div>
 
-      <textarea class="form-control markdown-textarea"
+      <!-- Formatting toolbar -->
+      <div class="markdown-toolbar d-flex align-items-center flex-wrap gap-1 p-2 border-bottom">
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Bold" (click)="insertMarkdown('**', '**', 'bold text')">
+          <strong>B</strong>
+        </button>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Italic" (click)="insertMarkdown('*', '*', 'italic text')">
+          <em>I</em>
+        </button>
+
+        <span class="toolbar-divider mx-1"></span>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Heading 1" (click)="insertLinePrefix('# ')">
+          H1
+        </button>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Heading 2" (click)="insertLinePrefix('## ')">
+          H2
+        </button>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Heading 3" (click)="insertLinePrefix('### ')">
+          H3
+        </button>
+
+        <span class="toolbar-divider mx-1"></span>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Bullet list" (click)="insertLinePrefix('- ')">
+          <i class="bi bi-list-ul"></i>
+        </button>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Numbered list" (click)="insertLinePrefix('1. ')">
+          <i class="bi bi-list-ol"></i>
+        </button>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Quote" (click)="insertLinePrefix('> ')">
+          <i class="bi bi-quote"></i>
+        </button>
+
+        <span class="toolbar-divider mx-1"></span>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Link" (click)="insertMarkdown('[', '](https://example.com)', 'link text')">
+          <i class="bi bi-link-45deg"></i>
+        </button>
+
+        <button type="button" class="btn btn-sm btn-light"
+                title="Inline code" (click)="insertMarkdown('`', '`', 'code')">
+          <i class="bi bi-code"></i>
+        </button>
+
+        <div class="d-flex align-items-center gap-1">
+          <select class="form-select form-select-sm code-language-select"
+                  [(ngModel)]="selectedCodeLanguage"
+                  title="Code language"
+                  aria-label="Code language">
+
+            <option value="csharp">C#</option>
+            <option value="typescript">TypeScript</option>
+            <option value="javascript">JavaScript</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="scss">SCSS</option>
+            <option value="json">JSON</option>
+            <option value="sql">SQL</option>
+            <option value="bash">Bash</option>
+            <option value="powershell">PowerShell</option>
+            <option value="python">Python</option>
+            <option value="xml">XML</option>
+            <option value="yaml">YAML</option>
+            <option value="plaintext">Plain text</option>
+          </select>
+
+          <button type="button"
+                  class="btn btn-sm btn-light"
+                  title="Insert code block"
+                  (click)="insertCodeBlock()">
+            <i class="bi bi-code-square"></i>
+          </button>
+        </div>
+
+        <span class="toolbar-divider mx-1"></span>
+
+        <button type="button"
+                class="btn btn-sm btn-light"
+                title="Undo"
+                [disabled]="!canUndo"
+                (click)="undo()">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+
+        <button type="button"
+                class="btn btn-sm btn-light"
+                title="Redo"
+                [disabled]="!canRedo"
+                (click)="redo()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+
+      <textarea #markdownTextarea
+                class="form-control markdown-textarea"
                 placeholder="# Project Architecture
 
-                ## Backend
+## Backend
 
-                Describe your backend architecture here...
+Describe your backend architecture here...
 
-                ## Technologies
+## Technologies
 
-                - ASP.NET Core
-                - MongoDB
-                - Angular
+- ASP.NET Core
+- MongoDB
+- Angular
 
-                ## Example code
+## Example code
 
-                ```csharp
-                public class Example
-                {
-                    public string Name { get; set; }
-                }
-                ```"
+```csharp
+public class Example
+{
+    public string Name { get; set; }
+}
+```"
                 [(ngModel)]="content"
                 (ngModelChange)="onContentChange()"
                 spellcheck="false">
@@ -63,11 +170,8 @@
         <span class="text-secondary small">Rendered output</span>
       </div>
 
-      <div class="markdown-preview"
-           [innerHTML]="previewHtml">
-      </div>
+      <div class="markdown-preview" [innerHTML]="previewHtml"></div>
     </div>
 
   </div>
-
 </div>
