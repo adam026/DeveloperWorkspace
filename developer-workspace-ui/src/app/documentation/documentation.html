@@ -1,0 +1,253 @@
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-semibold mb-1">Documentation</h2>
+      <p class="text-secondary mb-0">
+        Organize and manage your technical documentation by project.
+      </p>
+    </div>
+
+    <button type="button"
+            class="btn btn-primary d-flex align-items-center gap-2"
+            (click)="openCreateForm()"
+            [disabled]="showCreateForm">
+      <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+      New Project
+    </button>
+  </div>
+
+  <!-- Create project form -->
+  @if (showCreateForm) {
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+      <h5 class="fw-semibold mb-0">Create New Project</h5>
+    </div>
+
+    <div class="card-body px-4">
+      <form (ngSubmit)="createProject()">
+
+        <div class="mb-3">
+          <label for="projectName" class="form-label">
+            Project Name <span class="text-danger">*</span>
+          </label>
+          <input id="projectName"
+                 type="text"
+                 class="form-control"
+                 name="name"
+                 [(ngModel)]="newProject.name"
+                 placeholder="e.g. DevWorkspace"
+                 maxlength="150"
+                 required>
+        </div>
+
+        <div class="mb-3">
+          <label for="projectDescription" class="form-label">
+            Description
+          </label>
+          <textarea id="projectDescription"
+                    class="form-control"
+                    name="description"
+                    [(ngModel)]="newProject.description"
+                    placeholder="Describe the purpose of this project..."
+                    rows="3"
+                    maxlength="2000"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="projectTechnologies" class="form-label">
+            Technologies
+          </label>
+          <input id="projectTechnologies"
+                 type="text"
+                 class="form-control"
+                 name="technologies"
+                 [(ngModel)]="technologiesInput"
+                 placeholder="Angular, .NET, MongoDB, Docker">
+          <div class="form-text">
+            Separate technologies with commas.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="closeCreateForm()"
+                  [disabled]="isSaving">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary d-flex align-items-center gap-2"
+                  [disabled]="isSaving || !newProject.name.trim()">
+            @if (isSaving) {
+            <span class="spinner-border spinner-border-sm"></span>
+            Creating...
+            } @else {
+            <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+            Create Project
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+  }
+
+  <!-- Success message -->
+  @if (successMessage) {
+  <div class="alert alert-success d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="CheckCircle" [size]="18"></lucide-icon>
+    {{ successMessage }}
+  </div>
+  }
+
+  <!-- Error message -->
+  @if (errorMessage) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    {{ errorMessage }}
+  </div>
+  }
+
+  <!-- Search -->
+  <div class="row mb-4">
+    <div class="col-md-6 col-lg-5">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent">
+          <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+        </span>
+        <input type="text"
+               class="form-control"
+               placeholder="Search projects..."
+               [(ngModel)]="searchTerm"
+               name="searchTerm">
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+  <div class="d-flex flex-column align-items-center py-5">
+    <div class="spinner-border text-primary mb-3" role="status"></div>
+    <span class="text-secondary">Loading projects...</span>
+  </div>
+  }
+
+  <!-- Project list -->
+  @if (!isLoading) {
+
+  @if (filteredProjects.length > 0) {
+  <div class="row g-4">
+
+    @for (project of filteredProjects; track project.id) {
+    <div class="col-12 col-md-6 col-xl-4">
+
+      <div class="card h-100 border-0 shadow-sm project-card"
+           role="button"
+           tabindex="0"
+           (click)="openProject(project.id!)">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 p-3">
+              <lucide-icon [img]="FolderOpen"
+                           [size]="24"
+                           class="text-primary">
+              </lucide-icon>
+            </div>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="$event.stopPropagation(); confirmDelete(project.id!)"
+                    [disabled]="deletingProjectId === project.id"
+                    title="Delete project">
+              <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+            </button>
+          </div>
+
+          <h5 class="fw-semibold mb-2">
+            {{ project.name }}
+          </h5>
+
+          <p class="text-secondary small mb-3">
+            {{ project.description || 'No description provided.' }}
+          </p>
+
+          @if (project.technologies.length > 0) {
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            @for (technology of project.technologies; track technology) {
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+              {{ technology }}
+            </span>
+            }
+          </div>
+          }
+
+          <div class="d-flex align-items-center gap-2 text-secondary small mt-auto">
+            <lucide-icon [img]="CalendarDays" [size]="14"></lucide-icon>
+            Created:
+            {{ project.createdAt | date:'mediumDate' }}
+          </div>
+
+          <!-- Delete confirmation -->
+          @if (deletingProjectId === project.id) {
+          <div class="border-top mt-3 pt-3">
+            <p class="small mb-3">
+              Are you sure you want to delete this project?
+            </p>
+
+            <div class="d-flex gap-2">
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary flex-grow-1"
+                      (click)="$event.stopPropagation(); cancelDelete()">
+                Cancel
+              </button>
+
+              <button type="button"
+                      class="btn btn-sm btn-danger flex-grow-1"
+                      (click)="$event.stopPropagation(); deleteProject(project.id!)">
+                Delete
+              </button>
+            </div>
+          </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+    }
+
+  </div>
+  } @else {
+  <div class="text-center py-5">
+    <div class="mb-3 text-secondary">
+      <lucide-icon [img]="FolderOpen" [size]="48"></lucide-icon>
+    </div>
+
+    @if (searchTerm.trim()) {
+    <h5 class="fw-semibold">No matching projects</h5>
+    <p class="text-secondary">
+      Try changing your search criteria.
+    </p>
+    } @else {
+    <h5 class="fw-semibold">No projects yet</h5>
+    <p class="text-secondary">
+      Create your first project to start organizing its documentation.
+    </p>
+
+    <button type="button"
+            class="btn btn-primary mt-2"
+            (click)="openCreateForm()">
+      <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+      Create First Project
+    </button>
+    }
+  </div>
+  }
+
+  }
+
+</div>

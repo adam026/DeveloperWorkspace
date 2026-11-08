@@ -1,0 +1,508 @@
+<div class="container-fluid py-4">
+
+  <!-- Back navigation -->
+  <div class="mb-4">
+    <a routerLink="/documentation"
+       class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
+      <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>
+      Back to Documentation
+    </a>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+  <div class="d-flex flex-column align-items-center py-5">
+    <div class="spinner-border text-primary mb-3" role="status"></div>
+    <span class="text-secondary">Loading project documentation...</span>
+  </div>
+  }
+
+  @if (!isLoading) {
+
+  <!-- Error -->
+  @if (errorMessage) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    {{ errorMessage }}
+  </div>
+  }
+
+  @if (project) {
+
+  <!-- Project header -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+
+        <div class="d-flex align-items-start gap-3">
+          <div class="project-header-icon rounded-3 bg-primary bg-opacity-10 p-3">
+            <lucide-icon [img]="FolderOpen"
+                         [size]="28"
+                         class="text-primary">
+            </lucide-icon>
+          </div>
+
+          <div>
+            <h2 class="fw-semibold mb-2">
+              {{ project.name }}
+            </h2>
+
+            <p class="text-secondary mb-3">
+              {{ project.description || 'No project description available.' }}
+            </p>
+
+            @if (project.technologies.length > 0) {
+            <div class="d-flex flex-wrap gap-2">
+              @for (technology of project.technologies; track technology) {
+              <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                {{ technology }}
+              </span>
+              }
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="text-secondary small">
+          <lucide-icon [img]="CalendarDays"
+                       [size]="14"
+                       class="me-1">
+          </lucide-icon>
+          Created: {{ project.createdAt | date:'mediumDate' }}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentation header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h4 class="fw-semibold mb-1">Project Documentation</h4>
+      <p class="text-secondary mb-0">
+        Manage technical documentation for this project.
+      </p>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+        {{ documents.length }} Documents
+      </span>
+
+      <button type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              (click)="openCreateForm()">
+        <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+        New Document
+      </button>
+    </div>
+  </div>
+
+  <!-- Success message -->
+  @if (successMessage) {
+  <div class="alert alert-success" role="alert">
+    {{ successMessage }}
+  </div>
+  }
+
+  <!-- Create document form -->
+  @if (showCreateForm) {
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h5 class="fw-semibold mb-1">Create New Document</h5>
+          <p class="text-secondary small mb-0">
+            Add technical documentation to this project.
+          </p>
+        </div>
+
+        <button type="button"
+                class="btn-close"
+                aria-label="Close"
+                (click)="closeCreateForm()">
+        </button>
+      </div>
+
+      <form>
+        <div class="row g-3">
+
+          <!-- Title -->
+          <div class="col-12">
+            <label for="documentTitle" class="form-label">
+              Title <span class="text-danger">*</span>
+            </label>
+
+            <input id="documentTitle"
+                   type="text"
+                   class="form-control"
+                   placeholder="e.g. System Architecture"
+                   [(ngModel)]="newDocument.title"
+                   name="title"
+                   required>
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-6">
+            <label for="documentCategory" class="form-label">
+              Category <span class="text-danger">*</span>
+            </label>
+
+            <select id="documentCategory"
+                    class="form-select"
+                    [(ngModel)]="newDocument.category"
+                    name="category"
+                    required>
+              <option value="" disabled>Select a category</option>
+              <option value="Overview">Project Overview</option>
+              <option value="Architecture">Architecture</option>
+              <option value="API">API Documentation</option>
+              <option value="Database">Database</option>
+              <option value="Setup">Setup & Installation</option>
+              <option value="Deployment">Deployment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Tags -->
+          <div class="col-md-6">
+            <label for="documentTags" class="form-label">
+              Tags
+            </label>
+
+            <input id="documentTags"
+                   type="text"
+                   class="form-control"
+                   placeholder="e.g. Angular, Backend, API"
+                   [(ngModel)]="tagsInput"
+                   name="tags">
+
+            <div class="form-text">
+              Separate tags with commas.
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="col-12">
+            <label for="documentContent" class="form-label">
+              Content
+            </label>
+
+            <textarea id="documentContent"
+                      class="form-control"
+                      rows="8"
+                      placeholder="Write your documentation here..."
+                      [(ngModel)]="newDocument.content"
+                      name="content">
+                  </textarea>
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="closeCreateForm()">
+            Cancel
+          </button>
+
+          <button type="button"
+                  class="btn btn-primary d-inline-flex align-items-center gap-2"
+                  (click)="createDocument()"
+                  [disabled]="isSaving || !newDocument.title.trim() || !newDocument.category">
+            <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+            {{ isSaving ? 'Creating...' : 'Create Document' }}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+  }
+
+  <!-- Search -->
+  <div class="row mb-4">
+    <div class="col-md-6 col-lg-5">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent">
+          <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+        </span>
+
+        <input type="text"
+               class="form-control"
+               placeholder="Search documentation..."
+               [(ngModel)]="searchTerm"
+               name="searchTerm">
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  @if (filteredDocuments.length > 0) {
+
+  <div class="row g-4">
+
+    @for (document of filteredDocuments; track document.id) {
+
+    <div class="col-12 col-md-6 col-xl-4">
+
+      <div class="card h-100 border-0 shadow-sm documentation-card">
+        <div class="card-body p-4">
+
+          <!-- Edit mode -->
+          @if (editingDocumentId === document.id) {
+
+          <div class="mb-3">
+            <h5 class="fw-semibold mb-1">Edit Document</h5>
+            <p class="text-secondary small mb-0">
+              Update the documentation details.
+            </p>
+          </div>
+
+          <form (ngSubmit)="saveDocument(document.id!)">
+
+            <!-- Title -->
+            <div class="mb-3">
+              <label class="form-label" for="editDocumentTitle">
+                Title
+              </label>
+
+              <input id="editDocumentTitle"
+                     type="text"
+                     class="form-control"
+                     [(ngModel)]="editDocument.title"
+                     name="editTitle"
+                     required>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+              <label class="form-label" for="editDocumentCategory">
+                Category
+              </label>
+
+              <select id="editDocumentCategory"
+                      class="form-select"
+                      [(ngModel)]="editDocument.category"
+                      name="editCategory"
+                      required>
+                <option value="Overview">Project Overview</option>
+                <option value="Architecture">Architecture</option>
+                <option value="API">API Documentation</option>
+                <option value="Database">Database</option>
+                <option value="Setup">Setup & Installation</option>
+                <option value="Deployment">Deployment</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Content -->
+            <div class="mb-3">
+              <label class="form-label" for="editDocumentContent">
+                Content
+              </label>
+
+              <textarea id="editDocumentContent"
+                        class="form-control"
+                        rows="8"
+                        [(ngModel)]="editDocument.content"
+                        name="editContent">
+                        </textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="mb-3">
+              <label class="form-label" for="editDocumentTags">
+                Tags
+              </label>
+
+              <input id="editDocumentTags"
+                     type="text"
+                     class="form-control"
+                     [ngModel]="editDocument.tags.join(', ')"
+                     (ngModelChange)="editDocument.tags = $event.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)"
+                     name="editTags">
+
+              <div class="form-text">
+                Separate tags with commas.
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2">
+
+              <button type="button"
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="cancelEditing()"
+                      [disabled]="isSaving">
+                Cancel
+              </button>
+
+              <button type="submit"
+                      class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
+                      [disabled]="isSaving || !editDocument.title.trim() || !editDocument.category">
+                <lucide-icon [img]="Save" [size]="15"></lucide-icon>
+                {{ isSaving ? 'Saving...' : 'Save Changes' }}
+              </button>
+
+            </div>
+          </form>
+
+          } @else {
+
+          <!-- Document header -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+
+            <div class="document-icon rounded-3 bg-primary bg-opacity-10 p-3">
+              <lucide-icon [img]="FileText"
+                           [size]="23"
+                           class="text-primary">
+              </lucide-icon>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+
+              <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                {{ document.category }}
+              </span>
+
+              <div class="dropdown">
+                <button type="button"
+                        class="btn btn-sm btn-light border"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Document actions">
+                  <lucide-icon [img]="MoreVertical" [size]="16"></lucide-icon>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <button type="button"
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            (click)="startEditing(document)">
+                      <lucide-icon [img]="Pencil" [size]="15"></lucide-icon>
+                      Edit
+                    </button>
+                  </li>
+
+                  <li>
+                    <button type="button"
+                            class="dropdown-item d-flex align-items-center gap-2 text-danger"
+                            (click)="confirmDelete(document.id!)">
+                      <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+                      Delete
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Document content -->
+          <h5 class="fw-semibold mb-2">
+            {{ document.title }}
+          </h5>
+
+          <p class="text-secondary small document-preview mb-3">
+            {{ document.content || 'No content available.' }}
+          </p>
+
+          <!-- Tags -->
+          @if (document.tags.length > 0) {
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            @for (tag of document.tags; track tag) {
+            <span class="badge bg-light text-secondary border">
+              <lucide-icon [img]="Tag"
+                           [size]="11"
+                           class="me-1">
+              </lucide-icon>
+              {{ tag }}
+            </span>
+            }
+          </div>
+          }
+
+          <!-- Date -->
+          <div class="d-flex align-items-center gap-2 text-secondary small mt-auto">
+            <lucide-icon [img]="CalendarDays" [size]="14"></lucide-icon>
+            {{ document.updatedAt || document.createdAt | date:'mediumDate' }}
+          </div>
+
+          <!-- Delete confirmation -->
+          @if (deletingDocumentId === document.id) {
+
+          <div class="border-top mt-3 pt-3">
+
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <lucide-icon [img]="AlertCircle"
+                           [size]="18"
+                           class="text-danger">
+              </lucide-icon>
+
+              <span class="small fw-medium">
+                Are you sure you want to delete this document?
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary"
+                      (click)="cancelDelete()">
+                Cancel
+              </button>
+
+              <button type="button"
+                      class="btn btn-sm btn-danger d-inline-flex align-items-center gap-2"
+                      (click)="deleteDocument(document.id!)">
+                <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
+                Delete
+              </button>
+
+            </div>
+          </div>
+          }
+
+          }
+        </div>
+      </div>
+
+    </div>
+    }
+
+  </div>
+
+  } @else {
+
+  <!-- Empty state -->
+  <div class="text-center py-5">
+
+    <div class="mb-3 text-secondary">
+      <lucide-icon [img]="FileText" [size]="48"></lucide-icon>
+    </div>
+
+    @if (searchTerm.trim()) {
+
+    <h5 class="fw-semibold">No matching documents</h5>
+
+    <p class="text-secondary">
+      Try changing your search criteria.
+    </p>
+
+    } @else {
+
+    <h5 class="fw-semibold">No documentation yet</h5>
+
+    <p class="text-secondary">
+      Start organizing the technical documentation for this project.
+    </p>
+
+    }
+  </div>
+  }
+  }
+  }
+</div>

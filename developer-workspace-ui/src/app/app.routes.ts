@@ -37,6 +37,18 @@ export const routes: Routes = [
         .then(m => m.WorkspaceComponent)
   },
   {
+    path: 'documentation',
+    loadComponent: () =>
+      import('./documentation/documentation')
+        .then(m => m.DocumentationComponent)
+  },
+  {
+    path: 'documentation/:id',
+    loadComponent: () =>
+      import('./documentation-project-details/documentation-project-details')
+        .then(m => m.DocumentationProjectDetailsComponent)
+  },
+  {
     path: 'architecture-library',
     loadComponent: () =>
       import('./architecture-library/architecture-library')

@@ -62,6 +62,10 @@ export class App {
       return 'Markdown Document';
     }
 
+    if (url.startsWith('/documentation')) {
+      return 'Documentation';
+    }
+
     return 'Dashboard';
   }
 }
