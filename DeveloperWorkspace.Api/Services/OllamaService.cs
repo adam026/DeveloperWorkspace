@@ -58,6 +58,124 @@ public sealed class OllamaService
                 "Ollama did not return a summary.");
     }
 
+    public async Task<string> GenerateDocumentationAsync(
+    string category,
+    string projectName,
+    string description,
+    string technologies,
+    string additionalContext,
+    CancellationToken cancellationToken = default)
+    {
+        var prompt = $"""
+        You are an experienced software architect and
+        technical documentation specialist.
+
+        Your task is to generate professional technical
+        documentation in Markdown format.
+
+        Project information:
+        - Project name: {projectName}
+        - Project description: {description}
+        - Technologies: {technologies}
+        - Documentation category: {category}
+
+        Additional context provided by the user:
+        {additionalContext}
+
+        Requirements:
+        - Write the complete documentation in English.
+        - Use clear, professional technical language.
+        - Structure the document with appropriate Markdown headings.
+        - Include relevant technical details based on the provided information.
+        - Use lists and tables where they improve readability.
+        - Include code examples only when relevant.
+        - Do not invent project-specific implementation details.
+        - Clearly identify information that requires further clarification.
+        - Avoid generic filler text.
+        - Make the result useful for real software development work.
+        - Return only the Markdown document content.
+        - Do not wrap the entire response in a code fence.
+
+        Generate the documentation now.
+        """;
+
+        var request = new OllamaRequest(
+            Model: "llama3.2:3b",
+            Prompt: prompt,
+            Stream: false);
+
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/generate",
+            request,
+            cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<OllamaResponse>(
+            cancellationToken: cancellationToken);
+
+        return result?.Response.Trim()
+            ?? throw new InvalidOperationException(
+                "Ollama did not return documentation content.");
+    }
+
+    public async Task<string> ImproveDocumentationAsync(
+    string content,
+    string additionalInstructions,
+    CancellationToken cancellationToken = default)
+    {
+        var prompt = $"""
+        You are an experienced software architect and
+        technical documentation specialist.
+
+        Your task is to improve an existing technical
+        documentation written in Markdown.
+
+        Existing documentation:
+        {content}
+
+        Additional instructions:
+        {additionalInstructions}
+
+        Requirements:
+        - Write the improved documentation in English.
+        - Preserve all existing technical facts and information.
+        - Improve clarity, readability, grammar and structure.
+        - Use appropriate Markdown headings and formatting.
+        - Organize information into logical sections.
+        - Use lists and tables where they improve readability.
+        - Do not invent APIs, database structures, configurations,
+          technologies or implementation details.
+        - Do not remove important technical information.
+        - If information is unclear or incomplete, preserve it
+          and explicitly identify what needs clarification.
+        - Avoid generic filler text.
+        - Return only the improved Markdown content.
+        - Do not wrap the entire response in a code fence.
+
+        Improve the documentation now.
+        """;
+
+        var request = new OllamaRequest(
+            Model: "llama3.2:3b",
+            Prompt: prompt,
+            Stream: false);
+
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/generate",
+            request,
+            cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<OllamaResponse>(
+            cancellationToken: cancellationToken);
+
+        return result?.Response.Trim()
+            ?? throw new InvalidOperationException(
+                "Ollama did not return improved documentation.");
+    }
+
     public async Task<string> GenerateMarkdownAsync(
         string fileType,
         string name,
