@@ -13,6 +13,31 @@ export interface ProjectDocumentation {
   updatedAt?: string | null;
 }
 
+export interface GenerateDocumentationRequest {
+  projectName: string;
+  category: string;
+  description?: string;
+  technologies?: string;
+  additionalContext?: string;
+}
+
+export interface ImproveDocumentationRequest {
+  content: string;
+  additionalInstructions?: string;
+}
+
+export interface DocumentationAiResponse {
+  content: string;
+}
+
+export interface DocumentationSummaryRequest {
+  content: string;
+}
+
+export interface DocumentationSummaryResponse {
+  summary: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -65,6 +90,33 @@ export class ProjectDocumentationService {
   ): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${projectId}/documents/${documentId}`
+    );
+  }
+
+  generateDocumentation(
+    request: GenerateDocumentationRequest
+  ): Observable<DocumentationAiResponse> {
+    return this.http.post<DocumentationAiResponse>(
+      'http://localhost:8080/api/ai/documentation/generate',
+      request
+    );
+  }
+
+  improveDocumentation(
+    request: ImproveDocumentationRequest
+  ): Observable<DocumentationAiResponse> {
+    return this.http.post<DocumentationAiResponse>(
+      'http://localhost:8080/api/ai/documentation/improve',
+      request
+    );
+  }
+
+  summarizeDocumentation(
+    request: DocumentationSummaryRequest
+  ): Observable<DocumentationSummaryResponse> {
+    return this.http.post<DocumentationSummaryResponse>(
+      'http://localhost:8080/api/ai/documentation/summarize',
+      request
     );
   }
 }

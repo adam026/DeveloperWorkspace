@@ -2,7 +2,7 @@ import { Component,OnInit,inject,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideAngularModule,ArrowLeft,CalendarDays,FileText,Pencil,Trash2,Save,X,AlertCircle, Download } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, CalendarDays, FileText, Pencil, Trash2, Save, X, AlertCircle, Download, Sparkles, WandSparkles } from 'lucide-angular';
 import { ProjectDocumentation,ProjectDocumentationService } from '../services/project-documentation.service';
 import { DocumentationProject, DocumentationProjectService } from '../services/documentation-project.service';
 import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor';
@@ -24,15 +24,12 @@ import { MarkdownHtmlPipe } from '../pipes/markdown-html.pipe';
 })
 export class DocumentationDocumentDetailsComponent implements OnInit {
 
+  // Dependency injections
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  private readonly documentationService =
-    inject(ProjectDocumentationService);
-
-  private readonly projectService =
-    inject(DocumentationProjectService);
+  private readonly documentationService = inject(ProjectDocumentationService);
+  private readonly projectService = inject(DocumentationProjectService);
 
   protected projectId = '';
   protected documentId = '';
@@ -50,9 +47,20 @@ export class DocumentationDocumentDetailsComponent implements OnInit {
   protected errorMessage = '';
   protected successMessage = '';
 
+  // AI related states
+  protected isGeneratingDocumentation = false;
+  protected isImprovingDocumentation = false;
+  protected isGeneratingSummary = false;
+
+  protected showAiInstructions = false;
+  protected aiInstructions = '';
+
+  protected aiSummary = '';
+
   protected editDocument: ProjectDocumentation =
     this.createEmptyDocument();
 
+  // Icons 
   protected readonly ArrowLeft = ArrowLeft;
   protected readonly CalendarDays = CalendarDays;
   protected readonly FileText = FileText;
@@ -62,6 +70,8 @@ export class DocumentationDocumentDetailsComponent implements OnInit {
   protected readonly X = X;
   protected readonly AlertCircle = AlertCircle;
   protected readonly Download = Download;
+  protected readonly Sparkles = Sparkles;
+  protected readonly WandSparkles = WandSparkles;
 
   ngOnInit(): void {
     this.projectId =
@@ -275,6 +285,105 @@ export class DocumentationDocumentDetailsComponent implements OnInit {
         console.error('Failed to delete document:', error);
         this.errorMessage = 'Failed to delete the document.';
         this.isDeleting = false;
+        this.cdr.detectChanges(); 
+      }
+    });
+  }
+
+  // AI related methods
+  protected generateDocumentation(): void {
+    if (!this.project || !this.document) {
+      return;
+    }
+
+    this.isGeneratingDocumentation = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.documentationService.generateDocumentation({
+      projectName: this.project.name,
+      category: this.document.category,
+      description: this.project.description,
+      technologies: this.project.technologies.join(', '),
+      additionalContext: this.aiInstructions
+    }).subscribe({
+      next: response => {
+        this.editDocument.content = response.content;
+        this.isEditing = true;
+        this.isGeneratingDocumentation = false;
+        this.aiInstructions = '';
+        this.showAiInstructions = false;
+        this.successMessage = 'Documentation generated successfully. Review it before saving.';
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to generate documentation:', error);
+        this.errorMessage = 'Failed to generate documentation. Please check the AI service.';
+        this.isGeneratingDocumentation = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  protected improveDocumentation(): void {
+    if (!this.editDocument.content.trim()) {
+      this.errorMessage = 'There is no documentation content to improve.';
+      return;
+    }
+
+    this.isImprovingDocumentation = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.documentationService.improveDocumentation({
+      content: this.editDocument.content,
+      additionalInstructions: this.aiInstructions
+    }).subscribe({
+      next: response => {
+        this.editDocument.content = response.content;
+        this.isEditing = true;
+        this.isImprovingDocumentation = false;
+        this.aiInstructions = '';
+        this.showAiInstructions = false;
+        this.successMessage = 'Documentation improved successfully. Review it before saving.';
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to improve documentation:', error);
+        this.errorMessage = 'Failed to improve documentation. Please check the AI service.';
+        this.isImprovingDocumentation = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  protected generateSummary(): void {
+    const content = this.isEditing
+      ? this.editDocument.content
+      : this.document?.content ?? '';
+
+    if (!content.trim()) {
+      this.errorMessage = 'There is no documentation content to summarize.';
+      return;
+    }
+
+    this.isGeneratingSummary = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.aiSummary = '';
+
+    this.documentationService.summarizeDocumentation({
+      content
+    }).subscribe({
+      next: response => {
+        this.aiSummary = response.summary;
+        this.isGeneratingSummary = false;
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to generate summary:', error);
+        this.errorMessage = 'Failed to generate summary. Please check the AI service.';
+        this.isGeneratingSummary = false;
         this.cdr.detectChanges();
       }
     });
