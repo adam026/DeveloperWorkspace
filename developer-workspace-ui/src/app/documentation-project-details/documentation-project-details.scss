@@ -30,3 +30,48 @@
 .badge {
   font-weight: 500;
 }
+
+.documentation-card {
+  min-height: 240px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.document-main-content {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.document-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  min-height: 4.8em;
+}
+
+.document-date {
+  margin-top: auto;
+}
+
+.document-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 767.98px) {
+  .documentation-card {
+    min-height: 220px;
+  }
+}

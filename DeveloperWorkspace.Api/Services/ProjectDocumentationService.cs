@@ -19,7 +19,6 @@ namespace DeveloperWorkspace.Api.Services
         {
             return await _documents
                 .Find(document => document.ProjectId == projectId)
-                .SortByDescending(document => document.CreatedAt)
                 .ToListAsync();
         }
 

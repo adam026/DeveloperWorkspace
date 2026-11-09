@@ -61,6 +61,14 @@
         <div class="d-flex flex-wrap align-items-center gap-2">
 
           <button type="button"
+                  class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+                  (click)="downloadMarkdown()"
+                  [disabled]="!document">
+            <lucide-icon [img]="Download" [size]="15"></lucide-icon>
+            Download Markdown
+          </button>
+
+          <button type="button"
                   class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2"
                   (click)="startEditing()"
                   [disabled]="isEditing">

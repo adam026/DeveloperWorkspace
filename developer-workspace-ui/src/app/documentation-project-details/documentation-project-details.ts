@@ -6,7 +6,7 @@ import { DocumentationProject, DocumentationProjectService } from '../services/d
 import { ProjectDocumentation, ProjectDocumentationService } from '../services/project-documentation.service';
 import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor';
 import { Router } from '@angular/router';
-import {LucideAngularModule, ArrowLeft, FolderOpen, FileText, Search, CalendarDays, Tag, AlertCircle, Plus, MoreVertical,Pencil,Trash2,Save } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, FolderOpen, FileText, Search, CalendarDays, Tag, AlertCircle, Plus, MoreVertical,Pencil,Trash2,Save } from 'lucide-angular';
 
 @Component({
   selector: 'app-documentation-project-details',
@@ -62,8 +62,10 @@ export class DocumentationProjectDetailsComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  // Search
+  // Search and filters
   searchTerm = '';
+  selectedCategory = '';
+  sortOrder: 'newest' | 'oldest' = 'newest';
 
   // Create form
   showCreateForm = false;
@@ -148,21 +150,59 @@ export class DocumentationProjectDetailsComponent implements OnInit {
       });
   }
 
-  // Filter documents
+  // Filter and sort documents
   protected get filteredDocuments(): ProjectDocumentation[] {
     const term = this.searchTerm.trim().toLowerCase();
 
-    if (!term) {
-      return this.documents;
-    }
+    let result = this.documents.filter(document => {
+      const matchesSearch =
+        !term ||
+        document.title.toLowerCase().includes(term) ||
+        document.category.toLowerCase().includes(term) ||
+        document.content.toLowerCase().includes(term) ||
+        document.tags.some(tag => tag.toLowerCase().includes(term));
 
-    return this.documents.filter(document =>
-      document.title.toLowerCase().includes(term) ||
-      document.category.toLowerCase().includes(term) ||
-      document.tags.some(tag =>
-        tag.toLowerCase().includes(term)
-      )
-    );
+      const matchesCategory =
+        !this.selectedCategory ||
+        document.category === this.selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    result = [...result].sort((a, b) => {
+      const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+
+      return this.sortOrder === 'newest'
+        ? dateB - dateA
+        : dateA - dateB;
+    });
+
+    return result;
+  }
+
+  // Available categories
+  protected get documentCategories(): string[] {
+    return [...new Set(
+      this.documents
+        .map(document => document.category)
+        .filter(category => category.trim().length > 0)
+    )].sort((a, b) => a.localeCompare(b));
+  }
+
+  // Preview content for document list
+  protected getDocumentPreview(content: string): string {
+    return content
+      .replace(/```[\s\S]*?```/g, '[Code block]')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/!\[.*?\]\(.*?\)/g, '')
+      .replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
+      .replace(/[*_~>]/g, '')
+      .replace(/^\s*[-+]\s+/gm, '')
+      .replace(/^\s*\d+\.\s+/gm, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   // Open create form

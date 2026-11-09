@@ -2,7 +2,7 @@ import { Component,OnInit,inject,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideAngularModule, ArrowLeft,CalendarDays,FileText,Pencil,Trash2,Save,X,AlertCircle } from 'lucide-angular';
+import { LucideAngularModule,ArrowLeft,CalendarDays,FileText,Pencil,Trash2,Save,X,AlertCircle, Download } from 'lucide-angular';
 import { ProjectDocumentation,ProjectDocumentationService } from '../services/project-documentation.service';
 import { DocumentationProject, DocumentationProjectService } from '../services/documentation-project.service';
 import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor';
@@ -61,6 +61,7 @@ export class DocumentationDocumentDetailsComponent implements OnInit {
   protected readonly Save = Save;
   protected readonly X = X;
   protected readonly AlertCircle = AlertCircle;
+  protected readonly Download = Download;
 
   ngOnInit(): void {
     this.projectId =
@@ -207,6 +208,39 @@ export class DocumentationDocumentDetailsComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  protected downloadMarkdown(): void {
+    if (!this.document) {
+      return;
+    }
+
+    const content = this.document.content || '';
+
+    const fileName = this.document.title
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'document';
+
+    const blob = new Blob(
+      [content],
+      { type: 'text/markdown;charset=utf-8' }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileName}.md`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   protected confirmDelete(): void {
