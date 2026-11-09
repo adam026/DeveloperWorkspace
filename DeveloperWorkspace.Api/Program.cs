@@ -25,23 +25,14 @@ namespace DeveloperWorkspace.Api
             // Add services to the container.
             builder.Services.AddControllers();
 
-            // DocumentService registration for dependency injection
+            // Service registrations for dependency injection
             builder.Services.AddScoped<DocumentService>();
-
-            // PromptService registration for dependency injection
             builder.Services.AddScoped<PromptService>();
-
-            // MarkdownDocumentService registration for dependency injection
             builder.Services.AddScoped<MarkdownDocumentService>();
-
-            // ArchitectureProjectService registration for dependency injection
             builder.Services.AddScoped<ArchitectureProjectService>();
-
-            // DocumentationProjectService registration for dependency injection
             builder.Services.AddScoped<DocumentationProjectService>();
-
-            // ProjectDocumentationService registration for dependency injection
             builder.Services.AddScoped<ProjectDocumentationService>();
+            builder.Services.AddScoped<TaskService>();
 
             // MongoDbContext registration with configuration from appsettings.json
             builder.Services.AddSingleton<MongoDbContext>(sp =>
@@ -58,7 +49,6 @@ namespace DeveloperWorkspace.Api
             });
 
             // OllamaService registration with HttpClient configuration
-
             builder.Services.AddHttpClient<OllamaService>(client =>
             {
                 var ollamaUrl = builder.Configuration["Ollama:BaseUrl"]
@@ -68,7 +58,6 @@ namespace DeveloperWorkspace.Api
                 client.Timeout = TimeSpan.FromMinutes(3);
             });
 
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();

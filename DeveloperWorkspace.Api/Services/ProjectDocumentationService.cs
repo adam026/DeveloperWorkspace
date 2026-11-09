@@ -73,7 +73,7 @@ namespace DeveloperWorkspace.Api.Services
             return result.DeletedCount > 0;
         }
 
-        public async Task DeleteByProjectIdAsync(string projectId)
+        public async System.Threading.Tasks.Task DeleteByProjectIdAsync(string projectId)
         {
             await _documents.DeleteManyAsync(
                 document => document.ProjectId == projectId);
