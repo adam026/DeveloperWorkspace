@@ -5,12 +5,15 @@ import { forkJoin } from 'rxjs';
 import { DocumentService, Document } from '../services/document';
 import { PromptService, Prompt } from '../services/prompt';
 import { MarkdownDocument, MarkdownDocumentService } from '../services/markdown-document';
+import { ArchitectureProject, ArchitectureProjectService } from '../services/architecture-project.service';
+import { DocumentationProject, DocumentationProjectService } from '../services/documentation-project.service';
+import { Task, TaskService } from '../services/task';
 import { LucideAngularModule,FileText,Sparkles,Bot,FileCode,Workflow,BookOpen,ListTodo,Code2,Layers,Search,FolderOpen,ArrowRight}  from 'lucide-angular';
 
 interface RecentWorkspaceItem {
   id: string | undefined;
   title: string;
-  type: 'Document' | 'Prompt' | 'Markdown';
+  type: 'Document' | 'Prompt' | 'Markdown' | 'Architecture Project' | 'Documentation Project' | 'Task';
   subtitle: string;
   date: Date | string | undefined;
   sortDate: number;
@@ -42,6 +45,13 @@ export class DashboardComponent implements OnInit {
 
   documentCount = 0;
   promptCount = 0;
+  markdownDocumentCount = 0;
+  architectureProjectCount = 0;
+  documentationProjectCount = 0;
+  taskCount = 0;
+  todoTaskCount = 0;
+  inProgressTaskCount = 0;
+  completedTaskCount = 0;
 
   recentlyUpdatedItems: RecentWorkspaceItem[] = [];
 
@@ -51,6 +61,9 @@ export class DashboardComponent implements OnInit {
     private documentService: DocumentService,
     private promptService: PromptService,
     private markdownDocumentService: MarkdownDocumentService,
+    private architectureProjectService: ArchitectureProjectService,
+    private documentationProjectService: DocumentationProjectService,
+    private taskService: TaskService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -64,16 +77,29 @@ export class DashboardComponent implements OnInit {
     forkJoin({
       documents: this.documentService.getAll(),
       prompts: this.promptService.getAll(),
-      markdownDocuments: this.markdownDocumentService.getAll()
+      markdownDocuments: this.markdownDocumentService.getAll(),
+      architectureProjects: this.architectureProjectService.getAll(),
+      documentationProjects: this.documentationProjectService.getAll(),
+      tasks: this.taskService.getAll()
     }).subscribe({
-      next: ({ documents, prompts, markdownDocuments }) => {
+      next: ({ documents, prompts, markdownDocuments, architectureProjects, documentationProjects, tasks }) => {
         this.documentCount = documents.length;
         this.promptCount = prompts.length;
+        this.markdownDocumentCount = markdownDocuments.length;
+        this.architectureProjectCount = architectureProjects.length;
+        this.documentationProjectCount = documentationProjects.length;
+        this.taskCount = tasks.length;
+        this.todoTaskCount = tasks.filter(t => t.status === 'To Do').length;
+        this.inProgressTaskCount = tasks.filter(t => t.status === 'In Progress').length;
+        this.completedTaskCount = tasks.filter(t => t.status === 'Done').length;
 
         this.updateRecentlyUpdatedItems(
           documents,
           prompts,
-          markdownDocuments
+          markdownDocuments,
+          architectureProjects,
+          documentationProjects,
+          tasks
         );
 
         this.isLoadingDashboard = false;
@@ -90,7 +116,10 @@ export class DashboardComponent implements OnInit {
   private updateRecentlyUpdatedItems(
     documents: Document[],
     prompts: Prompt[],
-    markdownDocuments: MarkdownDocument[]
+    markdownDocuments: MarkdownDocument[],
+    architectureProjects: ArchitectureProject[],
+    documentationProjects: DocumentationProject[],
+    tasks: Task[]
   ): void {
     const documentItems: RecentWorkspaceItem[] = documents.map(document => {
       const date = document.updatedAt ?? document.createdAt;
@@ -132,10 +161,54 @@ export class DashboardComponent implements OnInit {
         };
       });
 
+    const architectureItems: RecentWorkspaceItem[] =
+      architectureProjects.map(project => {
+        const date = project.updatedAt ?? project.createdAt;
+
+        return {
+          id: project.id,
+          title: project.name,
+          type: 'Architecture Project',
+          subtitle: 'Architecture Library',
+          date,
+          sortDate: date ? new Date(date).getTime() : 0
+        };
+      });
+
+    const documentationProjectItems: RecentWorkspaceItem[] =
+      documentationProjects.map(project => {
+        const date = project.updatedAt ?? project.createdAt;
+
+        return {
+          id: project.id,
+          title: project.name,
+          type: 'Documentation Project',
+          subtitle: 'Documentation',
+          date,
+          sortDate: date ? new Date(date).getTime() : 0
+        };
+      });
+
+    const taskItems: RecentWorkspaceItem[] = tasks.map(task => {
+      const date = task.updatedAt ?? task.createdAt;
+
+      return {
+        id: task.id,
+        title: task.title,
+        type: 'Task',
+        subtitle: `${task.status} · ${task.priority}`,
+        date,
+        sortDate: date ? new Date(date).getTime() : 0
+      };
+    });
+
     this.recentlyUpdatedItems = [
       ...documentItems,
       ...promptItems,
-      ...markdownItems
+      ...markdownItems,
+      ...architectureItems,
+      ...documentationProjectItems,
+      ...taskItems
     ]
       .sort((a, b) => b.sortDate - a.sortDate)
       .slice(0, 5);

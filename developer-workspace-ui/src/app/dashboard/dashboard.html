@@ -19,22 +19,6 @@
     </span>
   </div>
 
-  <!-- Search -->
-  <div class="input-group mb-5 shadow-sm">
-    <span class="input-group-text bg-white border-end-0">
-      <i-lucide [img]="Search" [size]="18"></i-lucide>
-    </span>
-
-    <input type="search"
-           class="form-control border-start-0 py-3"
-           placeholder="Search documents, prompts, snippets..."
-           aria-label="Search workspace" />
-
-    <span class="input-group-text bg-white text-secondary small d-none d-md-flex">
-      Workspace search
-    </span>
-  </div>
-
   <!-- Workspace heading -->
   <div class="mb-3">
     <h3 class="h5 fw-bold mb-1">Your workspace</h3>
@@ -46,7 +30,6 @@
 
   <!-- Statistics -->
   <div class="row g-3 mb-4">
-
     <!-- Documents -->
     <div class="col-12 col-md-6">
       <div class="card border-0 shadow-sm h-100">
@@ -87,6 +70,113 @@
       </div>
     </div>
 
+    <!-- Markdown Files -->
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3 p-4">
+
+          <div class="dashboard-icon bg-success-subtle text-success rounded-3">
+            <i-lucide [img]="FileCode" [size]="24"></i-lucide>
+          </div>
+
+          <div>
+            <p class="text-secondary mb-1">Markdown Files</p>
+            <h3 class="fw-bold mb-0">
+              {{ isLoadingDashboard ? '...' : markdownDocumentCount }}
+            </h3>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture Projects -->
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3 p-4">
+
+          <div class="dashboard-icon bg-warning-subtle text-warning-emphasis rounded-3">
+            <i-lucide [img]="Workflow" [size]="24"></i-lucide>
+          </div>
+
+          <div>
+            <p class="text-secondary mb-1">Architecture Projects</p>
+            <h3 class="fw-bold mb-0">
+              {{ isLoadingDashboard ? '...' : architectureProjectCount }}
+            </h3>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Documentation Projects -->
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3 p-4">
+
+          <div class="dashboard-icon bg-info-subtle text-info rounded-3">
+            <i-lucide [img]="BookOpen" [size]="24"></i-lucide>
+          </div>
+
+          <div>
+            <p class="text-secondary mb-1">Documentation Projects</p>
+            <h3 class="fw-bold mb-0">
+              {{ isLoadingDashboard ? '...' : documentationProjectCount }}
+            </h3>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="dashboard-icon bg-danger-subtle text-danger rounded-3">
+              <i-lucide [img]="ListTodo" [size]="24"></i-lucide>
+            </div>
+
+            <div>
+              <p class="text-secondary mb-1">Total Tasks</p>
+              <h3 class="fw-bold mb-0">
+                {{ isLoadingDashboard ? '...' : taskCount }}
+              </h3>
+            </div>
+          </div>
+
+          @if (!isLoadingDashboard) {
+          <div class="d-flex flex-wrap gap-3 pt-2 border-top">
+            <div>
+              <span class="badge bg-secondary-subtle text-secondary">
+                To Do
+              </span>
+              <span class="fw-semibold ms-1">{{ todoTaskCount }}</span>
+            </div>
+
+            <div>
+              <span class="badge bg-primary-subtle text-primary">
+                In Progress
+              </span>
+              <span class="fw-semibold ms-1">{{ inProgressTaskCount }}</span>
+            </div>
+
+            <div>
+              <span class="badge bg-success-subtle text-success">
+                Done
+              </span>
+              <span class="fw-semibold ms-1">{{ completedTaskCount }}</span>
+            </div>
+          </div>
+          }
+
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Recently updated -->
@@ -100,58 +190,56 @@
         </p>
       </div>
 
-      <a class="btn btn-outline-primary btn-sm"
-         routerLink="/workspace">
-
+      <a class="btn btn-outline-primary btn-sm" routerLink="/workspace">
         View all
         <i-lucide [img]="ArrowRight" [size]="14" class="ms-1"></i-lucide>
       </a>
     </div>
 
     @if (isLoadingDashboard) {
-
     <div class="text-center text-secondary py-4">
       Loading recent items...
     </div>
-
     } @else if (recentlyUpdatedItems.length === 0) {
-
     <div class="card border-0 bg-light">
       <div class="card-body text-center py-4 text-secondary">
-        No workspace items yet. Add a document, prompt or Markdown file to get started.
+        No workspace items yet. Add a document, prompt, Markdown file,
+        architecture project, task or documentation project to get started.
       </div>
     </div>
-
     } @else {
-
     <div class="d-flex flex-column gap-2">
 
       @for (item of recentlyUpdatedItems; track item.type + '-' + item.id) {
-
       <div class="card border-0 shadow-sm">
         <div class="card-body d-flex align-items-center gap-3">
 
           <!-- Recent item icon -->
           <div class="recent-icon rounded-3"
                [class.bg-purple-subtle]="item.type === 'Document'"
-               [class.text-primary]="item.type === 'Document'"
+               [class.text-primary]="item.type === 'Document' || item.type === 'Prompt'"
                [class.bg-primary-subtle]="item.type === 'Prompt'"
-               [class.text-primary]="item.type === 'Prompt'"
                [class.bg-success-subtle]="item.type === 'Markdown'"
-               [class.text-success]="item.type === 'Markdown'">
+               [class.text-success]="item.type === 'Markdown'"
+               [class.bg-warning-subtle]="item.type === 'Architecture Project'"
+               [class.text-warning-emphasis]="item.type === 'Architecture Project'"
+               [class.bg-danger-subtle]="item.type === 'Task'"
+               [class.text-danger]="item.type === 'Task'"
+               [class.bg-info-subtle]="item.type === 'Documentation Project'"
+               [class.text-info]="item.type === 'Documentation Project'">
 
             @if (item.type === 'Document') {
-
             <i-lucide [img]="FileText" [size]="20"></i-lucide>
-
             } @else if (item.type === 'Prompt') {
-
             <i-lucide [img]="Sparkles" [size]="20"></i-lucide>
-
-            } @else {
-
+            } @else if (item.type === 'Markdown') {
             <i-lucide [img]="FileCode" [size]="20"></i-lucide>
-
+            } @else if (item.type === 'Architecture Project') {
+            <i-lucide [img]="Workflow" [size]="20"></i-lucide>
+            } @else if (item.type === 'Task') {
+            <i-lucide [img]="ListTodo" [size]="20"></i-lucide>
+            } @else if (item.type === 'Documentation Project') {
+            <i-lucide [img]="BookOpen" [size]="20"></i-lucide>
             }
 
           </div>
@@ -175,11 +263,9 @@
 
         </div>
       </div>
-
       }
 
     </div>
-
     }
 
   </section>
@@ -294,65 +380,52 @@
 
       <!-- Documentation -->
       <div class="col-12 col-md-6 col-xl-4">
-        <div class="card module-card h-100">
+        <a routerLink="/documentation"
+           class="card module-card h-100 text-decoration-none">
           <div class="card-body p-4">
 
             <div class="dashboard-icon bg-info-subtle text-info rounded-3 mb-3">
               <i-lucide [img]="BookOpen" [size]="22"></i-lucide>
             </div>
 
-            <h5 class="fw-bold mb-0">Documentation</h5>
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="fw-bold text-dark mb-0">Documentation</h5>
+              <i-lucide [img]="ArrowRight" [size]="16" class="text-secondary"></i-lucide>
+            </div>
 
             <p class="text-secondary small mt-2 mb-3">
               Keep project documentation accessible in one place.
             </p>
 
-            <span class="text-secondary small fw-semibold">Project knowledge</span>
+            <span class="text-primary small fw-semibold">Project knowledge</span>
 
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Task Manager -->
       <div class="col-12 col-md-6 col-xl-4">
-        <div class="card module-card h-100">
+        <a routerLink="/tasks"
+           class="card module-card h-100 text-decoration-none">
           <div class="card-body p-4">
 
             <div class="dashboard-icon bg-danger-subtle text-danger rounded-3 mb-3">
               <i-lucide [img]="ListTodo" [size]="22"></i-lucide>
             </div>
 
-            <h5 class="fw-bold mb-0">Task Manager</h5>
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="fw-bold text-dark mb-0">Task Manager</h5>
+              <i-lucide [img]="ArrowRight" [size]="16" class="text-secondary"></i-lucide>
+            </div>
 
             <p class="text-secondary small mt-2 mb-3">
               Track development tasks, ideas and personal reminders.
             </p>
 
-            <span class="text-secondary small fw-semibold">Personal productivity</span>
+            <span class="text-primary small fw-semibold">Personal productivity</span>
 
           </div>
-        </div>
-      </div>
-
-      <!-- Code Snippets -->
-      <div class="col-12 col-md-6 col-xl-4">
-        <div class="card module-card h-100">
-          <div class="card-body p-4">
-
-            <div class="dashboard-icon bg-warning-subtle text-warning-emphasis rounded-3 mb-3">
-              <i-lucide [img]="Code2" [size]="22"></i-lucide>
-            </div>
-
-            <h5 class="fw-bold mb-0">Code Snippets</h5>
-
-            <p class="text-secondary small mt-2 mb-3">
-              Save and find useful, reusable code examples.
-            </p>
-
-            <span class="text-secondary small fw-semibold">Reusable code</span>
-
-          </div>
-        </div>
+        </a>
       </div>
 
       <!-- Workspace -->

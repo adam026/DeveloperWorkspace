@@ -144,30 +144,35 @@
       <div class="item-icon d-flex align-items-center justify-content-center flex-shrink-0"
            [class.document-icon]="item.type === 'Document'"
            [class.prompt-icon]="item.type === 'Prompt'"
-           [class.markdown-icon]="item.type === 'Markdown'">
-
+           [class.markdown-icon]="item.type === 'Markdown'"
+           [class.architecture-icon]="item.type === 'Architecture Project'"
+           [class.documentation-icon]="item.type === 'Documentation Project'"
+           [class.task-icon]="item.type === 'Task'">
         @switch (item.type) {
-
         @case ('Document') {
-        <lucide-icon [img]="FileText"
-                     [size]="21">
-        </lucide-icon>
+        <lucide-icon [img]="FileText" [size]="21"></lucide-icon>
         }
 
         @case ('Prompt') {
-        <lucide-icon [img]="Sparkles"
-                     [size]="21">
-        </lucide-icon>
+        <lucide-icon [img]="Sparkles" [size]="21"></lucide-icon>
         }
 
         @case ('Markdown') {
-        <lucide-icon [img]="FileCode"
-                     [size]="21">
-        </lucide-icon>
+        <lucide-icon [img]="FileCode" [size]="21"></lucide-icon>
         }
 
+        @case ('Architecture Project') {
+        <lucide-icon [img]="Workflow" [size]="21"></lucide-icon>
         }
 
+        @case ('Documentation Project') {
+        <lucide-icon [img]="BookOpen" [size]="21"></lucide-icon>
+        }
+
+        @case ('Task') {
+        <lucide-icon [img]="ListTodo" [size]="21"></lucide-icon>
+        }
+        }
       </div>
 
       <!-- Item content -->

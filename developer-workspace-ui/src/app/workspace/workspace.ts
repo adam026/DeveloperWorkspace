@@ -6,9 +6,18 @@ import { Router } from '@angular/router';
 import { DocumentService, Document } from '../services/document';
 import { PromptService, Prompt } from '../services/prompt';
 import { MarkdownDocumentService, MarkdownDocument } from '../services/markdown-document';
-import { LucideAngularModule,Search,RefreshCw,FileText,Sparkles,FileCode,CalendarDays,FolderOpen,AlertCircle,ChevronRight } from 'lucide-angular';
+import { ArchitectureProject, ArchitectureProjectService } from '../services/architecture-project.service';
+import { DocumentationProject, DocumentationProjectService } from '../services/documentation-project.service';
+import { Task, TaskService } from '../services/task';
+import { LucideAngularModule, Search, RefreshCw, FileText, Sparkles, FileCode, CalendarDays, FolderOpen, AlertCircle, ChevronRight, Workflow, BookOpen, ListTodo } from 'lucide-angular';
 
-type WorkspaceItemType = 'Document' | 'Prompt' | 'Markdown';
+type WorkspaceItemType =
+  | 'Document'
+  | 'Prompt'
+  | 'Markdown'
+  | 'Architecture Project'
+  | 'Documentation Project'
+  | 'Task';
 
 interface WorkspaceItem {
   id: string;
@@ -37,6 +46,9 @@ export class WorkspaceComponent implements OnInit {
   private readonly documentService = inject(DocumentService);
   private readonly promptService = inject(PromptService);
   private readonly markdownDocumentService = inject(MarkdownDocumentService);
+  private readonly architectureProjectService = inject(ArchitectureProjectService);
+  private readonly documentationProjectService = inject(DocumentationProjectService);
+  private readonly taskService = inject(TaskService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   // Lucide icons
@@ -49,6 +61,9 @@ export class WorkspaceComponent implements OnInit {
   protected readonly FolderOpen = FolderOpen;
   protected readonly AlertCircle = AlertCircle;
   protected readonly ChevronRight = ChevronRight;
+  protected readonly Workflow = Workflow;
+  protected readonly BookOpen = BookOpen;
+  protected readonly ListTodo = ListTodo;
 
   items: WorkspaceItem[] = [];
 
@@ -58,7 +73,15 @@ export class WorkspaceComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
 
-  readonly types = ['All', 'Document', 'Prompt', 'Markdown'];
+  readonly types = [
+    'All',
+    'Document',
+    'Prompt',
+    'Markdown',
+    'Architecture Project',
+    'Documentation Project',
+    'Task'
+  ];
 
   get filteredItems(): WorkspaceItem[] {
     const search = this.searchTerm.trim().toLowerCase();
@@ -115,6 +138,18 @@ export class WorkspaceComponent implements OnInit {
           queryParams: { source: 'workspace' }
         });
         break;
+
+      case 'Architecture Project':
+        this.router.navigate(['/architecture-projects', item.id]);
+        break;
+
+      case 'Documentation Project':
+        this.router.navigate(['/documentation', item.id]);
+        break;
+
+      case 'Task':
+        this.router.navigate(['/tasks']);
+        break;
     }
   }
 
@@ -125,47 +160,81 @@ export class WorkspaceComponent implements OnInit {
     forkJoin({
       documents: this.documentService.getAll(),
       prompts: this.promptService.getAll(),
-      markdownDocuments: this.markdownDocumentService.getAll()
+      markdownDocuments: this.markdownDocumentService.getAll(),
+      architectureProjects: this.architectureProjectService.getAll(),
+      documentationProjects: this.documentationProjectService.getAll(),
+      tasks: this.taskService.getAll()
     }).subscribe({
-      next: ({ documents, prompts, markdownDocuments }) => {
+      next: ({
+        documents,
+        prompts,
+        markdownDocuments,
+        architectureProjects,
+        documentationProjects,
+        tasks
+      }) => {
 
-        const documentItems: WorkspaceItem[] = documents.map(
-          (document: Document) => ({
-            id: document.id ?? '',
-            title: document.title,
-            type: 'Document',
-            description: document.description ?? '',
-            category: document.category ?? '',
-            updatedAt: document.updatedAt ?? document.createdAt ?? ''
-          })
-        );
+        const documentItems: WorkspaceItem[] = documents.map(document => ({
+          id: document.id ?? '',
+          title: document.title,
+          type: 'Document',
+          description: document.description ?? '',
+          category: document.category ?? '',
+          updatedAt: document.updatedAt ?? document.createdAt ?? ''
+        }));
 
-        const promptItems: WorkspaceItem[] = prompts.map(
-          (prompt: Prompt) => ({
-            id: prompt.id ?? '',
-            title: prompt.title,
-            type: 'Prompt',
-            description: prompt.description ?? '',
-            category: prompt.category ?? '',
-            updatedAt: prompt.updatedAt ?? prompt.createdAt ?? ''
-          })
-        );
+        const promptItems: WorkspaceItem[] = prompts.map(prompt => ({
+          id: prompt.id ?? '',
+          title: prompt.title,
+          type: 'Prompt',
+          description: prompt.description ?? '',
+          category: prompt.category ?? '',
+          updatedAt: prompt.updatedAt ?? prompt.createdAt ?? ''
+        }));
 
-        const markdownItems: WorkspaceItem[] = markdownDocuments.map(
-          (document: MarkdownDocument) => ({
-            id: document.id ?? '',
-            title: document.name,
-            type: 'Markdown',
-            description: document.description ?? '',
-            category: document.fileType,
-            updatedAt: document.updatedAt ?? document.createdAt ?? ''
-          })
-        );
+        const markdownItems: WorkspaceItem[] = markdownDocuments.map(document => ({
+          id: document.id ?? '',
+          title: document.name,
+          type: 'Markdown',
+          description: document.description ?? '',
+          category: document.fileType,
+          updatedAt: document.updatedAt ?? document.createdAt ?? ''
+        }));
+
+        const architectureItems: WorkspaceItem[] = architectureProjects.map(project => ({
+          id: project.id ?? '',
+          title: project.name,
+          type: 'Architecture Project',
+          description: project.description ?? '',
+          category: 'Architecture Library',
+          updatedAt: project.updatedAt ?? project.createdAt ?? ''
+        }));
+
+        const documentationItems: WorkspaceItem[] = documentationProjects.map(project => ({
+          id: project.id ?? '',
+          title: project.name,
+          type: 'Documentation Project',
+          description: project.description ?? '',
+          category: project.technologies?.join(', ') ?? '',
+          updatedAt: project.updatedAt ?? project.createdAt ?? ''
+        }));
+
+        const taskItems: WorkspaceItem[] = tasks.map(task => ({
+          id: task.id ?? '',
+          title: task.title,
+          type: 'Task',
+          description: task.description ?? '',
+          category: `${task.status} · ${task.priority}`,
+          updatedAt: task.updatedAt ?? task.createdAt ?? ''
+        }));
 
         this.items = [
           ...documentItems,
           ...promptItems,
-          ...markdownItems
+          ...markdownItems,
+          ...architectureItems,
+          ...documentationItems,
+          ...taskItems
         ].sort((a, b) => {
           const dateA = a.updatedAt
             ? new Date(a.updatedAt).getTime()
