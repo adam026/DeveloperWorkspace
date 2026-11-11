@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  color: #263248;
+}
+
+.kanban-column {
+  background: #f7f8fc;
+  border: 1px solid #e9ebf2;
+  border-radius: 13px;
+  padding: 16px;
+  min-height: 300px;
+}
+
+.kanban-column-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-todo {
+  background: #94a3b8;
+}
+
+.status-progress {
+  background: #6366f1;
+}
+
+.status-done {
+  background: #22c55e;
+}
+
+.kanban-dropzone {
+  min-height: 220px;
+  height: 100%;
+}
+
+.task-card {
+  border-radius: 11px;
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: #d9d4ff;
+    box-shadow: 0 8px 24px rgb(38 52 90 / 7%) !important;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+  .task-card.cdk-drag-preview {
+    box-shadow: 0 12px 30px rgb(38 52 90 / 18%) !important;
+    border: 1px solid #d9d4ff;
+    border-radius: 11px;
+  }
+
+.task-drag-placeholder {
+  min-height: 100px;
+  border: 2px dashed #a99df5;
+  border-radius: 11px;
+  background: #f0edff;
+}
+
+.cdk-drop-list-dragging .task-card:not(.cdk-drag-placeholder) {
+  transition: transform 200ms ease;
+}
+
+.kanban-dropzone.cdk-drop-list-receiving {
+  background: #f0edff;
+  border: 2px dashed #a99df5;
+  border-radius: 11px;
+}
+
+.kanban-empty {
+  border: 1px dashed #d8dce7;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 50%);
+}
+
+.empty-icon {
+  width: 52px;
+  height: 52px;
+}
+
+@media (max-width: 991px) {
+  .kanban-column {
+    min-height: auto;
+  }
+
+  .kanban-dropzone {
+    min-height: 120px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .kanban-column {
+    min-height: 250px;
+  }
+
+  .kanban-dropzone {
+    min-height: 150px;
+  }
+
+  .task-card {
+    cursor: default;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .kanban-column {
+    padding: 10px;
+  }
+
+  .task-card .card-body {
+    padding: 12px;
+  }
+}

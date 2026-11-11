@@ -53,7 +53,7 @@
         Architecture Library
       </a>
 
-      <a class ="nav-item"
+      <a class="nav-item"
          routerLink="/documentation"
          routerLinkActive="active">
 
@@ -61,31 +61,21 @@
         <span>Documentation</span>
       </a>
 
-        <a class="nav-item"
-           href="#"
-           (click)="$event.preventDefault()">
+      <a class="nav-item"
+         routerLink="/tasks"
+         routerLinkActive="active">
+        <lucide-icon [img]="ListTodo" [size]="18"></lucide-icon>
+        Task Manager
+      </a>
 
-          <lucide-icon [img]="ListTodo" [size]="18"></lucide-icon>
-          Task Manager
-        </a>
+      <a class="nav-item"
+         routerLink="/workspace"
+         routerLinkActive="active">
 
-        <a class="nav-item"
-           href="#"
-           (click)="$event.preventDefault()">
-
-          <lucide-icon [img]="Code2" [size]="18"></lucide-icon>
-          Code Snippets
-        </a>
-
-        <a class="nav-item"
-           routerLink="/workspace"
-           routerLinkActive="active">
-
-          <lucide-icon [img]="Layers" [size]="18"></lucide-icon>
-          Workspace
-        </a>
-
-</nav>
+        <lucide-icon [img]="Layers" [size]="18"></lucide-icon>
+        Workspace
+      </a>
+    </nav>
 
     <div class="sidebar-footer">
       <div class="status-dot"></div>

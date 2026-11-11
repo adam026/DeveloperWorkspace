@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { LucideAngularModule,House,FileText,Sparkles,Bot,Workflow,BookOpen,ListTodo,Code2,Layers } from 'lucide-angular';
+import { LucideAngularModule,House,FileText,Sparkles,Bot,Workflow,BookOpen,ListTodo,Layers } from 'lucide-angular';
 import { Router,RouterOutlet,RouterLink,RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -25,7 +25,6 @@ export class App {
   readonly Workflow = Workflow;
   readonly BookOpen = BookOpen;
   readonly ListTodo = ListTodo;
-  readonly Code2 = Code2;
   readonly Layers = Layers;
 
   get currentPageTitle(): string {

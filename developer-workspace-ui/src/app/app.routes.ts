@@ -85,6 +85,12 @@ export const routes: Routes = [
         .then(m => m.MarkdownDetail)
   },
   {
+    path: 'tasks',
+    loadComponent: () =>
+      import('./task-manager/task-manager')
+        .then(m => m.TaskManager)
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

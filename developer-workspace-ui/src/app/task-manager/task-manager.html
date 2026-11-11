@@ -1,0 +1,609 @@
+<section class="container-fluid p-0">
+
+  <!-- Page header -->
+  <header class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-2">Task Manager</h1>
+      <p class="text-secondary mb-0">
+        Organize, track, and manage your development tasks.
+      </p>
+    </div>
+
+    <button type="button"
+            class="btn btn-primary d-inline-flex align-items-center gap-2"
+            (click)="openCreateForm()">
+      <lucide-icon [img]="Plus" [size]="17"></lucide-icon>
+      New task
+    </button>
+  </header>
+
+  <!-- Operation feedback -->
+  @if (successMessage) {
+  <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+    <lucide-icon [img]="Check" [size]="18"></lucide-icon>
+    <span>{{ successMessage }}</span>
+  </div>
+  }
+
+  @if (errorMessage) {
+  <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+  }
+
+  <!-- Task statistics -->
+  <section class="row g-3 mb-4">
+
+    <div class="col-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-secondary small">Total tasks</span>
+            <lucide-icon [img]="ListTodo" [size]="19" class="text-primary"></lucide-icon>
+          </div>
+          <div class="h3 fw-bold mb-0">{{ totalTasks }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-secondary small">To Do</span>
+            <span class="badge text-bg-secondary">Pending</span>
+          </div>
+          <div class="h3 fw-bold mb-0">{{ pendingTasks }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-secondary small">In Progress</span>
+            <span class="badge text-bg-primary">Active</span>
+          </div>
+          <div class="h3 fw-bold mb-0">{{ inProgressTasks }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-secondary small">Completed</span>
+            <span class="badge text-bg-success">Done</span>
+          </div>
+          <div class="h3 fw-bold mb-0">{{ completedTasks }}</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Create task form -->
+  @if (showCreateForm) {
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <div>
+          <h2 class="h5 fw-bold mb-1">New task</h2>
+          <p class="text-secondary small mb-0">
+            Add a new task to your workspace.
+          </p>
+        </div>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm"
+                aria-label="Close form"
+                [disabled]="isSaving"
+                (click)="closeCreateForm()">
+          <lucide-icon [img]="X" [size]="18"></lucide-icon>
+        </button>
+      </div>
+
+      <form (ngSubmit)="createTask()" #taskForm="ngForm">
+
+        <div class="mb-3">
+          <label for="task-title" class="form-label fw-semibold">
+            Title <span class="text-danger">*</span>
+          </label>
+          <input id="task-title"
+                 name="title"
+                 type="text"
+                 class="form-control"
+                 [(ngModel)]="newTask.title"
+                 placeholder="e.g. Implement authentication"
+                 required
+                 maxlength="200" />
+        </div>
+
+        <div class="mb-3">
+          <label for="task-description" class="form-label fw-semibold">
+            Description
+          </label>
+          <textarea id="task-description"
+                    name="description"
+                    class="form-control"
+                    [(ngModel)]="newTask.description"
+                    placeholder="Describe the task..."
+                    rows="4"
+                    maxlength="5000"></textarea>
+        </div>
+
+        <div class="row g-3 mb-3">
+
+          <div class="col-12 col-md-4">
+            <label for="task-status" class="form-label fw-semibold">
+              Status
+            </label>
+            <select id="task-status"
+                    name="status"
+                    class="form-select"
+                    [(ngModel)]="newTask.status">
+              @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="task-priority" class="form-label fw-semibold">
+              Priority
+            </label>
+            <select id="task-priority"
+                    name="priority"
+                    class="form-select"
+                    [(ngModel)]="newTask.priority">
+              @for (priority of priorities; track priority) {
+              <option [value]="priority">{{ priority }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="task-due-date" class="form-label fw-semibold">
+              Due date
+            </label>
+            <input id="task-due-date"
+                   name="dueDate"
+                   type="date"
+                   class="form-control"
+                   [(ngModel)]="newTask.dueDate" />
+          </div>
+
+        </div>
+
+        <div class="mb-3">
+          <label for="task-tags" class="form-label fw-semibold">
+            Tags
+          </label>
+          <input id="task-tags"
+                 name="tags"
+                 type="text"
+                 class="form-control"
+                 [ngModel]="newTask.tags.join(', ')"
+                 (ngModelChange)="updateNewTaskTags($event)"
+                 placeholder="e.g. Angular, Backend, Development" />
+          <div class="form-text">
+            Separate tags with commas.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="isSaving"
+                  (click)="closeCreateForm()">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary d-inline-flex align-items-center gap-2"
+                  [disabled]="isSaving || taskForm.invalid">
+            @if (isSaving) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+            Saving...
+            } @else {
+            <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+            Create task
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </section>
+  }
+
+  <!-- Search and filters -->
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+
+        <div class="col-12 col-lg-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white">
+              <lucide-icon [img]="Search" [size]="17"></lucide-icon>
+            </span>
+            <input type="search"
+                   class="form-control"
+                   aria-label="Search tasks"
+                   placeholder="Search by title, description, or tags..."
+                   [(ngModel)]="searchTerm" />
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <select class="form-select"
+                  aria-label="Filter by status"
+                  [(ngModel)]="selectedStatus">
+            <option value="">All statuses</option>
+            @for (status of statuses; track status) {
+            <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <select class="form-select"
+                  aria-label="Filter by priority"
+                  [(ngModel)]="selectedPriority">
+            <option value="">All priorities</option>
+            @for (priority of priorities; track priority) {
+            <option [value]="priority">{{ priority }}</option>
+            }
+          </select>
+        </div>
+
+        @if (searchTerm || selectedStatus || selectedPriority) {
+        <div class="col-12">
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2"
+                  (click)="clearFilters()">
+            <lucide-icon [img]="X" [size]="15"></lucide-icon>
+            Clear filters
+          </button>
+        </div>
+        }
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Kanban board heading -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+    <div>
+      <h2 class="h5 fw-bold mb-1">Task Board</h2>
+      <p class="text-secondary small mb-0">
+        {{ filteredTasks.length }} of {{ tasks.length }} tasks
+      </p>
+    </div>
+    <span class="text-secondary small">
+      Drag and drop tasks to update their status.
+    </span>
+  </div>
+
+  <!-- Loading state -->
+  @if (isLoading) {
+  <div class="card border-0 shadow-sm">
+    <div class="card-body d-flex justify-content-center align-items-center gap-2 py-5">
+      <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+      <span class="text-secondary small">Loading tasks...</span>
+    </div>
+  </div>
+  } @else {
+
+  <!-- Board -->
+  <div class="row g-3" cdkDropListGroup>
+
+    @for (status of statuses; track status) {
+    <div class="col-12 col-lg-4">
+
+      <section class="kanban-column h-100">
+
+        <!-- Column heading -->
+        <div class="kanban-column-header d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="status-indicator"
+                  [class.status-todo]="status === 'To Do'"
+                  [class.status-progress]="status === 'In Progress'"
+                  [class.status-done]="status === 'Done'">
+            </span>
+
+            <h3 class="h6 fw-bold mb-0">{{ status }}</h3>
+          </div>
+
+          <span class="badge rounded-pill bg-white text-secondary border">
+            {{ getTasksByStatus(status).length }}
+          </span>
+        </div>
+
+        <!-- Drop zone -->
+        <div class="kanban-dropzone"
+             cdkDropList
+             [id]="'kanban-' + status.replaceAll(' ', '-')"
+             [cdkDropListData]="getTasksByStatus(status)"
+             (cdkDropListDropped)="dropTask($event, status)">
+
+          @for (task of getTasksByStatus(status); track task.id) {
+
+          <article class="task-card card border-0 shadow-sm mb-3"
+                   cdkDrag
+                   [cdkDragData]="task"
+                   [cdkDragDisabled]="isSaving">
+
+            <div class="card-body p-3">
+
+              <!-- Drag placeholder -->
+              <div class="task-drag-placeholder" *cdkDragPlaceholder></div>
+
+              <!-- Task header -->
+              <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+
+                <h4 class="h6 fw-bold mb-0">
+                  {{ task.title }}
+                </h4>
+
+                <span class="badge rounded-pill flex-shrink-0"
+                      [class.text-bg-success]="task.priority === 'Low'"
+                      [class.text-bg-warning]="task.priority === 'Medium'"
+                      [class.text-bg-danger]="task.priority === 'High'">
+                  {{ task.priority }}
+                </span>
+
+              </div>
+
+              <!-- Description -->
+              <p class="text-secondary small mb-3">
+                {{ task.description || 'No description provided.' }}
+              </p>
+
+              <!-- Tags -->
+              @if (task.tags.length > 0) {
+              <div class="d-flex flex-wrap gap-1 mb-3">
+                @for (tag of task.tags; track tag) {
+                <span class="badge bg-light text-secondary border">
+                  {{ tag }}
+                </span>
+                }
+              </div>
+              }
+
+              <!-- Due date -->
+              @if (task.dueDate) {
+              <div class="small d-flex align-items-center gap-1"
+                   [ngClass]="isOverdue(task) ? 'text-danger fw-semibold' : 'text-secondary'">
+                <lucide-icon [img]="Calendar" [size]="14"></lucide-icon>
+
+                <span>{{ task.dueDate | date:'mediumDate' }}</span>
+
+                @if (isOverdue(task)) {
+                <span class="badge bg-danger ms-1">Overdue</span>
+                }
+              </div>
+              }
+
+              <!-- Task actions -->
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+
+                <span class="text-secondary small">
+                  @if (task.createdAt) {
+                  Created {{ task.createdAt | date:'shortDate' }}
+                  }
+                </span>
+
+                <div class="d-flex gap-1">
+
+                  <button type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          aria-label="Edit task"
+                          [disabled]="isSaving"
+                          (click)="startEditing(task)">
+                    <lucide-icon [img]="Pencil" [size]="14"></lucide-icon>
+                  </button>
+
+                  <button type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          aria-label="Delete task"
+                          [disabled]="isSaving"
+                          (click)="confirmDelete(task)">
+                    <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
+                  </button>
+
+                </div>
+              </div>
+
+              <!-- Delete confirmation -->
+              @if (deletingTaskId === task.id) {
+              <div class="alert alert-warning mt-3 mb-0">
+                <p class="small mb-2">
+                  Are you sure you want to delete this task?
+                </p>
+
+                <div class="d-flex justify-content-end gap-2">
+                  <button type="button"
+                          class="btn btn-sm btn-outline-secondary"
+                          [disabled]="isSaving"
+                          (click)="cancelDelete()">
+                    Cancel
+                  </button>
+
+                  <button type="button"
+                          class="btn btn-sm btn-danger"
+                          [disabled]="isSaving"
+                          (click)="task.id && deleteTask(task.id)">
+                    Delete
+                  </button>
+                </div>
+              </div>
+              }
+
+            </div>
+
+          </article>
+
+          } @empty {
+          <div class="kanban-empty text-center py-4">
+            <span class="text-secondary small">
+              No tasks in this column
+            </span>
+          </div>
+          }
+
+        </div>
+      </section>
+
+    </div>
+    }
+
+  </div>
+  }
+
+  <!-- Edit task modal -->
+  @if (editingTaskId) {
+  <div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title h5 fw-bold mb-1">Edit task</h2>
+            <p class="text-secondary small mb-0">
+              Update the task details and settings.
+            </p>
+          </div>
+
+          <button type="button"
+                  class="btn-close"
+                  aria-label="Close"
+                  [disabled]="isSaving"
+                  (click)="cancelEditing()">
+          </button>
+        </div>
+
+        <form (ngSubmit)="updateTask()">
+
+          <div class="modal-body">
+
+            <div class="mb-3">
+              <label for="modal-task-title" class="form-label fw-semibold">
+                Title <span class="text-danger">*</span>
+              </label>
+              <input id="modal-task-title"
+                     name="modalTitle"
+                     type="text"
+                     class="form-control"
+                     [(ngModel)]="editTask.title"
+                     required
+                     maxlength="200" />
+            </div>
+
+            <div class="mb-3">
+              <label for="modal-task-description" class="form-label fw-semibold">
+                Description
+              </label>
+              <textarea id="modal-task-description"
+                        name="modalDescription"
+                        class="form-control"
+                        [(ngModel)]="editTask.description"
+                        rows="4"
+                        maxlength="5000"></textarea>
+            </div>
+
+            <div class="row g-3 mb-3">
+
+              <div class="col-md-4">
+                <label for="modal-task-status" class="form-label fw-semibold">
+                  Status
+                </label>
+                <select id="modal-task-status"
+                        name="modalStatus"
+                        class="form-select"
+                        [(ngModel)]="editTask.status">
+                  @for (status of statuses; track status) {
+                  <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label for="modal-task-priority" class="form-label fw-semibold">
+                  Priority
+                </label>
+                <select id="modal-task-priority"
+                        name="modalPriority"
+                        class="form-select"
+                        [(ngModel)]="editTask.priority">
+                  @for (priority of priorities; track priority) {
+                  <option [value]="priority">{{ priority }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label for="modal-task-due-date" class="form-label fw-semibold">
+                  Due date
+                </label>
+                <input id="modal-task-due-date"
+                       name="modalDueDate"
+                       type="date"
+                       class="form-control"
+                       [(ngModel)]="editTask.dueDate" />
+              </div>
+
+            </div>
+
+            <div class="mb-3">
+              <label for="modal-task-tags" class="form-label fw-semibold">
+                Tags
+              </label>
+              <input id="modal-task-tags"
+                     name="modalTags"
+                     type="text"
+                     class="form-control"
+                     [ngModel]="editTask.tags.join(', ')"
+                     (ngModelChange)="updateEditTaskTags($event)" />
+              <div class="form-text">
+                Separate tags with commas.
+              </div>
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    [disabled]="isSaving"
+                    (click)="cancelEditing()">
+              Cancel
+            </button>
+
+            <button type="submit"
+                    class="btn btn-primary d-inline-flex align-items-center gap-2"
+                    [disabled]="isSaving || !editTask.title.trim()">
+              @if (isSaving) {
+              <span class="spinner-border spinner-border-sm" role="status"></span>
+              Saving...
+              } @else {
+              <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+              Save changes
+              }
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+  }
+</section>
