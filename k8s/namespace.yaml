@@ -4,3 +4,4 @@ metadata:
   name: developerworkspace
   labels:
     app: developerworkspace
+    environment: thesis-demo
