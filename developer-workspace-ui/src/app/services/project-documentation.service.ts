@@ -46,7 +46,7 @@ export class ProjectDocumentationService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/documentationprojects';
+    '/api/documentationprojects';
 
   getByProjectId(projectId: string): Observable<ProjectDocumentation[]> {
     return this.http.get<ProjectDocumentation[]>(
@@ -97,7 +97,7 @@ export class ProjectDocumentationService {
     request: GenerateDocumentationRequest
   ): Observable<DocumentationAiResponse> {
     return this.http.post<DocumentationAiResponse>(
-      'http://localhost:8080/api/ai/documentation/generate',
+      '/api/ai/documentation/generate',
       request
     );
   }
@@ -106,7 +106,7 @@ export class ProjectDocumentationService {
     request: ImproveDocumentationRequest
   ): Observable<DocumentationAiResponse> {
     return this.http.post<DocumentationAiResponse>(
-      'http://localhost:8080/api/ai/documentation/improve',
+      '/api/ai/documentation/improve',
       request
     );
   }
@@ -115,7 +115,7 @@ export class ProjectDocumentationService {
     request: DocumentationSummaryRequest
   ): Observable<DocumentationSummaryResponse> {
     return this.http.post<DocumentationSummaryResponse>(
-      'http://localhost:8080/api/ai/documentation/summarize',
+      '/api/ai/documentation/summarize',
       request
     );
   }

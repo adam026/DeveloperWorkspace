@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
+    <File Path="k8s/namespace.yaml" />
   </Folder>
   <Project Path="DeveloperWorkspace.Api/DeveloperWorkspace.Api.csproj" />
 </Solution>

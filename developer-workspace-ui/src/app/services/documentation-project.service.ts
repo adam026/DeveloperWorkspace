@@ -19,7 +19,7 @@ export class DocumentationProjectService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/documentationprojects';
+    '/api/documentationprojects';
 
   getAll(): Observable<DocumentationProject[]> {
     return this.http.get<DocumentationProject[]>(this.apiUrl);

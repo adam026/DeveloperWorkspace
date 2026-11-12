@@ -21,7 +21,7 @@ export interface Task {
 })
 export class TaskService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/tasks';
+  private readonly apiUrl = '/api/tasks';
 
   getAll(): Observable<Task[]> {
     return this.http.get<Task[]>(this.apiUrl);

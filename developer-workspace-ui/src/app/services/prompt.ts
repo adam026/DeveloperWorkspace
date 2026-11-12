@@ -17,7 +17,7 @@ export interface Prompt {
 })
 export class PromptService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/prompts';
+  private readonly apiUrl = '/api/prompts';
 
   getAll(): Observable<Prompt[]> {
     return this.http.get<Prompt[]>(this.apiUrl);
