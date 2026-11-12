@@ -2,12 +2,13 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Prompt, PromptService } from '../services/prompt';
+import { RouterLink } from '@angular/router';
 import { LucideAngularModule,Plus,X,Save,Search,AlertCircle,Sparkles,Pencil,Trash2,Check,Copy } from 'lucide-angular';
 
 @Component({
   selector: 'app-prompt-library',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './prompt-library.html',
   styleUrl: './prompt-library.scss'
 })

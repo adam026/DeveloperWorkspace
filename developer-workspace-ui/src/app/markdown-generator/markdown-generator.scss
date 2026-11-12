@@ -1,44 +1,68 @@
+
 :host {
   display: block;
   color: #263248;
 }
 
+/* Saved Markdown document cards */
 .saved-document-item {
-  border-color: #e9ebf3;
-  transition: background-color 0.2s ease;
+  border: 1px solid #e2e7f1;
+  border-radius: 13px;
+  background-color: #ffffff;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
-  &:hover {
-    background-color: #f8f9fc;
+  &.saved-document-clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: #d2ccff;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.10);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #818cf8;
+      outline-offset: 2px;
+    }
   }
 
   &.selected {
-    background-color: #f6f4ff;
-    border-color: #d9d4ff;
+    border-color: #c9c0ff;
+    background-color: #faf9ff;
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.12);
   }
 }
 
+/* Document icon */
 .document-icon {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+}
+
+/* Document information */
+.saved-document-content {
+  min-width: 0;
 }
 
 .document-name {
-  max-width: 100%;
-  overflow-wrap: anywhere;
+  color: #263248;
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .document-path {
   overflow-wrap: anywhere;
 }
 
+/* File type badge */
 .category-label {
   border: 1px solid #e7e3ff;
   background: #f6f4ff;
   color: #6d5de7;
-  font-size: 11px;
+  font-size: 10px;
 }
 
+/* Markdown preview */
 .markdown-preview {
   min-height: 400px;
   font-family: "Cascadia Code", "Consolas", monospace;
@@ -50,10 +74,20 @@
   tab-size: 2;
 }
 
+/* Responsive adjustments */
 @media (max-width: 576px) {
+  .saved-document-item .card-body {
+    gap: 12px !important;
+    padding: 12px;
+  }
+
   .document-icon {
     width: 36px;
     height: 36px;
+  }
+
+  .document-name {
+    font-size: 13px;
   }
 
   .markdown-preview {

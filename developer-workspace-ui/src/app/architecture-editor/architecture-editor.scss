@@ -1,3 +1,4 @@
+
 /* Main workspace */
 .editor-workspace {
   background-color: #ffffff;
@@ -8,44 +9,97 @@
 }
 
 .component-list-item {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background-color: #ffffff;
   border-color: #dee2e6 !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
 
-  .component-list-item:hover {
+  &:hover {
     border-color: #a5b4fc !important;
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
   }
 
+  > .d-flex {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .min-w-0 {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .badge {
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+    vertical-align: top;
+  }
+
+  .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+}
+
+/* Canvas toolbar */
 .canvas-toolbar {
   background-color: #202330 !important;
   border-color: #343849 !important;
-}
 
-  .canvas-toolbar .text-secondary {
+  .text-secondary {
     color: #cbd5e1 !important;
   }
+}
 
 .canvas-container {
   min-width: 0;
   background-color: #171923;
 }
 
+/* Architecture canvas */
 .architecture-canvas {
   position: relative;
   width: 100%;
   height: 650px;
   overflow: auto;
   background-color: #171923;
-  background-image: radial-gradient( circle, #41465b 1px, transparent 1px );
+  background-image: radial-gradient(circle, #41465b 1px, transparent 1px);
   background-size: 22px 22px;
   cursor: grab;
-}
 
-  .architecture-canvas:active {
+  &:active {
     cursor: grabbing;
   }
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #202330;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #454b60;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #636b85;
+    }
+  }
+}
 
 .canvas-content {
   position: relative;
@@ -53,11 +107,12 @@
   min-height: 1000px;
 }
 
+/* Canvas components */
 .canvas-component {
   position: absolute;
   display: flex;
   flex-direction: column;
-  background: linear-gradient( 145deg, #292d40 0%, #222536 100% );
+  background: linear-gradient(145deg, #292d40 0%, #222536 100%);
   border: 1px solid #555a78;
   border-radius: 10px;
   color: #f1f5f9;
@@ -65,32 +120,44 @@
   z-index: 2;
   cursor: move;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
 
-  .canvas-component:hover {
+  &:hover {
     border-color: #818cf8;
     box-shadow: 0 6px 18px rgba(99, 102, 241, 0.2);
   }
 
-  .canvas-component.selected {
+  &.selected {
     border-color: #818cf8;
     box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2);
   }
+}
 
 /* Component header */
 .canvas-component-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   gap: 8px;
   padding: 8px 10px;
   min-height: 30px;
   background-color: rgba(129, 140, 248, 0.08);
   border-bottom: 1px solid #3b4055;
   border-radius: 9px 9px 0 0;
+
+  > .d-flex {
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px !important;
+  }
 }
 
 .canvas-component-type {
+  flex: 1;
+  min-width: 0;
   color: #a5b4fc;
   font-size: 11px;
   font-weight: 500;
@@ -104,6 +171,7 @@
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
   padding: 8px 10px;
   color: #f1f5f9;
   font-size: 13px;
@@ -116,42 +184,47 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
   padding: 2px;
   background: transparent;
   border: none;
   color: #a5b4fc;
   cursor: pointer;
   transition: color 0.15s ease;
-}
 
-  .canvas-action-btn:hover {
+  &:hover {
     color: #ffffff;
   }
-
-.component-edit-form {
-  padding: 8px;
-  width: 100%;
-  background-color: #292d40;
-  border-radius: 9px;
 }
 
-  .component-edit-form .form-control,
-  .component-edit-form .form-select {
+/* Component edit form */
+.component-edit-form {
+  width: 100%;
+  padding: 8px;
+  background-color: #292d40;
+  border-radius: 9px;
+  box-sizing: border-box;
+
+  .form-control,
+  .form-select {
     background-color: #1e2232;
     border-color: #454b60;
     color: #f1f5f9;
-  }
 
-    .component-edit-form .form-control::placeholder {
-      color: #9299ad;
-    }
-
-    .component-edit-form .form-control:focus,
-    .component-edit-form .form-select:focus {
+    &:focus {
       border-color: #818cf8;
       box-shadow: 0 0 0 0.2rem rgba(129, 140, 248, 0.15);
     }
+  }
 
+    .form-control::placeholder {
+      color: #9299ad;
+    }
+}
+
+/* Resize handle */
 .resize-handle {
   position: absolute;
   right: 0;
@@ -163,6 +236,7 @@
   border-radius: 0 0 8px 0;
 }
 
+/* Connections */
 .connections-layer {
   position: absolute;
   top: 0;
@@ -206,31 +280,14 @@
   cursor: pointer;
   pointer-events: auto;
   transition: background-color 0.15s ease, color 0.15s ease;
-}
 
-  .connection-delete-btn:hover {
+  &:hover {
     background-color: #ef4444;
     color: #ffffff;
   }
-
-.architecture-canvas::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
 }
 
-.architecture-canvas::-webkit-scrollbar-track {
-  background-color: #202330;
-}
-
-.architecture-canvas::-webkit-scrollbar-thumb {
-  background-color: #454b60;
-  border-radius: 5px;
-}
-
-  .architecture-canvas::-webkit-scrollbar-thumb:hover {
-    background-color: #636b85;
-  }
-
+/* Responsive layout */
 @media (max-width: 991.98px) {
   .component-sidebar {
     border-right: none !important;

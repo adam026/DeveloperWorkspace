@@ -169,9 +169,7 @@ export class ArchitectureEditorComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/']).then(() => {
-      // The main workspace is displayed at the root route.
-    });
+    this.router.navigate(['/architecture-library']);
   }
 
 
@@ -699,39 +697,27 @@ export class ArchitectureEditorComponent implements OnInit {
       'x',
       targetComponentId
     );
+
     const y1 = this.getConnectionPoint(
       sourceComponentId,
       'y',
       targetComponentId
     );
+
     const x2 = this.getConnectionPoint(
       targetComponentId,
       'x',
       sourceComponentId
     );
+
     const y2 = this.getConnectionPoint(
       targetComponentId,
       'y',
       sourceComponentId
     );
 
-    const sourceCenterX = source.x + (source.width ?? 190) / 2;
-    const targetCenterX = target.x + (target.width ?? 190) / 2;
-    const sourceCenterY = source.y + (source.height ?? 72) / 2;
-    const targetCenterY = target.y + (target.height ?? 72) / 2;
-
-    // Prefer a straight line for components in the same row or column.
-    if (
-      Math.abs(sourceCenterY - targetCenterY) < 10 ||
-      Math.abs(sourceCenterX - targetCenterX) < 10
-    ) {
-      return `M ${x1} ${y1} L ${x2} ${y2}`;
-    }
-
-    // Otherwise, route through a midpoint to create a right-angle path.
-    const middleX = (x1 + x2) / 2;
-
-    return `M ${x1} ${y1} L ${middleX} ${y1} L ${middleX} ${y2} L ${x2} ${y2}`;
+    // Always draw a straight connection.
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
   // Panning methods
@@ -959,46 +945,27 @@ export class ArchitectureEditorComponent implements OnInit {
       'x',
       targetComponentId
     );
+
     const y1 = this.getConnectionPoint(
       sourceComponentId,
       'y',
       targetComponentId
     );
+
     const x2 = this.getConnectionPoint(
       targetComponentId,
       'x',
       sourceComponentId
     );
+
     const y2 = this.getConnectionPoint(
       targetComponentId,
       'y',
       sourceComponentId
     );
 
-    const sourceCenterX = source.x + (source.width ?? 190) / 2;
-    const sourceCenterY = source.y + (source.height ?? 72) / 2;
-    const targetCenterX = target.x + (target.width ?? 190) / 2;
-    const targetCenterY = target.y + (target.height ?? 72) / 2;
-
-    // Same row: the arrow points horizontally.
-    if (Math.abs(sourceCenterY - targetCenterY) < 10) {
-      return this.getArrowHeadPoints(x1, y1, x2, y2);
-    }
-
-    // Same column: the arrow points vertically.
-    if (Math.abs(sourceCenterX - targetCenterX) < 10) {
-      return this.getArrowHeadPoints(x1, y1, x2, y2);
-    }
-
-    // The current path bends at the midpoint X.
-    const middleX = (x1 + x2) / 2;
-
-    return this.getArrowHeadPoints(
-      middleX,
-      y2,
-      x2,
-      y2
-    );
+    // Arrowhead follows the straight connection.
+    return this.getArrowHeadPoints(x1, y1, x2, y2);
   }
 
   // Export architecture as PNG

@@ -322,22 +322,27 @@
           } @else {
 
           <!-- Prompt card content -->
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <span class="category-label badge rounded-pill">
-              {{ prompt.category || 'General' }}
-            </span>
-            <lucide-icon [img]="Sparkles" [size]="17" class="text-primary"></lucide-icon>
-          </div>
+          <a [routerLink]="['/prompts', prompt.id]"
+             class="text-decoration-none text-reset d-block">
 
-          <h3 class="h5 fw-bold mb-2">{{ prompt.title }}</h3>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="category-label badge rounded-pill">
+                {{ prompt.category || 'General' }}
+              </span>
+              <lucide-icon [img]="Sparkles" [size]="17" class="text-primary"></lucide-icon>
+            </div>
 
-          <p class="text-secondary small mb-3">
-            {{ prompt.description || 'No description provided.' }}
-          </p>
+            <h3 class="h5 fw-bold mb-2">{{ prompt.title }}</h3>
 
-          <div class="prompt-content bg-light rounded-3 p-3 mb-4">
-            {{ prompt.content }}
-          </div>
+            <p class="text-secondary small mb-3">
+              {{ prompt.description || 'No description provided.' }}
+            </p>
+
+            <div class="prompt-content bg-light rounded-3 p-3 mb-4">
+              {{ prompt.content }}
+            </div>
+
+          </a>
 
           <!-- Prompt actions -->
           <div class="d-flex flex-wrap gap-2">

@@ -2,7 +2,7 @@ import { ChangeDetectorRef,Component,inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule,Plus,X,Save,Search,RefreshCw,FileText,Pencil,Trash2,ArrowUpRight } from 'lucide-angular';
+import { LucideAngularModule,Plus,X,Save,Search,RefreshCw,FileText,Pencil,Trash2 } from 'lucide-angular';
 
 import {
   Document,
@@ -29,7 +29,6 @@ export class DocumentsComponent {
   readonly FileText = FileText;
   readonly Pencil = Pencil;
   readonly Trash2 = Trash2;
-  readonly ArrowUpRight = ArrowUpRight;
 
   documents: Document[] = [];
 
