@@ -59,6 +59,63 @@ For a simpler local deployment, Docker Compose can be used to start the frontend
 
 See the [Docker Compose Deployment Guide](docs/installation/DOCKER-COMPOSE-DEPLOYMENT.md).
 
+## Optional AI Integration
+
+DevWorkspace supports optional local AI functionality through [Ollama](https://ollama.com/).
+
+Ollama allows users to run large language models locally on their own computers without requiring an external AI API or a cloud-based AI provider.
+
+### Recommended Model
+
+The application is configured to use the following model:
+
+- **Model:** `llama3.2:3b`
+
+### Installation
+
+1. Download and install Ollama from the official website:
+   https://ollama.com/download
+
+2. Open a terminal and download the recommended model:
+
+   ```powershell
+   ollama pull llama3.2:3b
+   ```
+
+3. Verify that the model has been downloaded:
+
+   ```powershell
+   ollama list
+   ```
+
+4. Make sure the Ollama service is running and accessible to the DevWorkspace backend.
+
+### Configuration
+
+The backend communicates with Ollama through its HTTP API.
+
+The default Ollama endpoint is:
+
+```text
+http://host.docker.internal:11434/
+```
+
+When using Docker Compose or the local Kubernetes deployment, Ollama runs on the host machine, while the backend runs inside a container.
+
+For this reason, the backend must be able to reach the host machine through the configured endpoint.
+
+On Windows, ensure that Ollama is configured to accept connections from the container environment. If necessary, configure the `OLLAMA_HOST` environment variable to listen on `0.0.0.0:11434`.
+
+### Notes
+
+- Ollama integration is optional.
+- The core application can be used without a local AI model.
+- AI-related features require Ollama to be running and the recommended model to be downloaded.
+- Model execution requires sufficient system memory and processing resources.
+- AI response times depend on the hardware and the selected model.
+
+For detailed setup instructions, refer to the deployment guides.
+
 ## Repository Structure
 
 ```text
