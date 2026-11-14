@@ -2,6 +2,7 @@ import { ChangeDetectorRef,Component,inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor';
 import { LucideAngularModule,Plus,X,Save,Search,RefreshCw,FileText,Pencil,Trash2 } from 'lucide-angular';
 
 import {
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: 'app-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterLink, MarkdownEditorComponent, LucideAngularModule],
   templateUrl: './documents.html',
   styleUrl: './documents.scss'
 })

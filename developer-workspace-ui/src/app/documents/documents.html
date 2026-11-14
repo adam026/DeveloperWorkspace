@@ -237,8 +237,8 @@
 
         @for (document of filteredDocuments; track document.id) {
         <article class="document-card card"
-                 [routerLink]="editingDocumentId === document.id ? null : ['/documents', document.id]"
-                 [class.document-card-clickable]="editingDocumentId !== document.id">
+                 [routerLink]="['/documents', document.id]"
+                 [class.document-card-clickable]="true">
 
           <div class="card-body d-flex align-items-start gap-3">
 
@@ -248,74 +248,6 @@
 
             <div class="document-details flex-grow-1 min-w-0">
 
-              <!-- Edit form -->
-              @if (editingDocumentId === document.id) {
-              <form class="document-form"
-                    (ngSubmit)="updateDocument()"
-                    (click)="$event.stopPropagation()">
-
-                <div class="mb-3">
-                  <label class="form-label">Title <span class="text-danger">*</span></label>
-                  <input name="editTitle"
-                         type="text"
-                         class="form-control"
-                         [(ngModel)]="editDocument.title"
-                         required
-                         maxlength="150" />
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label">Description</label>
-                  <textarea name="editDescription"
-                            class="form-control"
-                            [(ngModel)]="editDocument.description"
-                            rows="3"
-                            maxlength="2000"></textarea>
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label">Content</label>
-                  <textarea name="editContent"
-                            class="form-control"
-                            [(ngModel)]="editDocument.content"
-                            placeholder="Enter the full document content..."
-                            rows="10"
-                            maxlength="50000"></textarea>
-                  <div class="form-text">
-                    Edit the full text of your document or technical notes.
-                  </div>
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label">Category</label>
-                  <input name="editCategory"
-                         type="text"
-                         class="form-control"
-                         [(ngModel)]="editDocument.category"
-                         maxlength="100" />
-                </div>
-
-                <div class="d-flex justify-content-end flex-wrap gap-2">
-                  <button type="button"
-                          class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
-                          (click)="cancelEditing()">
-                    <lucide-icon [img]="X" [size]="15"></lucide-icon>
-                    Cancel
-                  </button>
-
-                  <button type="submit"
-                          class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
-                          [disabled]="saving || !editDocument.title.trim()">
-                    <lucide-icon [img]="Save" [size]="15"></lucide-icon>
-                    {{ saving ? 'Saving...' : 'Save changes' }}
-                  </button>
-                </div>
-
-              </form>
-              }
-
-              <!-- Document details -->
-              @else {
               <h3 class="h6 fw-bold mb-2">{{ document.title }}</h3>
 
               <p class="text-secondary small mb-3">
@@ -327,7 +259,8 @@
               </span>
 
               <!-- Actions -->
-              <div class="d-flex flex-wrap gap-2 mt-3" (click)="$event.stopPropagation()">
+              <div class="d-flex flex-wrap gap-2 mt-3"
+                   (click)="$event.stopPropagation()">
 
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
@@ -375,7 +308,6 @@
 
               </div>
               }
-              }
 
             </div>
           </div>
@@ -384,7 +316,125 @@
 
       </div>
       }
-
     </div>
   </section>
+
+  <!-- Edit document modal -->
+  @if (editingDocumentId) {
+  <div class="modal-backdrop fade show"></div>
+
+  <div class="modal d-block"
+       tabindex="-1"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="edit-document-title">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow">
+
+        <form class="document-form" (ngSubmit)="updateDocument()">
+
+          <!-- Header -->
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow mb-1">KNOWLEDGE BASE</p>
+              <h2 class="modal-title fs-5 fw-bold" id="edit-document-title">
+                Edit document
+              </h2>
+            </div>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    [disabled]="saving"
+                    (click)="cancelEditing()">
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body p-4">
+
+            <div class="mb-3">
+              <label for="edit-document-title-input" class="form-label">
+                Title <span class="text-danger">*</span>
+              </label>
+
+              <input id="edit-document-title-input"
+                     name="editTitle"
+                     type="text"
+                     class="form-control"
+                     [(ngModel)]="editDocument.title"
+                     required
+                     maxlength="150" />
+            </div>
+
+            <div class="mb-3">
+              <label for="edit-document-description" class="form-label">
+                Description
+              </label>
+
+              <textarea id="edit-document-description"
+                        name="editDescription"
+                        class="form-control"
+                        [(ngModel)]="editDocument.description"
+                        rows="3"
+                        maxlength="2000"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Content</label>
+
+              <app-markdown-editor [(content)]="editDocument.content">
+              </app-markdown-editor>
+
+              <div class="form-text mt-2">
+                Write and format your document using Markdown.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="edit-document-category" class="form-label">
+                Category
+              </label>
+
+              <input id="edit-document-category"
+                     name="editCategory"
+                     type="text"
+                     class="form-control"
+                     [(ngModel)]="editDocument.category"
+                     maxlength="100" />
+            </div>
+
+            @if (errorMessage) {
+            <div class="alert alert-danger py-2 mb-0" role="alert">
+              {{ errorMessage }}
+            </div>
+            }
+
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button"
+                    class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
+                    [disabled]="saving"
+                    (click)="cancelEditing()">
+              <lucide-icon [img]="X" [size]="16"></lucide-icon>
+              Cancel
+            </button>
+
+            <button type="submit"
+                    class="btn btn-primary d-inline-flex align-items-center gap-2"
+                    [disabled]="saving || !editDocument.title.trim()">
+              <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+              {{ saving ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+  }
 </div>
