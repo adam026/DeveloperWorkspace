@@ -94,8 +94,8 @@
 
 /* Document edit modal */
 .document-edit-modal {
-  height: calc(100dvh - 2rem);
-  max-height: calc(100dvh - 2rem);
+  height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -115,23 +115,22 @@
 .document-edit-modal .modal-body {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-  .document-edit-modal .modal-body::-webkit-scrollbar {
-    width: 7px;
-  }
-
-  .document-edit-modal .modal-body::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-  }
+/* Content editor gets the available space */
+.document-edit-modal .markdown-content-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
 
 @media (max-width: 576px) {
   .document-edit-modal {
-    height: calc(100dvh - 1rem);
-    max-height: calc(100dvh - 1rem);
+    height: calc(100vh - 1rem);
+    max-height: calc(100vh - 1rem);
   }
 
   .modal-dialog {
