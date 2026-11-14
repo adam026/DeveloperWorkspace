@@ -92,8 +92,13 @@
   }
 }
 
-.modal {
-  overflow-y: auto;
+/* Document edit modal */
+.document-edit-modal {
+  height: calc(100dvh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-dialog {
@@ -101,10 +106,35 @@
   margin-bottom: 1rem;
 }
 
-.modal-content {
-  max-height: calc(100vh - 2rem);
+.document-edit-modal .modal-header,
+.document-edit-modal .modal-footer {
+  flex-shrink: 0;
+  background: #fff;
 }
 
-.modal-body {
+.document-edit-modal .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+  .document-edit-modal .modal-body::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .document-edit-modal .modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+
+@media (max-width: 576px) {
+  .document-edit-modal {
+    height: calc(100dvh - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
 }
