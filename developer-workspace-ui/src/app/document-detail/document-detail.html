@@ -99,6 +99,14 @@
       </div>
 
       <div class="detail-field py-3 border-bottom">
+        <span class="field-label d-block mb-2">Content</span>
+
+        <div class="document-content">
+          {{ document.content || 'No content provided.' }}
+        </div>
+      </div>
+
+      <div class="detail-field py-3 border-bottom">
         <span class="field-label d-block mb-2">Category</span>
         <p class="mb-0">{{ document.category || 'Uncategorized' }}</p>
       </div>

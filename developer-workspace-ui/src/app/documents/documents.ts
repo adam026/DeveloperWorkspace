@@ -50,12 +50,14 @@ export class DocumentsComponent {
   newDocument = {
     title: '',
     description: '',
+    content: '',
     category: ''
   };
 
   editDocument = {
     title: '',
     description: '',
+    content: '',
     category: ''
   };
 
@@ -92,6 +94,7 @@ export class DocumentsComponent {
     this.newDocument = {
       title: '',
       description: '',
+      content: '',
       category: ''
     };
   }
@@ -107,6 +110,7 @@ export class DocumentsComponent {
     const documentToCreate: Document = {
       title: this.newDocument.title.trim(),
       description: this.newDocument.description.trim(),
+      content: this.newDocument.content.trim(),
       category: this.newDocument.category.trim()
     };
 
@@ -135,6 +139,7 @@ export class DocumentsComponent {
     this.editDocument = {
       title: document.title,
       description: document.description,
+      content: document.content ?? '',
       category: document.category
     };
   }
@@ -144,6 +149,7 @@ export class DocumentsComponent {
     this.editDocument = {
       title: '',
       description: '',
+      content: '',
       category: ''
     };
   }
@@ -163,6 +169,7 @@ export class DocumentsComponent {
     const documentToUpdate: Document = {
       title: this.editDocument.title.trim(),
       description: this.editDocument.description.trim(),
+      content: this.editDocument.content.trim(),
       category: this.editDocument.category.trim()
     };
 

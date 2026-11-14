@@ -7,6 +7,7 @@ export interface Document {
   id?: string;
   title: string;
   description: string;
+  content?: string;
   category: string;
   createdAt?: string;
   updatedAt?: string | null;

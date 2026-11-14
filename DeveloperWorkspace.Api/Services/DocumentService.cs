@@ -52,10 +52,12 @@ namespace DeveloperWorkspace.Api.Services
             var contentChanged =
                 existingDocument.Title != updatedDocument.Title ||
                 existingDocument.Description != updatedDocument.Description ||
+                existingDocument.Content != updatedDocument.Content ||
                 existingDocument.Category != updatedDocument.Category;
 
             existingDocument.Title = updatedDocument.Title;
             existingDocument.Description = updatedDocument.Description;
+            existingDocument.Content = updatedDocument.Content;
             existingDocument.Category = updatedDocument.Category;
             existingDocument.UpdatedAt = DateTime.UtcNow;
 

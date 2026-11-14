@@ -20,6 +20,10 @@ namespace DeveloperWorkspace.Api.Models
         [StringLength(2000, ErrorMessage = "A leírás legfeljebb 2000 karakter lehet.")]
         public string Description { get; set; } = string.Empty;
 
+        [BsonElement("content")]
+        [StringLength(50000, ErrorMessage = "A dokumentum tartalma legfeljebb 50000 karakter lehet.")]
+        public string Content { get; set; } = string.Empty;
+
         [BsonElement("category")]
         [StringLength(100, ErrorMessage = "A kategória legfeljebb 100 karakter lehet.")]
         public string Category { get; set; } = string.Empty;

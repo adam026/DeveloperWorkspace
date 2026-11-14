@@ -211,6 +211,7 @@ public sealed class AiController : ControllerBase
             Cím: {document.Title}
             Kategória: {document.Category}
             Leírás: {document.Description}
+            Tartalom: {document.Content}
             """;
 
         try
