@@ -4,7 +4,6 @@
 }
 
 /* Page header */
-
 .eyebrow {
   color: #7464ed;
   font-size: 11px;
@@ -26,7 +25,6 @@
 }
 
 /* Document cards */
-
 .document-card {
   border-color: #e2e7f1;
   border-radius: 13px;
@@ -62,7 +60,6 @@
 }
 
 /* Document details link */
-
 .document-arrow {
   width: 34px;
   height: 34px;
@@ -75,7 +72,6 @@
 }
 
 /* Responsive adjustments */
-
 @media (max-width: 760px) {
   .document-card .card-body {
     gap: 12px !important;
@@ -92,14 +88,34 @@
   }
 }
 
-/* Document edit modal */
-.document-edit-modal {
-  height: calc(100dvh - 2rem);
-  max-height: calc(100dvh - 2rem);
-  display: flex;
-  flex-direction: column;
+/* Document edit modal: fixed viewport, independently scrollable body/editor */
+.modal.d-block {
   overflow: hidden;
 }
+
+.modal-dialog.modal-xl {
+  width: calc(100% - 2rem);
+  max-width: 1140px;
+  height: calc(100dvh - 2rem);
+  margin: 1rem auto;
+}
+
+.document-edit-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+  .document-edit-modal > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
 
   .document-edit-modal .modal-header,
   .document-edit-modal .modal-footer {
@@ -108,34 +124,43 @@
   }
 
   .document-edit-modal .modal-body {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-height: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
-    .document-edit-modal .modal-body > .mb-3:not(.markdown-content-area) {
-      flex: 0 0 auto;
-    }
-
   .document-edit-modal .markdown-content-area {
-    flex: 1 1 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: block;
+    margin-bottom: 1rem;
   }
 
     .document-edit-modal .markdown-content-area app-markdown-editor {
-      flex: 1 1 0;
-      min-height: 0;
-      overflow: hidden;
+      display: block;
+      width: 100%;
     }
 
-@media (max-width: 576px) {
-  .document-edit-modal {
+/* On short screens, keep the footer visible and let the body scroll. */
+@media (max-height: 760px) {
+  .modal-dialog.modal-xl {
     height: calc(100dvh - 1rem);
-    max-height: calc(100dvh - 1rem);
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .document-edit-modal .modal-body {
+    padding: 1rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-dialog.modal-xl {
+    width: calc(100% - 1rem);
+    height: calc(100dvh - 1rem);
+    margin: 0.5rem auto;
+  }
+
+  .document-edit-modal .modal-body {
+    padding: 1rem !important;
   }
 }
