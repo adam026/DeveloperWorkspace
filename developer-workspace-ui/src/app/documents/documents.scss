@@ -91,3 +91,20 @@
     height: 30px;
   }
 }
+
+.modal {
+  overflow-y: auto;
+}
+
+.modal-dialog {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-content {
+  max-height: calc(100vh - 2rem);
+}
+
+.modal-body {
+  overflow-y: auto;
+}
