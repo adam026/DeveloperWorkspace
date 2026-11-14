@@ -101,9 +101,13 @@
       <div class="detail-field py-3 border-bottom">
         <span class="field-label d-block mb-2">Content</span>
 
-        <div class="document-content">
-          {{ document.content || 'No content provided.' }}
+        @if (document.content) {
+        <div class="document-content markdown-preview"
+             [innerHTML]="previewHtml">
         </div>
+        } @else {
+        <p class="text-secondary mb-0">No content provided.</p>
+        }
       </div>
 
       <div class="detail-field py-3 border-bottom">
