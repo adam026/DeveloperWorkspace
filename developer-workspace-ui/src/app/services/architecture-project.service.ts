@@ -6,6 +6,7 @@ export interface ArchitectureComponent {
   id: string;
   name: string;
   type: string;
+  description?: string;
   x: number;
   y: number;
   width?: number;

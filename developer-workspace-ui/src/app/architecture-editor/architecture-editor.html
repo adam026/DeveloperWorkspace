@@ -131,10 +131,20 @@
               }
             </select>
           </div>
+          @if (newComponentType === 'Other') {
+          <div class="col-12 col-md-6">
+            <label for="newComponentCustomType" class="form-label">Custom Component Type</label>
+            <input id="newComponentCustomType" name="newComponentCustomType" class="form-control" [(ngModel)]="newComponentCustomType" placeholder="Enter component type" required maxlength="80">
+          </div>
+          }
+          <div class="col-12">
+            <label for="newComponentDescription" class="form-label">Description (Optional)</label>
+            <textarea id="newComponentDescription" name="newComponentDescription" class="form-control" rows="3" [(ngModel)]="newComponentDescription" placeholder="Add notes or additional information about this component..."></textarea>
+          </div>
         </div>
         <div class="d-flex justify-content-end gap-2 mt-3">
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="showAddComponentForm = false">Cancel</button>
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newComponentName.trim()">Add Component</button>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newComponentName.trim() || (newComponentType === 'Other' && !newComponentCustomType.trim())">Add Component</button>
         </div>
       </form>
     </div>
@@ -174,6 +184,12 @@
               }
             </select>
           </div>
+          @if (newConnectionType === 'Other') {
+          <div class="col-12 col-md-6">
+            <label for="newConnectionCustomType" class="form-label">Custom Connection Type</label>
+            <input id="newConnectionCustomType" name="newConnectionCustomType" class="form-control" [(ngModel)]="newConnectionCustomType" placeholder="Enter connection type" required maxlength="80">
+          </div>
+          }
           <div class="col-12 col-md-6">
             <label for="newConnectionLabel" class="form-label">Label (Optional)</label>
             <input id="newConnectionLabel" name="newConnectionLabel" class="form-control" [(ngModel)]="newConnectionLabel" placeholder="Connection description">
@@ -192,7 +208,7 @@
         </div>
         <div class="d-flex justify-content-end gap-2 mt-3">
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="showAddConnectionForm = false">Cancel</button>
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newConnectionSourceId || !newConnectionTargetId || newConnectionSourceId === newConnectionTargetId">Add Connection</button>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newConnectionSourceId || !newConnectionTargetId || newConnectionSourceId === newConnectionTargetId || (newConnectionType === 'Other' && !newConnectionCustomType.trim())">Add Connection</button>
         </div>
       </form>
     </div>
@@ -227,6 +243,9 @@
                 <div class="min-w-0">
                   <div class="fw-semibold small text-break">{{ component.name }}</div>
                   <span class="badge bg-body-secondary text-secondary mt-1">{{ component.type }}</span>
+                  @if (getComponentDescription(component)) {
+                  <p class="small text-secondary mt-2 mb-0 text-break">{{ getComponentDescription(component) }}</p>
+                  }
                 </div>
                 <div class="d-flex gap-1 flex-shrink-0">
                   <button type="button" class="btn btn-outline-secondary btn-sm icon-button" (click)="editComponent(component.id)" title="Edit Component">
@@ -240,6 +259,42 @@
             </div>
             }
           </div>
+          }
+
+          @if (editingComponentId) {
+          <section class="card border-primary-subtle bg-body-tertiary mt-3">
+            <div class="card-body p-3">
+              <h3 class="h6 fw-semibold mb-3">Edit Component</h3>
+              <form (ngSubmit)="saveComponentEdit()">
+                <div class="mb-3">
+                  <label for="editComponentName" class="form-label small">Component Name</label>
+                  <input id="editComponentName" name="editComponentName" class="form-control form-control-sm" [(ngModel)]="editComponentName" required maxlength="100">
+                </div>
+                <div class="mb-3">
+                  <label for="editComponentType" class="form-label small">Component Type</label>
+                  <select id="editComponentType" name="editComponentType" class="form-select form-select-sm" [(ngModel)]="editComponentType">
+                    @for (type of componentTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                    }
+                  </select>
+                </div>
+                @if (editComponentType === 'Other') {
+                <div class="mb-3">
+                  <label for="editComponentCustomType" class="form-label small">Custom Component Type</label>
+                  <input id="editComponentCustomType" name="editComponentCustomType" class="form-control form-control-sm" [(ngModel)]="editComponentCustomType" required maxlength="80">
+                </div>
+                }
+                <div class="mb-3">
+                  <label for="editComponentDescription" class="form-label small">Description (Optional)</label>
+                  <textarea id="editComponentDescription" name="editComponentDescription" class="form-control form-control-sm" rows="4" [(ngModel)]="editComponentDescription" placeholder="Additional information..."></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelComponentEdit()">Cancel</button>
+                  <button type="submit" class="btn btn-primary btn-sm" [disabled]="!editComponentName.trim() || (editComponentType === 'Other' && !editComponentCustomType.trim())">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </section>
           }
         </div>
       </aside>
@@ -264,9 +319,6 @@
                 <text class="connection-label" [attr.x]="getConnectionLabelX(connection)" [attr.y]="getConnectionLabelY(connection)">
                   {{ connection.label || connection.type }}
                 </text>
-                <foreignObject [attr.x]="getConnectionLabelX(connection) - 15" [attr.y]="getConnectionLabelY(connection) - 30" width="30" height="25">
-                  <button xmlns="http://www.w3.org/1999/xhtml" class="connection-delete-btn" (click)="deleteConnection(connection.id)" title="Delete Connection">×</button>
-                </foreignObject>
               </g>
               }
             </svg>
@@ -274,42 +326,16 @@
             <!-- Canvas Components -->
             @for (component of project.components; track component.id) {
             <div class="canvas-component"
-                 [class.selected]="editingComponentId === component.id"
                  [style.left.px]="component.x"
                  [style.top.px]="component.y"
                  [style.width.px]="component.width ?? 190"
                  [style.height.px]="component.height ?? 72"
                  (mousedown)="startDragging($event, component.id)">
 
-              @if (editingComponentId === component.id) {
-              <div class="component-edit-form">
-                <input type="text" class="form-control form-control-sm mb-2" [(ngModel)]="editComponentName" placeholder="Component name">
-                <select class="form-select form-select-sm mb-2" [(ngModel)]="editComponentType">
-                  @for (type of componentTypes; track type) {
-                  <option [value]="type">{{ type }}</option>
-                  }
-                </select>
-                <div class="d-flex gap-1">
-                  <button type="button" class="btn btn-primary btn-sm flex-grow-1" (click)="saveComponentEdit()">Save</button>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelComponentEdit()">
-                    <lucide-icon [img]="X" [size]="14"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-              } @else {
               <div class="canvas-component-header">
                 <span class="canvas-component-type">{{ component.type }}</span>
-                <div class="d-flex gap-1">
-                  <button type="button" class="canvas-action-btn" (click)="editComponent(component.id)" title="Edit">
-                    <lucide-icon [img]="Pencil" [size]="13"></lucide-icon>
-                  </button>
-                  <button type="button" class="canvas-action-btn text-danger" (click)="deleteComponent(component.id)" title="Delete">
-                    <lucide-icon [img]="Trash2" [size]="13"></lucide-icon>
-                  </button>
-                </div>
               </div>
               <div class="canvas-component-name">{{ component.name }}</div>
-              }
 
               <div class="resize-handle" (mousedown)="startResizing($event, component.id)"></div>
             </div>
@@ -402,6 +428,12 @@
               }
             </select>
           </div>
+          @if (editConnectionType === 'Other') {
+          <div class="col-12 col-md-6">
+            <label for="editConnectionCustomType" class="form-label">Custom Connection Type</label>
+            <input id="editConnectionCustomType" name="editConnectionCustomType" class="form-control" [(ngModel)]="editConnectionCustomType" required maxlength="80">
+          </div>
+          }
           <div class="col-12 col-md-6">
             <label for="editConnectionLabel" class="form-label">Label</label>
             <input id="editConnectionLabel" name="editConnectionLabel" class="form-control" [(ngModel)]="editConnectionLabel">

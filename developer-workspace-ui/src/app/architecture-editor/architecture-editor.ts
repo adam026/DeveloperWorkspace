@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ArchitectureProject, ArchitectureProjectService } from '../services/architecture-project.service';
-import { LucideAngularModule,ArrowLeft,Boxes,GitBranch,GitBranchPlus,AlertCircle,CheckCircle,Plus,Workflow,Scan,Minus,Download,Save,MousePointer2,Box,Pencil,Trash2,X } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Boxes, GitBranch, GitBranchPlus, AlertCircle, CheckCircle, Plus, Workflow, Scan, Minus, Download, Save, MousePointer2, Box, Pencil, Trash2 } from 'lucide-angular';
 
 
 @Component({
@@ -36,7 +36,6 @@ export class ArchitectureEditorComponent implements OnInit {
   protected readonly Box = Box;
   protected readonly Pencil = Pencil;
   protected readonly Trash2 = Trash2;
-  protected readonly X = X;
 
   project: ArchitectureProject | null = null;
   loading = false;
@@ -51,6 +50,7 @@ export class ArchitectureEditorComponent implements OnInit {
   newConnectionTargetId = '';
   newConnectionType = 'REST API';
   newConnectionLabel = '';
+  newConnectionCustomType = '';
 
   readonly connectionTypes = [
     'REST API',
@@ -76,12 +76,15 @@ export class ArchitectureEditorComponent implements OnInit {
   editConnectionTargetId = '';
   editConnectionType = 'REST API';
   editConnectionLabel = '';
+  editConnectionCustomType = '';
   editConnectionDirection: 'forward' | 'backward' | 'both' = 'forward';
 
   // New component form fields
   showAddComponentForm = false;
   newComponentName = '';
   newComponentType = 'Service';
+  newComponentCustomType = '';
+  newComponentDescription = '';
 
   readonly componentTypes = [
     'Frontend',
@@ -97,6 +100,8 @@ export class ArchitectureEditorComponent implements OnInit {
   editingComponentId: string | null = null;
   editComponentName = '';
   editComponentType = '';
+  editComponentCustomType = '';
+  editComponentDescription = '';
 
   // Zoom
   zoomLevel = 1;
@@ -179,6 +184,10 @@ export class ArchitectureEditorComponent implements OnInit {
     );
 
     return component?.name ?? 'Unknown component';
+  }
+
+  getComponentDescription(component: ArchitectureProject['components'][number]): string {
+    return (component as typeof component & { description?: string }).description ?? '';
   }
 
   getConnectionPoint(
@@ -305,19 +314,33 @@ export class ArchitectureEditorComponent implements OnInit {
       return;
     }
 
-    this.project.components.push({
+    const type = this.newComponentType === 'Other'
+      ? this.newComponentCustomType.trim()
+      : this.newComponentType;
+
+    if (!type) {
+      this.errorMessage = 'Please enter a component type.';
+      return;
+    }
+
+    const component = {
       id: crypto.randomUUID(),
       name,
-      type: this.newComponentType,
+      type,
       x: 40 + (this.project.components.length % 4) * 220,
       y: 40 + Math.floor(this.project.components.length / 4) * 120,
       width: 190,
       height: 72,
-      properties: {}
-    });
+      properties: {},
+      description: this.newComponentDescription.trim()
+    } as typeof this.project.components[number];
+
+    this.project.components.push(component);
 
     this.newComponentName = '';
     this.newComponentType = 'Service';
+    this.newComponentCustomType = '';
+    this.newComponentDescription = '';
     this.showAddComponentForm = false;
     this.successMessage = '';
   }
@@ -348,14 +371,23 @@ export class ArchitectureEditorComponent implements OnInit {
       return;
     }
 
+    const type = this.newConnectionType === 'Other'
+      ? this.newConnectionCustomType.trim()
+      : this.newConnectionType;
+
+    if (!type) {
+      this.errorMessage = 'Please enter a connection type.';
+      return;
+    }
+
     const label = this.newConnectionLabel.trim();
 
     this.project.connections.push({
       id: crypto.randomUUID(),
       sourceComponentId: sourceId,
       targetComponentId: targetId,
-      type: this.newConnectionType,
-      label: label || this.newConnectionType,
+      type,
+      label: label || type,
       direction: this.newConnectionDirection
     });
 
@@ -363,6 +395,7 @@ export class ArchitectureEditorComponent implements OnInit {
     this.newConnectionSourceId = '';
     this.newConnectionTargetId = '';
     this.newConnectionType = 'REST API';
+    this.newConnectionCustomType = '';
     this.newConnectionLabel = '';
     this.newConnectionDirection = 'forward';
 
@@ -389,7 +422,12 @@ export class ArchitectureEditorComponent implements OnInit {
     this.editingConnectionId = connection.id;
     this.editConnectionSourceId = connection.sourceComponentId;
     this.editConnectionTargetId = connection.targetComponentId;
-    this.editConnectionType = connection.type;
+    this.editConnectionType = this.connectionTypes.includes(connection.type)
+      ? connection.type
+      : 'Other';
+    this.editConnectionCustomType = this.editConnectionType === 'Other'
+      ? connection.type
+      : '';
     this.editConnectionLabel = connection.label ?? '';
     this.editConnectionDirection =
       connection.direction === 'backward' || connection.direction === 'both'
@@ -421,10 +459,19 @@ export class ArchitectureEditorComponent implements OnInit {
       return;
     }
 
+    const type = this.editConnectionType === 'Other'
+      ? this.editConnectionCustomType.trim()
+      : this.editConnectionType;
+
+    if (!type) {
+      this.errorMessage = 'Please enter a connection type.';
+      return;
+    }
+
     connection.sourceComponentId = sourceId;
     connection.targetComponentId = targetId;
-    connection.type = this.editConnectionType;
-    connection.label = this.editConnectionLabel.trim() || this.editConnectionType;
+    connection.type = type;
+    connection.label = this.editConnectionLabel.trim() || type;
     connection.direction = this.editConnectionDirection;
 
     this.cancelConnectionEdit();
@@ -438,6 +485,7 @@ export class ArchitectureEditorComponent implements OnInit {
     this.editConnectionSourceId = '';
     this.editConnectionTargetId = '';
     this.editConnectionType = 'REST API';
+    this.editConnectionCustomType = '';
     this.editConnectionLabel = '';
     this.editConnectionDirection = 'forward';
     this.errorMessage = '';
@@ -474,7 +522,13 @@ export class ArchitectureEditorComponent implements OnInit {
 
     this.editingComponentId = component.id;
     this.editComponentName = component.name;
-    this.editComponentType = component.type || 'Service';
+    this.editComponentType = this.componentTypes.includes(component.type)
+      ? component.type
+      : 'Other';
+    this.editComponentCustomType = this.editComponentType === 'Other'
+      ? component.type
+      : '';
+    this.editComponentDescription = (component as typeof component & { description?: string }).description ?? '';
 
     this.errorMessage = '';
     this.successMessage = '';
@@ -486,7 +540,9 @@ export class ArchitectureEditorComponent implements OnInit {
     }
 
     const name = this.editComponentName.trim();
-    const type = this.editComponentType.trim();
+    const type = this.editComponentType === 'Other'
+      ? this.editComponentCustomType.trim()
+      : this.editComponentType.trim();
 
     if (!name || !type) {
       this.errorMessage = 'Component name and type are required.';
@@ -503,10 +559,13 @@ export class ArchitectureEditorComponent implements OnInit {
 
     component.name = name;
     component.type = type;
+    (component as typeof component & { description?: string }).description = this.editComponentDescription.trim();
 
     this.editingComponentId = null;
     this.editComponentName = '';
     this.editComponentType = '';
+    this.editComponentCustomType = '';
+    this.editComponentDescription = '';
 
     this.errorMessage = '';
     this.successMessage = 'Component updated. Save to keep the changes.';
@@ -518,6 +577,8 @@ export class ArchitectureEditorComponent implements OnInit {
     this.editingComponentId = null;
     this.editComponentName = '';
     this.editComponentType = '';
+    this.editComponentCustomType = '';
+    this.editComponentDescription = '';
     this.errorMessage = '';
 
     this.cdr.detectChanges();
