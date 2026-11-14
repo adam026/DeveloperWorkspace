@@ -77,18 +77,15 @@
         </div>
 
         <div class="mb-3">
-          <label for="document-content" class="form-label">
+          <label class="form-label">
             Content
           </label>
-          <textarea id="document-content"
-                    name="content"
-                    class="form-control"
-                    [(ngModel)]="newDocument.content"
-                    placeholder="Enter the document content..."
-                    rows="10"
-                    maxlength="50000"></textarea>
-          <div class="form-text">
-            Enter the full text of your document or technical notes.
+
+          <app-markdown-editor [(content)]="newDocument.content">
+          </app-markdown-editor>
+
+          <div class="form-text mt-2">
+            Write and format your document using Markdown.
           </div>
         </div>
 
