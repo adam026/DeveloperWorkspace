@@ -3,6 +3,8 @@ import { DatePipe, Location} from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { DocumentService, Document } from '../services/document';
 import { AiService } from '../services/ai';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import { LucideAngularModule,ArrowLeft,AlertCircle,FileText,Sparkles,Info,Clock } from 'lucide-angular';
 
 @Component({
@@ -35,6 +37,8 @@ export class DocumentDetail implements OnInit {
   protected summarizing = false;
   protected summaryError = '';
 
+  previewHtml = '';
+
   protected returnToWorkspace = false;
 
   ngOnInit(): void {
@@ -53,6 +57,10 @@ export class DocumentDetail implements OnInit {
       next: documents => {
         this.document = documents.find(item => item.id === id) ?? null;
         this.summary = this.document?.aiSummary ?? '';
+
+        if (this.document) {
+          void this.updatePreview();
+        }
 
         if (!this.document) {
           this.errorMessage = 'The requested document could not be found.';
@@ -96,5 +104,13 @@ export class DocumentDetail implements OnInit {
 
   protected goBack(): void {
     this.location.back();
+  }
+
+  async updatePreview(): Promise<void> {
+    const markdown = this.document?.content ?? '';
+    const html = await marked.parse(markdown);
+
+    this.previewHtml = DOMPurify.sanitize(html);
+    this.cdr.markForCheck();
   }
 }
